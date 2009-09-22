@@ -1,0 +1,20 @@
+#importFrom(
+#)
+
+
+#exportClasses(
+#)
+
+#exportMethods(
+#)
+
+export(
+  blankplot,
+  colorblind,
+  createThreeWayDataset,
+  graphsFor50States,
+  statemaps,
+  pal,
+  visualizeThreewayDataset,
+  visualizeThreewayDatasetWithAll
+)
