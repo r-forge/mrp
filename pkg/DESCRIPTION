@@ -6,7 +6,7 @@ Author:
   Andrew Gelman <gelman@stat.columbia.edu>,
   Daniel Lee <djsyclik@gmail.com>,
   Yu-Sung Su <ys463@columbia.edu>,
-Maintainer: Yu-Sung Su <ys463@columbia.edu>
+Maintainer: Daniel Lee <djsyclik@gmail.com>
 Depends: methods, arm, maps, maptools, colorspace
 Description: Multilevel Regressions and Poststratification
 License: GPL (>=2)
