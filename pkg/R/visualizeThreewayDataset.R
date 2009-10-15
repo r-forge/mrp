@@ -2,8 +2,99 @@
 # 
 # Author: Statistics
 ###############################################################################
-
+require(colorspace)
 ## for ... use: colorFunction=colorblind, lo=-0.25, hi=0.25, alternative="White", minimumProportion=0.01
+
+visualizeThreewayDatasetWithoutPoststratification <- function(
+        mlm, theta.hat, proportionOfVoters, 
+        var1, var2, var3, 
+        var2Labels=levels(var2), var3Labels=levels(var3),
+        outputFilename="maps",
+        var1PlotFunction=statemaps,
+        caption=paste("2000: State-level support for spending on healthcare, relative to national average of ", round (100*nationalAverage), sep=""),
+        caption2="",
+        midpointFunction=weighted.mean,
+        height=800,
+        width=1000,
+        ...
+) {
+    # Make the map  
+    ## pdf (paste (outputFilename, ".pdf", sep=""), height=, width=15)
+    png (paste (outputFilename, ".png", sep=""), height=height, width=width)
+    par (mar=c(0,0,2,0), oma=c(0,0,3,0))
+    
+#===to see the layout, use layout.show()=================
+    total.mat <- createLayoutMatrix (nlevels(var2), nlevels(var3), includeAllRow=FALSE)
+    #layout(total.mat, widths=c(3, rep(4, nlevels(var3))), heights=c(1,rep(4,nlevels(var2)),1.5))
+
+    vert <- 10
+    shrinkVertical <- 0.75
+    
+    heightOfMaps <- (height-vert) / (nlevels(var2)+1)
+    widthOfMaps <- (width) / (nlevels(var3)+1)
+    
+    sizeOfMaps <- max (heightOfMaps, widthOfMaps)
+    vert <- height - sizeOfMaps * (nlevels(var2) + 1) * shrinkVertical
+    # want nrows == ncols
+    
+    widths <- rep(sizeOfMaps, nlevels(var3)+1)
+    heights <- c (vert/2, rep(sizeOfMaps*shrinkVertical, nlevels(var2)+1), vert/2)
+    
+    layout(total.mat, 
+           widths=widths, 
+           heights=heights)
+   
+   print (c(widthOfMaps, heightOfMaps, sizeOfMaps))
+   print (widths)
+   print (sum (widths))
+   print (heights)
+   print (sum(heights))
+    
+#=====================
+    
+    proportionOfVoters[is.na(proportionOfVoters)] <- 0
+    nationalAverage <- midpointFunction(theta.hat, proportionOfVoters, na.rm=TRUE)
+    for (k in var2Labels){
+        blankplot (k, cex=2)
+    }
+    for(j in var3Labels){
+        blankplot(j, cex=2)
+    }
+
+    for (j in 1:nlevels(var2)){
+        for (k in 1:nlevels(var3)){
+            var1PlotFunction (theta.hat[,j,k] - nationalAverage, proportionOfVoters[,j,k], ...)
+        }
+    }
+    
+    #par(mar=c(2,0,1,0))
+    par(mar=c(7,0,3,2))
+    pal( diverge_hcl(1001, h = c(60, 190), c = 200, l = c(10, 90)))
+    #text(1,   -1, "Yes", xpd=TRUE, cex=2)
+    additionalArgs <- list(...)
+    hi <- max (0, additionalArgs$hi, na.rm=TRUE)
+    lo <- min (0, additionalArgs$lo, na.rm=TRUE)
+
+    print (c (hi, lo))
+    
+    
+    text(0.95,   -1, paste ("U.S. avg. -", round (abs(lo)*100), "%", sep=""), xpd=TRUE, cex=2)
+    text(0.5, -1, "U.S. avg.", xpd=TRUE, cex=2)
+    text(0.05,   -1, paste ("U.S. avg. +", round (abs(hi)*100), "%", sep=""), xpd=TRUE, cex=2)
+    
+#    text(1,   -1, paste (round ((hi)*100), "%", sep=""), xpd=TRUE, cex=2)
+#    text(0.5, -1, "national average", xpd=TRUE, cex=2)
+#    text(0,   -1, paste (round ((lo)*100), "%", sep=""), xpd=TRUE, cex=2)
+    
+    #text(0,   -1, "No",  xpd=TRUE, cex=2)
+    par(mar=c(2,0,0,0))
+    blankplot (paste (caption2, "The state is left blank where a category represents less than 1% of the voters of a state.\n", "U.S. avg. is ", round (100*nationalAverage), "%", sep=""), cex=2)
+    mtext(caption, side=3, line=0, xpd=TRUE, cex=2, outer=TRUE)
+    dev.off()       
+}
+
+
+
 
 visualizeThreewayDataset <- function(
         mlm, theta.hat, proportionOfVoters, 
@@ -21,7 +112,7 @@ visualizeThreewayDataset <- function(
     
 #===to see the layout, use layout.show()=================
     total.mat <- createLayoutMatrix (nlevels(var2), nlevels(var3))
-    layout(total.mat, width=c(3, rep(4, nlevels(var3))), height=c(1,rep(4,nlevels(var2)+1),1.5))
+    layout(total.mat, widths=c(3, rep(4, nlevels(var3))), heights=c(1,rep(4,nlevels(var2)+1),1.5))
 #=====================
 
     proportionOfVoters[is.na(proportionOfVoters)] <- 0
@@ -250,10 +341,10 @@ visualizeThreewayDatasetWithAll <- function(
     
     
     for (k in var2Labels){
-        blankplot (k, cex=2)
+        blankplot (k, cex=1.8)
     }
     for(j in var3Labels){
-        blankplot(j, cex=2)
+        blankplot(j, cex=1.8)
     }
     
     blankplot ("")
