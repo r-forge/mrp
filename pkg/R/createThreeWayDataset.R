@@ -10,7 +10,7 @@ createThreeWayDataset <- function (y, var1, var2, var3, pop.weight=rep(1, length
                length(y) == length(var2), 
                length(y) == length(var3),
                nlevels(y) == 2)
-    
+
     
     ## Want to generalize: state=var1, income=vaWr2, religionAndEthnicity=var3
     # set up empty arrays
@@ -30,7 +30,7 @@ createThreeWayDataset <- function (y, var1, var2, var3, pop.weight=rep(1, length
     # change y to a 1 / 0 variable with 1 for Yes, 0 for No
     y <- relevel (factor(y, ordered=FALSE), positiveResponse)
     y <- 2-as.numeric(y) 
-    
+ 
     # set up three way data
     ybar.weighted         <- array (NA, arrayDimensions, dimnames=arrayDimnames) 
     n                     <- array (NA, arrayDimensions, dimnames=arrayDimnames)
@@ -49,7 +49,8 @@ createThreeWayDataset <- function (y, var1, var2, var3, pop.weight=rep(1, length
         }
     }
     ybar.weighted[is.nan(ybar.weighted)] <- NA
-    design.effect <- weighted.mean (design.effect.by.cell[n > 1], n [n > 1], na.rm=TRUE)
+    keep <- !is.na(design.effect.by.cell)&!is.na(n)
+    design.effect <- weighted.mean (design.effect.by.cell[n > 1&keep], n [n > 1&keep], na.rm=TRUE)
     n.effective <- n / design.effect
     
     return (list (ybar.weighted=ybar.weighted, n=n, n.effective=n.effective, design.effect=design.effect, design.effect.by.cell=design.effect.by.cell, pop.weight=pop.weight, dataLength=sum(completeDataSubset)))
