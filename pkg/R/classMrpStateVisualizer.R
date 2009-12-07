@@ -75,7 +75,7 @@ setGeneric ("createColorFunction", function (object) { standardGeneric ("createC
 setMethod (f="createColorFunction", 
         definition=function (object) {
             colorFunction <- function (data) {
-                require(colorspace)
+                #require(colorspace)
                 data <- pmin (object@colorFunction.hi, pmax (object@colorFunction.lo, data))
                 colors <-  diverge_hcl(object@colorFunction.nShades, h = c(190, 60), c = 200, l = c(10, 90))
                 return (colors[floor (1 + (object@colorFunction.nShades-1)*(data-object@colorFunction.lo)/(object@colorFunction.hi-object@colorFunction.lo))])
@@ -88,7 +88,7 @@ setMethod (f="createStatemapsFunction",
         signature="MrpStateVisualizer",
         definition=function (object) {
             statemaps <- function (data, average, population) {
-                require(maps)
+                #require(maps)
                 
                 # some parameters to be pulled out
                 stopifnot (length (population) == length(data))

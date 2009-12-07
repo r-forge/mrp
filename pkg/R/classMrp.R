@@ -1,5 +1,5 @@
 #source ("MRP/MRP/R/classThreeWayData.R")
-require (lme4)
+#require (lme4)
 setClass(Class="mrp",
         representation=representation(
                 data = "data.frame",
@@ -129,7 +129,7 @@ setMethod (f="fitMultilevelModel",
             
             response <- cbind (ybarWeighted * nEffective, (1-ybarWeighted)*nEffective)
             ## renormalize data that can be renormalized
-            require (arm)
+            #require (arm)
             ## if (is.ordered (object@data$var1)) {
             ##     z.var1 <- rescale (var1)  
             ## }
