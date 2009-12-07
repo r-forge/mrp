@@ -7,6 +7,6 @@ Author:
   Daniel Lee <bearlee@alum.mit.edu>,
   Yu-Sung Su <ys463@columbia.edu>,
 Maintainer: Daniel Lee <bearlee@alum.mit.edu>
-Depends: methods, arm, lme4, maps, maptools, colorspace
+Depends: methods, arm, lme4, maps, colorspace
 Description: Multilevel Regressions and Poststratification
 License: GPL (>=2)
