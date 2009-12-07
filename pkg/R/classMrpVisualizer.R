@@ -1,4 +1,4 @@
-source ("MRP/MRP/R/classMrp.R")
+#source ("MRP/MRP/R/classMrp.R")
 setClass(Class="MrpVisualizer",
         representation=representation(
                 filename="character",

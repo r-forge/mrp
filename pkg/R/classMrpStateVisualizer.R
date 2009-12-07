@@ -1,5 +1,5 @@
-source ("MRP/MRP/R/classMrp.R")
-source ("MRP/MRP/R/classMrpVisualizer.R")
+#source ("MRP/MRP/R/classMrp.R")
+#source ("MRP/MRP/R/classMrpVisualizer.R")
 setClass(Class="MrpStateVisualizer",
         contains="MrpVisualizer",
         representation=representation (

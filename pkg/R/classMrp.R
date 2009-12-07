@@ -1,4 +1,4 @@
-source ("MRP/MRP/R/classThreeWayData.R")
+#source ("MRP/MRP/R/classThreeWayData.R")
 require (lme4)
 setClass(Class="mrp",
         representation=representation(
@@ -84,7 +84,7 @@ setMethod (f="p",
             poststratified <- object@theta.hat * object@population
             groups <- which (poststratification.specification == TRUE)
             if (length(groups) == 0) {
-                return (sum (poststratified, na.rm=TRUE) / sum (object@population))	
+                return (sum (poststratified, na.rm=TRUE) / sum (object@population)) 
             } else {
                 return (apply (poststratified, groups, sum, na.rm=TRUE) / apply (object@population, groups, sum)) ## population should never have NAs
             }
