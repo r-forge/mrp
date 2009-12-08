@@ -1,8 +1,8 @@
-library (RUnit)
-source ("MRP/MRP/R/classMrpStateVisualizer.R")
+#library (RUnit)
+#source ("MRP/MRP/R/classMrpStateVisualizer.R")
 
 createFakeData <- function (n=100) {
-    library (maps)
+    #library (maps)
     response <- factor (rep (c("Yes", "No"), length.out=n))
     response <- relevel (response, "Yes")
     var1 <- factor (rep (state.abb, length.out=n))

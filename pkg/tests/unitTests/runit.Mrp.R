@@ -1,5 +1,5 @@
-library (RUnit)
-source ("MRP/MRP/R/classMrp.R")
+#library (RUnit)
+#source ("MRP/MRP/R/classMrp.R")
 
 ## Use case: happy path
 
@@ -13,7 +13,7 @@ source ("MRP/MRP/R/classMrp.R")
 ##    - verify that we can graph every thing properly.
 ##
 createFakeData <- function (n=100) {
-    library (maps)
+    #library (maps)
     response <- factor (rep (c("Yes", "No"), length.out=n))
     response <- relevel (response, "Yes")
     var1 <- factor (rep (state.abb, length.out=n))

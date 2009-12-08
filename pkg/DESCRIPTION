@@ -10,3 +10,4 @@ Maintainer: Daniel Lee <bearlee@alum.mit.edu>
 Depends: methods, arm, lme4, maps, colorspace
 Description: Multilevel Regressions and Poststratification
 License: GPL (>=2)
+Collate: 'classThreeWayData.R' 'classMrp.R' 'classMrpVisualizer.R' 'classMrpStateVisualizer.R'
