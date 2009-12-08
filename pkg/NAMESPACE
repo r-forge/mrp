@@ -1,21 +1,15 @@
-exportClasses (mrp, ThreeWayData, MrpVisualizer, MrpStateVisualizer)
+exportClasses (mrp)
+exportMethods (setPopulation, setFormula, getFormula, mr, p, createNWayData, hasNWayData, fitMultilevelModel, hasMultilevelModel)
+export (newMrp)
 
+exportClasses (ThreeWayData)
+exportMethods (getNumberWays, getYbarWeighted, getN, getDesignEffectByCell, getDataLength, getNEffective, getDesignEffect)
+export (newThreeWayData)
 
-#importFrom(
-#)
-#exportClasses(
-#)
+exportClasses (MrpVisualizer)
+exportMethods (visualize, placeMisc, placeCharts, placeLabels, prepareLayout, createMatForLayout)
+export (newMrpVisualizer)
 
-#exportMethods(
-#)
-
-#export(
-#  blankplot,
-#  colorblind,
-#  createThreeWayDataset,
-#  graphsFor50States,
-#  statemaps,
-#  pal,
-#  visualizeThreewayDataset,
-#  visualizeThreewayDatasetWithAll
-#)
+exportClasses (MrpStateVisualizer)
+exportMethods (setPlotFunction, setColorFunction, createColorFunction, createStatemapsFunction)
+export (newMrpStateVisualizer)
