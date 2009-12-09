@@ -112,22 +112,22 @@ setMethod (f="fitMultilevelModel",
             # unwrap each of the indexes 
             # (there should be a much better way of doing this by combining
             #  this with the ThreeWayData class, but save it for another day)
-            var1Levels <- dimnames (getYbarWeighted (object@data.nWay))[[1]]
-            var2Levels <- dimnames (getYbarWeighted (object@data.nWay))[[2]]
-            var3Levels <- dimnames (getYbarWeighted (object@data.nWay))[[3]]
-            
-            var1 <- gl (n=length(var1Levels), k=1, length=length(getYbarWeighted(object@data.nWay)), labels=var1Levels)
-            var2 <- gl (n=length(var2Levels), k=length(var1Levels), length=length(getYbarWeighted(object@data.nWay)), labels=var2Levels)
-            var3 <- gl (n=length(var3Levels), k=length(var1Levels)*length(var2Levels), length=length(getYbarWeighted(object@data.nWay)), labels=var3Levels)
+            ## var1Levels <- dimnames (getYbarWeighted (object@data.nWay))[[1]]
+            ## var2Levels <- dimnames (getYbarWeighted (object@data.nWay))[[2]]
+            ## var3Levels <- dimnames (getYbarWeighted (object@data.nWay))[[3]]
+            ## 
+            ## var1 <- gl (n=length(var1Levels), k=1, length=length(getYbarWeighted(object@data.nWay)), labels=var1Levels)
+            ## var2 <- gl (n=length(var2Levels), k=length(var1Levels), length=length(getYbarWeighted(object@data.nWay)), labels=var2Levels)
+            ## var3 <- gl (n=length(var3Levels), k=length(var1Levels)*length(var2Levels), length=length(getYbarWeighted(object@data.nWay)), labels=var3Levels)
             
             #prepare data
             ## TODO: What does this mean exactly? 
             # I think we could get the same effect by replacing all NA's 
             # adjust for having 0 effective n
-            ybarWeighted <- as.vector (replace (getYbarWeighted(object@data.nWay), getNEffective(object@data.nWay)==0, 0.5))
-            nEffective <- as.vector (getNEffective (object@data.nWay))
-            
-            response <- cbind (ybarWeighted * nEffective, (1-ybarWeighted)*nEffective)
+            ## ybarWeighted <- as.vector (replace (getYbarWeighted(object@data.nWay), getNEffective(object@data.nWay)==0, 0.5))
+            ## nEffective <- as.vector (getNEffective (object@data.nWay))
+            ## 
+            ## response <- cbind (ybarWeighted * nEffective, (1-ybarWeighted)*nEffective)
             ## renormalize data that can be renormalized
             #require (arm)
             ## if (is.ordered (object@data$var1)) {
@@ -141,7 +141,7 @@ setMethod (f="fitMultilevelModel",
             ## }
             ##
             object@multilevelModel <- 
-                    glmer (formula (object@formula),
+                    glmer (formula (object@formula), data=getData(object@data.nWay),
                            family=quasibinomial(link="logit")) 
             
             theta.hat <- rep (NA, length (ybarWeighted))

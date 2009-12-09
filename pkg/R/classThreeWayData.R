@@ -4,7 +4,8 @@ setClass(Class="ThreeWayData",
                 ybarWeighted = "array", 
                 n="array",
                 designEffectByCell="array", 
-                dataLength="numeric"))
+                dataLength="numeric",
+                data="data.frame"))
 
 setGeneric ("getNumberWays", function (object) { standardGeneric ("getNumberWays")})
 setMethod (f="getNumberWays",
@@ -57,6 +58,33 @@ setMethod (f="getDesignEffect",
             return (weighted.mean (getDesignEffectByCell (object), getN(object), na.rm=TRUE))
         })
 
+setGeneric ("getData", function (object) { standardGeneric ("getData")})
+setMethod (f="getData",
+        signature="ThreeWayData",
+        definition=function (object) {
+            return (object@data)
+        })
+
+setGeneric ("flattenData", function (object) { standardGeneric ("flattenData")})
+setMethod (f="flattenData",
+        signature="ThreeWayData",
+        definition=function(object) {
+            var1Levels <- dimnames (object@ybarWeighted)[[1]]
+            var2Levels <- dimnames (object@ybarWeighted)[[2]]
+            var3Levels <- dimnames (object@ybarWeighted)[[3]]
+            
+            var1 <- gl (n=length(var1Levels), k=1, length=length(object@ybarWeighted), labels=var1Levels)
+            var2 <- gl (n=length(var2Levels), k=length(var1Levels), length=length(object@ybarWeighted), labels=var2Levels)
+            var3 <- gl (n=length(var3Levels), k=length(var1Levels)*length(var2Levels), length=length(object@ybarWeighted), labels=var3Levels)
+            
+            ybarWeighted <- as.vector (replace (object@ybarWeighted, getNEffective(object)==0, 0.5))
+            nEffective <- as.vector (getNEffective (object))
+            
+            object@data <- data.frame (response.yes=ybarWeighted*nEffective, response.no=(1-ybarWeighted)*nEffective, 
+                    var1=var1, var2=var2, var3=var3)
+            return (object)
+        })
+
 
 
 newThreeWayData <- function (numberWays, mrp.data) {
@@ -95,10 +123,12 @@ newThreeWayData <- function (numberWays, mrp.data) {
     }
     ybarWeighted[is.nan(ybarWeighted)] <- NA
     
-    return (new ("ThreeWayData", 
+    threeWayData <- new ("ThreeWayData", 
             numberWays=numberWays,
             ybarWeighted = ybarWeighted, 
             n=n,
             designEffectByCell=designEffectByCell, 
-            dataLength=sum(completeCases)))
+            dataLength=sum(completeCases))
+    threeWayData <- flattenData (threeWayData) 
+    return (threeWayData)
 }
