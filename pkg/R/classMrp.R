@@ -11,7 +11,7 @@ setClass(Class="mrp",
                 population = "array",
                 .debug = "logical"),
         prototype=prototype (
-                formula="response ~ (1 | var1) + (1 | var2) + (1 | var3) + (1 | var1:var2) + (1 | var1:var3) + (1 | var2:var3)"),
+                formula="cbind(response.yes, response.no) ~ 1 + (1 | var1) + (1 | var2) + (1 | var3) + (1 | var1:var2) + (1 | var1:var3) + (1 | var2:var3)"),
         validity=function (object) {
             cat("~~~ mrp: inspector ~~~ \n")
             if (is.null (object@data)) { stop ("[mrp: validation] data must not be null") }
@@ -141,7 +141,7 @@ setMethod (f="fitMultilevelModel",
             ## }
             ##
             object@multilevelModel <- 
-                    glmer (formula (object@formula), data=getData(object@data.nWay),
+                    glmer (formula (object@formula), data=getData(object@data.nWay), 
                            family=quasibinomial(link="logit")) 
             
             theta.hat <- rep (NA, length (ybarWeighted))
