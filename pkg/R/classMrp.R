@@ -111,8 +111,8 @@ setMethod (f="fitMultilevelModel",
                     glmer (formula (object@formula), data=getData(object@data.nWay), 
                            family=quasibinomial(link="logit")) 
             
-            theta.hat <- rep (NA, length (ybarWeighted))
-            theta.hat[complete.cases(ybarWeighted)] <- fitted(object@multilevelModel)
+            theta.hat <- rep (NA, length (getYbarWeighted (object@data.nWay)))
+            theta.hat[complete.cases(getYbarWeighted (object@data.nWay))] <- fitted(object@multilevelModel)
             object@theta.hat <- array (theta.hat, dim (getYbarWeighted(object@data.nWay)),
                     dimnames=dimnames (getYbarWeighted(object@data.nWay)))
             
