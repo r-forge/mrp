@@ -105,10 +105,6 @@ newThreeWayData <- function (numberWays, mrp.data) {
     n                  <- array (0, dim=dims, dimnames=dimnames)
     designEffectByCell <- array (0, dim=dims, dimnames=dimnames)
 
-    ## i <- gl (n=nlevels (var1), k=nlevels(var2) * nlevels(var3), labels=levels (var1))
-    ## j <- gl (n=nlevels (var2), k=nlevels(var3), )
-    ## 
-    
     for (i in levels(mrp.data$var1)) {
         for (j in levels(mrp.data$var2)) {
             for (k in levels(mrp.data$var3)) {

@@ -1,5 +1,3 @@
-#source ("MRP/MRP/R/classThreeWayData.R")
-#require (lme4)
 setClass(Class="mrp",
         representation=representation(
                 data = "data.frame",
@@ -109,37 +107,6 @@ setGeneric ("fitMultilevelModel", function(object) { standardGeneric ("fitMultil
 setMethod (f="fitMultilevelModel",
         signature="mrp",
         definition=function (object) {
-            # unwrap each of the indexes 
-            # (there should be a much better way of doing this by combining
-            #  this with the ThreeWayData class, but save it for another day)
-            ## var1Levels <- dimnames (getYbarWeighted (object@data.nWay))[[1]]
-            ## var2Levels <- dimnames (getYbarWeighted (object@data.nWay))[[2]]
-            ## var3Levels <- dimnames (getYbarWeighted (object@data.nWay))[[3]]
-            ## 
-            ## var1 <- gl (n=length(var1Levels), k=1, length=length(getYbarWeighted(object@data.nWay)), labels=var1Levels)
-            ## var2 <- gl (n=length(var2Levels), k=length(var1Levels), length=length(getYbarWeighted(object@data.nWay)), labels=var2Levels)
-            ## var3 <- gl (n=length(var3Levels), k=length(var1Levels)*length(var2Levels), length=length(getYbarWeighted(object@data.nWay)), labels=var3Levels)
-            
-            #prepare data
-            ## TODO: What does this mean exactly? 
-            # I think we could get the same effect by replacing all NA's 
-            # adjust for having 0 effective n
-            ## ybarWeighted <- as.vector (replace (getYbarWeighted(object@data.nWay), getNEffective(object@data.nWay)==0, 0.5))
-            ## nEffective <- as.vector (getNEffective (object@data.nWay))
-            ## 
-            ## response <- cbind (ybarWeighted * nEffective, (1-ybarWeighted)*nEffective)
-            ## renormalize data that can be renormalized
-            #require (arm)
-            ## if (is.ordered (object@data$var1)) {
-            ##     z.var1 <- rescale (var1)  
-            ## }
-            ## if (is.ordered (object@data$var2)) {
-            ##     z.var2 <- rescale (var2)  
-            ## }
-            ## if (is.ordered (object@data$var3)) {
-            ##     z.var3 <- rescale (var3)  
-            ## }
-            ##
             object@multilevelModel <- 
                     glmer (formula (object@formula), data=getData(object@data.nWay), 
                            family=quasibinomial(link="logit")) 
@@ -159,7 +126,6 @@ setMethod (f="hasMultilevelModel",
             return (length (object@theta.hat) != 0)
         })
 
-## Constructor
 newMrp <- function (response, var1, var2, var3, weight=rep(1, length(response)), positiveResponse=levels(response)[1], formula=NULL) {
     stopifnot (length (response) == length(var1), length (response) == length (var2), length(response) == length (var3))
     stopifnot (is.factor (response), is.factor (var1), is.factor (var2), is.factor (var3))

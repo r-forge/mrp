@@ -1,5 +1,3 @@
-#source ("MRP/MRP/R/classMrp.R")
-#source ("MRP/MRP/R/classMrpVisualizer.R")
 setClass(Class="MrpStateVisualizer",
         contains="MrpVisualizer",
         representation=representation (
@@ -75,7 +73,6 @@ setGeneric ("createColorFunction", function (object) { standardGeneric ("createC
 setMethod (f="createColorFunction", 
         definition=function (object) {
             colorFunction <- function (data) {
-                #require(colorspace)
                 data <- pmin (object@colorFunction.hi, pmax (object@colorFunction.lo, data))
                 colors <-  diverge_hcl(object@colorFunction.nShades, h = c(190, 60), c = 200, l = c(10, 90))
                 return (colors[floor (1 + (object@colorFunction.nShades-1)*(data-object@colorFunction.lo)/(object@colorFunction.hi-object@colorFunction.lo))])
@@ -88,8 +85,6 @@ setMethod (f="createStatemapsFunction",
         signature="MrpStateVisualizer",
         definition=function (object) {
             statemaps <- function (data, average, population) {
-                #require(maps)
-                
                 # some parameters to be pulled out
                 stopifnot (length (population) == length(data))
                 
@@ -105,9 +100,11 @@ setMethod (f="createStatemapsFunction",
                     data <- data[lower48]
                     population <- population[lower48]
                 }
-                else if (length(data)!=48) stop ("wrong number of states")
+                else if (length(data)!=48){
+                    stop ("wrong number of states")  
+                } 
                 data <- replace (data, population < object@statemaps.minimumProportion, NA)
-                ## data <- data * -1
+                
                 mapping <- c (lapply ((1:7), c), lapply ((9:19), c), list(20:22), list(23:24), lapply ((25:33), c),
                         list(34:37), list(38:40), lapply ((41:52), c), list(53:55), list(56:60), lapply ((61:63), c))
                 data.long <- rep (NA, 63)
