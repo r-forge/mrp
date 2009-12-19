@@ -70,13 +70,13 @@ setMethod (f="flattenData",
         signature="NWayData",
         definition=function(object) {
             dimLevels <- dimnames (object@ybarWeighted)
-            vars <- array (NA, dim=c (length(object@ybarWeighted), numberWays), dimnames=list(list(), names(dimLevels)))
+            vars <- data.frame(array (NA, dim=c (length(object@ybarWeighted), object@numberWays), dimnames=list(list(), names(dimLevels))))
             carry <- 1
             for (ii in 1:object@numberWays) {
                 vars[, ii] <- gl (n=length(dimLevels[[ii]]), k=carry, length=length(object@ybarWeighted), labels=dimLevels[[ii]])
                 carry <- carry * length(dimLevels[[ii]])
             }
-
+            
             ybarWeighted <- as.vector (replace (object@ybarWeighted, getNEffective(object)==0, 0.5))
             nEffective <- as.vector (getNEffective (object))
             
