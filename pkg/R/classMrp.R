@@ -2,7 +2,7 @@ setClass(Class="mrp",
         representation=representation(
                 data = "data.frame",
                 numberWays = "integer",
-                data.nWay = "ThreeWayData", ## This is not general for now. Once this is up and running, think about how to refactor this into a general n-way dataset
+                data.nWay = "NWayData", ## This is not general for now. Once this is up and running, think about how to refactor this into a general n-way dataset
                 formula = "character",
                 multilevelModel = "mer",
                 theta.hat = "array",
@@ -11,9 +11,7 @@ setClass(Class="mrp",
         prototype=prototype (
                 formula="cbind(response.yes, response.no) ~ 1 + (1 | var1) + (1 | var2) + (1 | var3) + (1 | var1:var2) + (1 | var1:var3) + (1 | var2:var3)"),
         validity=function (object) {
-            cat("~~~ mrp: inspector ~~~ \n")
             if (is.null (object@data)) { stop ("[mrp: validation] data must not be null") }
-            if (object@numberWays!=3)  { stop (paste ("[mrp: validation] number ways supported for now is 3; found:", object@numberWays)) }
             return(TRUE)
         }
 )
@@ -92,7 +90,7 @@ setGeneric ("createNWayData", function (object) { standardGeneric ("createNWayDa
 setMethod (f="createNWayData",
         signature="mrp",
         definition=function (object) {
-            object@data.nWay <- newThreeWayData (object@numberWays, object@data)
+            object@data.nWay <- newNWayData (object@numberWays, object@data)
             return (object)
         })
 
@@ -126,16 +124,21 @@ setMethod (f="hasMultilevelModel",
             return (length (object@theta.hat) != 0)
         })
 
-newMrp <- function (response, var1, var2, var3, weight=rep(1, length(response)), positiveResponse=levels(response)[1], formula=NULL) {
-    stopifnot (length (response) == length(var1), length (response) == length (var2), length(response) == length (var3))
-    stopifnot (is.factor (response), is.factor (var1), is.factor (var2), is.factor (var3))
-    stopifnot (levels(response) != 2)
-    response <- relevel (response, positiveResponse)
-    
+newMrp <- function (response, vars, weight=rep(1, length(response)), positiveResponse=levels(response)[1], formula=NULL) {
+    if ("data.frame" != class(vars)) {
+        stop ("vars must be a data.frame.")
+    }
+    if (length(response) != nrow(vars)) {
+        stop ("response must have the same length as the rows as the vars.")
+    }
+    if (nlevels(response) != 2) {
+        stop (paste ("response must have 2 levels, found:", nlevels(response)))
+    }
     if (is.null (formula)) {
-        return (new(Class="mrp", data=data.frame (response=response, var1=var1, var2=var2, var3=var3, weight=weight), numberWays=as.integer(3)))    
+        return (new(Class="mrp", data=data.frame (response, vars, weight), numberWays=ncol(vars)))    
     }
     else {
-        return (new(Class="mrp", data=data.frame (response=response, var1=var1, var2=var2, var3=var3, weight=weight), numberWays=as.integer(3), formula=formula))
+        return (new(Class="mrp", data=data.frame (response, vars, weight), numberWays=ncol(vars), formula=formula))    
     }
 }
+

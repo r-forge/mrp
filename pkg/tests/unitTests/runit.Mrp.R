@@ -27,7 +27,7 @@ createFakeData <- function (n=100) {
 
 test.creation <- function () {
     fakeData <- createFakeData()
-    mrp <- newMrp (fakeData$response, fakeData$var1, fakeData$var2, fakeData$var3, fakeData$weight)
+    mrp <- newMrp (fakeData$response, fakeData[,2:4], fakeData$weight)
     
     checkEquals (fakeData, mrp@data, "Data should be what was put in")
     checkEqualsNumeric (3, mrp@numberWays, "Number Ways should be initialized to 3")
@@ -36,7 +36,7 @@ test.creation <- function () {
 
 test.createNWayData <- function () {
     fakeData <- createFakeData()
-    mrp <- newMrp (fakeData$response, fakeData$var1, fakeData$var2, fakeData$var3, fakeData$weight)
+    mrp <- newMrp (fakeData$response, fakeData[,2:4], fakeData$weight)
 
     mrp <- createNWayData (mrp)
     checkEqualsNumeric (3, mrp@data.nWay@numberWays)
@@ -45,7 +45,7 @@ test.createNWayData <- function () {
 
 test.fitMultilevelModel <- function () {
     fakeData <- createFakeData()
-    mrp <- newMrp (fakeData$response, fakeData$var1, fakeData$var2, fakeData$var3, fakeData$weight)
+    mrp <- newMrp (fakeData$response, fakeData[,2:4], fakeData$weight)
     mrp <- createNWayData (mrp)
     
     mrp <- fitMultilevelModel (mrp)
@@ -55,7 +55,7 @@ test.fitMultilevelModel <- function () {
 
 test.multilevelRegression <- function () {
     fakeData <- createFakeData()
-    mrp <- newMrp (fakeData$response, fakeData$var1, fakeData$var2, fakeData$var3, fakeData$weight)
+    mrp <- newMrp (fakeData$response, fakeData[,2:4], fakeData$weight)
     mrp <- mr (mrp)
     
     ## TODO: add some asserts here.
@@ -64,7 +64,7 @@ test.multilevelRegression <- function () {
 
 test.poststratify <- function () {
     fakeData <- createFakeData()
-    mrp <- newMrp (fakeData$response, fakeData$var1, fakeData$var2, fakeData$var3, fakeData$weight)
+    mrp <- newMrp (fakeData$response, fakeData[,2:4], fakeData$weight)
     mrp <- mr (mrp)
     
     population <- array (1, dim=dim (mrp@theta.hat), dimnames=dimnames (mrp@theta.hat))

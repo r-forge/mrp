@@ -1,5 +1,5 @@
-setClass(Class="ThreeWayData",
-    representation=representation(
+setClass(Class="NWayData",
+            representation=representation(
                 numberWays="numeric",
                 ybarWeighted = "array", 
                 n="array",
@@ -9,21 +9,21 @@ setClass(Class="ThreeWayData",
 
 setGeneric ("getNumberWays", function (object) { standardGeneric ("getNumberWays")})
 setMethod (f="getNumberWays",
-        signature="ThreeWayData",
+        signature="NWayData",
         definition=function (object) {
             return (object@numberWays)
         })
 
 setGeneric ("getYbarWeighted", function (object) { standardGeneric ("getYbarWeighted")})
 setMethod (f="getYbarWeighted",
-        signature="ThreeWayData",
+        signature="NWayData",
         definition=function (object) {
             return (object@ybarWeighted)
         })
 
 setGeneric ("getN", function (object) { standardGeneric ("getN")})
 setMethod (f="getN",
-        signature="ThreeWayData",
+        signature="NWayData",
         definition=function (object) {
             return (object@n)
         })
@@ -31,14 +31,14 @@ setMethod (f="getN",
 
 setGeneric ("getDesignEffectByCell", function (object) { standardGeneric ("getDesignEffectByCell")})
 setMethod (f="getDesignEffectByCell",
-        signature="ThreeWayData",
+        signature="NWayData",
         definition=function (object) {
             return (object@designEffectByCell)
         })
 
 setGeneric ("getDataLength", function (object) { standardGeneric ("getDataLength")})
 setMethod (f="getDataLength",
-        signature="ThreeWayData",
+        signature="NWayData",
         definition=function (object) {
             return (object@dataLength)
         })
@@ -46,85 +46,97 @@ setMethod (f="getDataLength",
 
 setGeneric ("getNEffective", function (object) { standardGeneric ("getNEffective")})
 setMethod (f="getNEffective",
-        signature="ThreeWayData",
+        signature="NWayData",
         definition=function (object) {
             return (getN (object) / getDesignEffect (object))
         })
 
 setGeneric ("getDesignEffect", function (object) { standardGeneric ("getDesignEffect")})
 setMethod (f="getDesignEffect",
-        signature="ThreeWayData",
+        signature="NWayData",
         definition=function (object) {
             return (weighted.mean (getDesignEffectByCell (object), getN(object), na.rm=TRUE))
         })
 
 setGeneric ("getData", function (object) { standardGeneric ("getData")})
 setMethod (f="getData",
-        signature="ThreeWayData",
+        signature="NWayData",
         definition=function (object) {
             return (object@data)
         })
 
 setGeneric ("flattenData", function (object) { standardGeneric ("flattenData")})
 setMethod (f="flattenData",
-        signature="ThreeWayData",
+        signature="NWayData",
         definition=function(object) {
-            var1Levels <- dimnames (object@ybarWeighted)[[1]]
-            var2Levels <- dimnames (object@ybarWeighted)[[2]]
-            var3Levels <- dimnames (object@ybarWeighted)[[3]]
-            
-            var1 <- gl (n=length(var1Levels), k=1, length=length(object@ybarWeighted), labels=var1Levels)
-            var2 <- gl (n=length(var2Levels), k=length(var1Levels), length=length(object@ybarWeighted), labels=var2Levels)
-            var3 <- gl (n=length(var3Levels), k=length(var1Levels)*length(var2Levels), length=length(object@ybarWeighted), labels=var3Levels)
-            
+            dimLevels <- dimnames (object@ybarWeighted)
+            vars <- array (NA, dim=c (length(object@ybarWeighted), numberWays), dimnames=list(list(), names(dimLevels)))
+            carry <- 1
+            for (ii in 1:object@numberWays) {
+                vars[, ii] <- gl (n=length(dimLevels[[ii]]), k=carry, length=length(object@ybarWeighted), labels=dimLevels[[ii]])
+                carry <- carry * length(dimLevels[[ii]])
+            }
+
             ybarWeighted <- as.vector (replace (object@ybarWeighted, getNEffective(object)==0, 0.5))
             nEffective <- as.vector (getNEffective (object))
             
-            object@data <- data.frame (response.yes=ybarWeighted*nEffective, response.no=(1-ybarWeighted)*nEffective, 
-                    var1=var1, var2=var2, var3=var3)
+            
+            object@data <- data.frame (response.yes=ybarWeighted*nEffective, response.no=(1-ybarWeighted)*nEffective, vars)
             return (object)
         })
 
-
-
-newThreeWayData <- function (numberWays, mrp.data) {
-    stopifnot (numberWays==3)
-    
-    dims <- c (nlevels (mrp.data$var1), nlevels (mrp.data$var2), nlevels (mrp.data$var3))
-    dimnames   <- list(levels(mrp.data$var1), levels(mrp.data$var2), levels(mrp.data$var3))
+newNWayData <- function (numberWays, mrp.data) {
+    if ("data.frame" != class (mrp.data)) {
+        stop ("Correct usage (data.frame): <response> <var 1> <var 2> ... <var n> <weights>\n")
+    } 
+    if (numberWays + 2 != ncol(mrp.data)) {
+        stop (cat ("mrp.data must have", numberWays+2, "columns. Found: ", length(mrp.data), "\n",
+                                           "Correct usage (data.frame): <response> <var 1> <var 2> ... <var n> <weights>\n"))
+    }
+    dims <- lapply (mrp.data[,2:(1+numberWays)], nlevels)
+    dimLevels <- lapply (mrp.data[,2:(1+numberWays)], levels)
+    varNames <- names (mrp.data)
     
     ## reduce data set to remove NAs
     completeCases <- complete.cases (mrp.data)
     mrp.data <- mrp.data[completeCases,]
     
+    matchingSubsets <- list()
+    for (i in 1:numberWays) {
+        matchingSubsets[[varNames[i+1]]] <- lapply (dimLevels[[i]], "==", mrp.data[ , i+1])
+    }
+    
     ## change the response variable to a binary variable with 1 for Yes and 0 for No: 
     ## as.numeric() should make the positive response 1 and the negative response 2.
-    y <- 2-as.numeric(mrp.data$response) 
+    y <- 2-as.numeric(mrp.data[ , varNames[1]]) 
     
-    ybarWeighted       <- array (NA, dim=dims, dimnames=dimnames) 
-    n                  <- array (0, dim=dims, dimnames=dimnames)
-    designEffectByCell <- array (0, dim=dims, dimnames=dimnames)
-
-    for (i in levels(mrp.data$var1)) {
-        for (j in levels(mrp.data$var2)) {
-            for (k in levels(mrp.data$var3)) {
-                subset <- mrp.data$var1==i & mrp.data$var2==j & mrp.data$var3==k
-                ybarWeighted[i,j,k] <- weighted.mean (y[subset], mrp.data$weight[subset])
-                n[i,j,k] <- sum (subset)
-                designEffectByCell[i,j,k] <- 
-                        ifelse (n[i,j,k]==1, 1,
-                                1 + var (mrp.data$weight[subset] / mean(mrp.data$weight[subset]))) 
-            }
+    ybarWeighted       <- array (NA, dim=dims, dimnames=dimLevels) 
+    n                  <- array (0, dim=dims, dimnames=dimLevels)
+    designEffectByCell <- array (0, dim=dims, dimnames=dimLevels)
+    
+    subset <- rep (TRUE, nrow(mrp.data))
+    for (ii in 1:length(ybarWeighted)) {
+        subset <- rep (TRUE, nrow(mrp.data))
+        carry <- 1
+        for (jj in 1:numberWays) {
+            ind <- ((ii-1) %/% carry) %% dims[[jj]] + 1
+            carry <- carry * dims[[jj]]
+            subset <- subset & matchingSubsets[[jj]][[ind]] 
         }
+        ybarWeighted[ii] <- weighted.mean (y[subset], mrp.data[subset , numberWays + 2])
+        n[ii] <- sum (subset)
+        designEffectByCell[ii] <- 
+                ifelse (n[ii]==1, 1,
+                        1 + var (mrp.data[subset, numberWays+2] / mean(mrp.data[subset, numberWays+2])))
     }
     ybarWeighted[is.nan(ybarWeighted)] <- NA
     
-    threeWayData <- new ("ThreeWayData", 
+    nWayData <- new ("NWayData", 
             numberWays=numberWays,
             ybarWeighted = ybarWeighted, 
             n=n,
             designEffectByCell=designEffectByCell, 
             dataLength=sum(completeCases))
-    threeWayData <- flattenData (threeWayData) 
-    return (threeWayData)
+    nWayData <- flattenData (nWayData) 
+    return (nWayData)
 }

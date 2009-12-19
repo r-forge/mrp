@@ -2,9 +2,9 @@ exportClasses (mrp)
 exportMethods (setPopulation, setFormula, getFormula, mr, p, createNWayData, hasNWayData, fitMultilevelModel, hasMultilevelModel)
 export (newMrp)
 
-exportClasses (ThreeWayData)
+exportClasses (NWayData)
 exportMethods (getNumberWays, getYbarWeighted, getN, getDesignEffectByCell, getDataLength, getNEffective, getDesignEffect)
-export (newThreeWayData)
+export (newNWayData)
 
 exportClasses (MrpVisualizer)
 exportMethods (visualize, placeMisc, placeCharts, placeLabels, prepareLayout, createMatForLayout)

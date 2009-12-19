@@ -1,16 +1,17 @@
-\name{ThreeWayData-class}
+\name{NWayData-class}
 \Rdversion{1.1}
 \docType{class}
-\alias{ThreeWayData-class}
+\alias{NWayData-class}
 
-\title{Class "ThreeWayData" ~~~ }
+\title{Class "NWayData" ~~~ }
 \description{	 ~~ A concise (1-5 lines) description of what the class is.  ~~}
 \section{Objects from the Class}{
-Objects can be created by calls of the form \code{new("ThreeWayData", ...)}.
+Objects can be created by calls of the form \code{new("NWayData", ...)}.
 	 ~~ describe objects here ~~ 
 }
 \section{Slots}{
 	 \describe{
+	\item{\code{data}:}{Object of calls \code{"data.frame"} ~~ }
     \item{\code{numberWays}:}{Object of class \code{"numeric"} ~~ }
     \item{\code{ybarWeighted}:}{Object of class \code{"array"} ~~ }
     \item{\code{n}:}{Object of class \code{"array"} ~~ }
@@ -19,7 +20,7 @@ Objects can be created by calls of the form \code{new("ThreeWayData", ...)}.
   }
 }
 \section{Methods}{
-No methods defined with class "ThreeWayData" in the signature.
+No methods defined with class "NWayData" in the signature.
 }
 \references{ ~put references to the literature/web site here ~ }
 \author{ ~~who you are~~ }
@@ -32,6 +33,6 @@ No methods defined with class "ThreeWayData" in the signature.
 	or \code{\linkS4class{CLASSNAME}} for links to other classes
 }
 \examples{
-showClass("ThreeWayData")
+showClass("NWayData")
 }
 \keyword{classes}
