@@ -85,7 +85,7 @@ setMethod (f="prepareLayout",
             
             sizeOfMaps <- min (object@height / cols, object@width / rows)
             vert <- max (object@height - sizeOfMaps * (dim (mrp@data.nWay@ybarWeighted)[2]) * object@shrinkVertical, 0)
-            widths <- rep(sizeOfMaps, rows)
+            widths <- rep(sizeOfMaps, cols)
             heights <- c (vert*0.3, rep(sizeOfMaps*object@shrinkVertical, dim (mrp@data.nWay@ybarWeighted)[2]), vert*0.15, vert*0.55)
             
             return (list(mat=mat, widths=widths, heights=heights, respect=FALSE))

@@ -12,4 +12,3 @@
 \item{\code{signature(object = "NWayData")}}{ Returns the effective n, which is n (by cell) divided by the design effect.
 }}
 \keyword{methods}
-\keyword{ ~~ other possible keyword(s)}

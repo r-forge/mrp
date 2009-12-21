@@ -54,6 +54,44 @@
 	or \code{\linkS4class{CLASSNAME}} for links to other classes
 }
 \examples{
-%showClass("mrp")
+	## load data
+	data(pew)
+	## Run 3-way analysis of pew data
+	## response: rvote - republican vote
+	## variables: stnum - state
+	##            age2 - age
+	##            inc - income
+	pewMrp <- newMrp (pew$rvote, pew[, c("stnum", "age2", "inc")])
+	pewMrp <- createNWayData (pewMrp)
+	pewMrp <- setFormula (pewMrp, "cbind(response.yes, response.no) ~ 1 + (1 | stnum) + (1 | age2) + (1 | inc) + (1 | stnum:age2) + (1 | stnum:inc) + (1 | age2:inc)")
+	
+	
+	pewMrp <- mr (pewMrp)
+	
+	pewMrp <- setPopulation (pewMrp, array (1, dim (pewMrp@theta.hat)))
+	(p (pewMrp))
+	
+	stateVisualizer <- newMrpStateVisualizer()
+	visualize (stateVisualizer, pewMrp)
+	
+	
+	
+	## Run 3-way analysis of pew data
+	## response: rvote - republican vote
+	## variables: stnum - state
+	##            age2 - age
+	##            edu2 - education
+	pewMrp <- newMrp (pew$rvote, pew[, c("stnum", "age2", "edu2")])
+	pewMrp <- createNWayData (pewMrp)
+	pewMrp <- setFormula (pewMrp, "cbind(response.yes, response.no) ~ 1 + (1 | stnum) + (1 | age2) + (1 | edu2) + (1 | stnum:age2) + (1 | stnum:age2) + (1 | age2:edu2)")
+	
+	
+	pewMrp <- mr (pewMrp)
+	
+	pewMrp <- setPopulation (pewMrp, array (1, dim (pewMrp@theta.hat)))
+	(p (pewMrp))
+	
+	stateVisualizer <- newMrpStateVisualizer()
+	visualize (stateVisualizer, pewMrp)
 }
 \keyword{classes}

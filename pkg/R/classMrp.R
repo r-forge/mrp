@@ -134,6 +134,7 @@ newMrp <- function (response, vars, weight=rep(1, length(response)), positiveRes
     if (nlevels(response) != 2) {
         stop (paste ("response must have 2 levels, found:", nlevels(response)))
     }
+    vars <- data.frame(apply (vars, 2, as.factor))
     if (is.null (formula)) {
         return (new(Class="mrp", data=data.frame (response, vars, weight), numberWays=ncol(vars)))    
     }

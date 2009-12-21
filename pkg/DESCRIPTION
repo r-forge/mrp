@@ -7,7 +7,7 @@ Author:
   Daniel Lee <bearlee@alum.mit.edu>,
   Yu-Sung Su <ys463@columbia.edu>,
 Maintainer: Daniel Lee <bearlee@alum.mit.edu>
-Depends: methods, arm, lme4, maps, colorspace
+Depends: methods, arm, lme4, maps, colorspace, mapproj
 Description: Multilevel Regressions and Poststratification
 License: GPL (>=2)
 Collate: 'classNWayData.R' 'classMrp.R' 'classMrpVisualizer.R' 'classMrpStateVisualizer.R'

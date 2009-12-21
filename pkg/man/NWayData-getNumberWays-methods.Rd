@@ -12,4 +12,3 @@
 \item{\code{signature(object = "NWayData")}}{ Returns the number of ways this object was created with. }
 }}
 \keyword{methods}
-\keyword{ ~~ other possible keyword(s)}
