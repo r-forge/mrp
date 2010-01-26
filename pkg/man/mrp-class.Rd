@@ -52,7 +52,7 @@
 	or \code{\linkS4class{CLASSNAME}} for links to other classes
 }
 \examples{
-	## 1) Republican vote
+## 1) Republican vote
 	## load data
 	data(pew)
 	## Run 3-way analysis of pew data
@@ -163,9 +163,8 @@
 	visualize (stateVisualizer, favorVoucher2000Mrp.fullModel)
 
 
-	#3) Health care : 2000
+	#4) Health care : 2000
 	data (naes00)
-	data (propStateAgeIncome)
 	supportHealthcare2000Mrp <- newMrp (naes00$healthFavorSpendingOnUninsured, naes00[, c("stateAbbreviation", "age", "income")])
 	
 	## hierarchical data:
@@ -214,7 +213,9 @@
 	    "+ (1 | age)"))
 
 	supportHealthcare2000Mrp <- mr (supportHealthcare2000Mrp)
-	missingStates <- which (dimnames (propStateAgeIncome)[[2]] %in% c("AK", "HI"))
+	
+	data (propStateAgeIncome)
+	missingStates <- which (dimnames (propStateAgeIncome)[[2]] \%in\% c("AK", "HI"))
 	supportHealthcare2000Mrp <- setPopulation (supportHealthcare2000Mrp, propStateAgeIncome["2000", -missingStates, , ])
 
 	(supportHealthcare2000 <- p (supportHealthcare2000Mrp))
@@ -225,9 +226,8 @@
 
 
 	
-	#3) Health care : 2004
+	#5) Health care : 2004
 	data (naes04)
-	data (propStateAgeIncome)
 	supportHealthcare2004Mrp <- newMrp (naes04$healthFavorSpending, naes04[, c("stateAbbreviation", "age", "income")])
 	
 	## hierarchical data:
@@ -276,7 +276,9 @@
 	    "+ (1 | age)"))
 
 	supportHealthcare2004Mrp <- mr (supportHealthcare2004Mrp)
-	missingStates <- which (dimnames (propStateAgeIncome)[[2]] %in% c("AK", "HI"))
+	
+	data (propStateAgeIncome)
+	missingStates <- which (dimnames (propStateAgeIncome)[[2]] \%in\% c("AK", "HI"))
 	supportHealthcare2004Mrp <- setPopulation (supportHealthcare2004Mrp, propStateAgeIncome["2004", -missingStates, , ])
 
 	(supportHealthcare2004 <- p (supportHealthcare2004Mrp))
@@ -284,5 +286,6 @@
 	
 	#stateVisualizer <- newMrpStateVisualizer()
 	visualize (stateVisualizer, supportHealthcare2004Mrp)
-}
+
+	}
 \keyword{classes}
