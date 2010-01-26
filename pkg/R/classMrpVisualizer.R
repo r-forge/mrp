@@ -11,7 +11,7 @@ setClass(Class="MrpVisualizer",
         prototype=prototype(
                 height=1,
                 width=1,
-                shrinkVertical=0.75,
+                shrinkVertical=0.9,
                 parameters=list(mar=c(1,1,1,1), oma=c(0,0,0.3,0)),
                 plot.var1=function (data, average, proportions) { return (plot (data))},
                 ## TODO: Make this a true class: gives it structure
@@ -51,8 +51,8 @@ setMethod (f="placeCharts",
         definition=function (object, mrp) {
             poststratified <- p (mrp, rep (TRUE, 3))
             average <- p (mrp)
-            for (i in 1:dim(mrp@data.nWay@ybarWeighted)[2]) {
-                for (j in 1:dim(mrp@data.nWay@ybarWeighted)[3]) {
+            for (i in 1:dim(mrp@data@ybarWeighted)[2]) {
+                for (j in 1:dim(mrp@data@ybarWeighted)[3]) {
                     object@plot.var1 (poststratified[, i, j], average, mrp@population[,i,j])
                 }
             }
@@ -66,10 +66,10 @@ setMethod (f="placeLabels",
                 plot (c(0,1), c(0,1), xlab="", ylab="", xaxt="n", yaxt="n", bty="n",type="n")
                 text (.5, .5, words, cex=cex)
             }
-            for (i in dimnames(mrp@data.nWay@ybarWeighted)[[2]]) {
+            for (i in dimnames(mrp@data@ybarWeighted)[[2]]) {
                 blankplot (i)   
             }
-            for (i in dimnames(mrp@data.nWay@ybarWeighted)[[3]]) {
+            for (i in dimnames(mrp@data@ybarWeighted)[[3]]) {
                 blankplot (i)   
             }
         })
@@ -84,9 +84,9 @@ setMethod (f="prepareLayout",
             cols <- dim (mat)[2]
             
             sizeOfMaps <- min (object@height / cols, object@width / rows)
-            vert <- max (object@height - sizeOfMaps * (dim (mrp@data.nWay@ybarWeighted)[2]) * object@shrinkVertical, 0)
+            vert <- max (object@height - sizeOfMaps * (dim (mrp@data@ybarWeighted)[2]) * object@shrinkVertical, 0)
             widths <- rep(sizeOfMaps, cols)
-            heights <- c (vert*0.3, rep(sizeOfMaps*object@shrinkVertical, dim (mrp@data.nWay@ybarWeighted)[2]), vert*0.15, vert*0.55)
+            heights <- c (vert*0.3, rep(sizeOfMaps*object@shrinkVertical, dim (mrp@data@ybarWeighted)[2]), vert*0.15, vert*0.55)
             
             return (list(mat=mat, widths=widths, heights=heights, respect=FALSE))
         })
@@ -102,8 +102,8 @@ setMethod (f="createMatForLayout",
             ## if (includeAllCol) {
             ##     ncols <- ncols + 1
             ## }
-            nrows <- dim (mrp@data.nWay@ybarWeighted)[2]
-            ncols <- dim (mrp@data.nWay@ybarWeighted)[3]
+            nrows <- dim (mrp@data@ybarWeighted)[2]
+            ncols <- dim (mrp@data@ybarWeighted)[3]
             
             rowLabels <- seq(1, nrows)  ## the labels for each row
             colLabels <- c(0, seq(max(rowLabels)+1, max(rowLabels)+ncols))

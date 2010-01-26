@@ -1,6 +1,3 @@
-#library (RUnit)
-#source ("MRP/MRP/R/classMrp.R")
-
 ## Use case: happy path
 
 ## 1) create object with data.
@@ -24,33 +21,39 @@ createFakeData <- function (n=100) {
     return (data.frame (response=response, var1=var1, var2=var2, var3=var3, weight=weight))
 }
 
+createFakePopulation <- function () {
+    population <- array (data=1, dim=c(length(state.abb), 3, 5))
+    return (population)
+}
+
 
 test.creation <- function () {
     fakeData <- createFakeData()
-    mrp <- newMrp (fakeData$response, fakeData[,2:4], fakeData$weight)
+    fakePopulation <- createFakePopulation()
+    mrp <- newMrp (fakeData$response, fakeData[,2:4], fakePopulation)
     
     checkEquals (fakeData, mrp@data, "Data should be what was put in")
     checkEqualsNumeric (3, mrp@numberWays, "Number Ways should be initialized to 3")
-    checkEquals (numeric(0), mrp@data.nWay@numberWays, "data.nWay should be uninitialized")
+    checkEquals (numeric(0), mrp@data@numberWays, "data should be uninitialized")
 }
 
-test.createNWayData <- function () {
-    fakeData <- createFakeData()
-    mrp <- newMrp (fakeData$response, fakeData[,2:4], fakeData$weight)
-
-    mrp <- createNWayData (mrp)
-    checkEqualsNumeric (3, mrp@data.nWay@numberWays)
-}
-
-
-test.fitMultilevelModel <- function () {
-    fakeData <- createFakeData()
-    mrp <- newMrp (fakeData$response, fakeData[,2:4], fakeData$weight)
-    mrp <- createNWayData (mrp)
-    
-    mrp <- fitMultilevelModel (mrp)
-    ## TODO: check mrp@multilevelModel, mrp@theta.hat
-}
+## test.createNWayData <- function () {
+##     fakeData <- createFakeData()
+##     mrp <- newMrp (fakeData$response, fakeData[,2:4], fakeData$weight)
+## 
+##     mrp <- createNWayData (mrp)
+##     checkEqualsNumeric (3, mrp@data.nWay@numberWays)
+## }
+## 
+## 
+## test.fitMultilevelModel <- function () {
+##     fakeData <- createFakeData()
+##     mrp <- newMrp (fakeData$response, fakeData[,2:4], fakeData$weight)
+##     mrp <- createNWayData (mrp)
+##     
+##     mrp <- fitMultilevelModel (mrp)
+##     ## TODO: check mrp@multilevelModel, mrp@theta.hat
+## }
 
 
 test.multilevelRegression <- function () {

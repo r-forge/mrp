@@ -9,6 +9,5 @@
 \section{Methods}{
 \describe{
 
-\item{\code{signature(object = "NWayData")}}{ Returns the effective n, which is n (by cell) divided by the design effect.
-}}
+\item{\code{signature(object = "NWayData")}}{ Returns the effective n, which is n (by cell) divided by the design effect.}}}
 \keyword{methods}

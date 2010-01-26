@@ -1,8 +1,6 @@
 setClass(Class="mrp",
         representation=representation(
-                data = "data.frame",
-                numberWays = "integer",
-                data.nWay = "NWayData", ## This is not general for now. Once this is up and running, think about how to refactor this into a general n-way dataset
+                data = "NWayData", 
                 formula = "character",
                 multilevelModel = "mer",
                 theta.hat = "array",
@@ -28,12 +26,19 @@ setClass(Class="mrp",
 ## setGeneric ("getDebug", function (object) { standardGeneric ("getDebug") })
 ## setGeneric ("setDebug", function (object) { standardGeneric ("setDebug") })
 
+#setGeneric ("getNumberWays", function (object) { standardGeneric ("getNumberWays") })
+setMethod (f="getNumberWays",
+        signature="mrp",
+        definition=function(object) {
+            return (getNumberWays(object@data))   
+        })
+
 setGeneric ("setPopulation", function (object, population) { standardGeneric ("setPopulation")})
 setMethod (f="setPopulation",
         signature="mrp",
         definition=function(object, population) {
             stopifnot (class (population) == "array")
-            stopifnot (dim (population) == dim (object@theta.hat))
+            #stopifnot (dim (population) == dim (object@theta.hat))
 
             ## Need more checks here.
             object@population <- replace (population, is.na (population), 0)
@@ -60,16 +65,13 @@ setGeneric ("mr", function (object) { standardGeneric ("mr")})
 setMethod (f="mr",
         signature="mrp",
         definition=function(object) {
-            if (hasNWayData(object) == FALSE) {
-                object <- createNWayData (object)
-            }
             if (hasMultilevelModel(object) == FALSE) {
                 object <- fitMultilevelModel(object)
             }   
             return (object)
         })
 
-setGeneric ("p", function (object, poststratification.specification=rep(FALSE, object@numberWays)) { standardGeneric ("p")})
+setGeneric ("p", function (object, poststratification.specification=rep(FALSE, getNumberWays (object@data))) { standardGeneric ("p")})
 #setGeneric ("poststratify", function (object) { standardGeneric ("poststratify")})
 setMethod (f="p",
         signature="mrp",
@@ -86,33 +88,19 @@ setMethod (f="p",
             }
         })
 
-setGeneric ("createNWayData", function (object) { standardGeneric ("createNWayData")})
-setMethod (f="createNWayData",
-        signature="mrp",
-        definition=function (object) {
-            object@data.nWay <- newNWayData (object@numberWays, object@data)
-            return (object)
-        })
-
-setGeneric ("hasNWayData", function (object) { standardGeneric ("hasNWayData")})
-setMethod (f="hasNWayData",
-        signature="mrp",
-        definition=function (object) {
-            return (length(object@data.nWay@numberWays) != 0)
-        })
 
 setGeneric ("fitMultilevelModel", function(object) { standardGeneric ("fitMultilevelModel")})
 setMethod (f="fitMultilevelModel",
         signature="mrp",
         definition=function (object) {
             object@multilevelModel <- 
-                    glmer (formula (object@formula), data=getData(object@data.nWay), family=quasibinomial(link="logit"))  
+                    glmer (formula (object@formula), data=getData(object@data), family=quasibinomial(link="logit"))  
                            
             
-            theta.hat <- rep (NA, length (getYbarWeighted (object@data.nWay)))
-            theta.hat[complete.cases(getYbarWeighted (object@data.nWay))] <- fitted(object@multilevelModel)
-            object@theta.hat <- array (theta.hat, dim (getYbarWeighted(object@data.nWay)),
-                    dimnames=dimnames (getYbarWeighted(object@data.nWay)))
+            theta.hat <- rep (NA, length (getYbarWeighted (object@data)))
+            theta.hat[complete.cases(object@data@data)] <- fitted(object@multilevelModel)
+            object@theta.hat <- array (theta.hat, dim (getYbarWeighted(object@data)),
+                    dimnames=dimnames (getYbarWeighted(object@data)))
             
             return (object)
         })
@@ -124,7 +112,8 @@ setMethod (f="hasMultilevelModel",
             return (length (object@theta.hat) != 0)
         })
 
-newMrp <- function (response, vars, weight=rep(1, length(response)), positiveResponse=levels(response)[1], formula=NULL) {
+newMrp <- function (response, vars, population, weight=rep(1, length(response))) {
+    # check inputs
     if ("data.frame" != class(vars)) {
         stop ("vars must be a data.frame.")
     }
@@ -134,12 +123,20 @@ newMrp <- function (response, vars, weight=rep(1, length(response)), positiveRes
     if (nlevels(response) != 2) {
         stop (paste ("response must have 2 levels, found:", nlevels(response)))
     }
-    vars <- data.frame(apply (vars, 2, as.factor))
-    if (is.null (formula)) {
-        return (new(Class="mrp", data=data.frame (response, vars, weight), numberWays=ncol(vars)))    
+    # make inputs factors
+    response <- factor (response)
+    for (i in 1:length (vars)) {
+        vars[,i] <- factor(vars[,i])
     }
-    else {
-        return (new(Class="mrp", data=data.frame (response, vars, weight), numberWays=ncol(vars), formula=formula))    
-    }
-}
 
+    data <- newNWayData (ncol(vars), data.frame (response, vars, weight))
+    if (missing(population)) {
+        population <- array (1, dim(data@ybarWeighted)) 
+    }
+    
+    if (all (dim(data@ybarWeighted) == dim (population)) == FALSE) {
+        stop (paste ("dim (population) must match dim (data@ybarWeighted).\n\tExpected:", dim (data@ybarWeighted)," but found: ", dim (population)))
+    }
+    
+    return (new(Class="mrp", data=data, population=population))
+}

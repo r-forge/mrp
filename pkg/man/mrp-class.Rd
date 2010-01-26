@@ -47,13 +47,12 @@
 	Yu-Sung Su <ys463@columbia.edu>}
 \note{ ~~further notes~~ }
 
- ~Make other sections like Warning with \section{Warning }{....} ~
-
 \seealso{
 	~~objects to See Also as \code{\link{~~fun~~}}, ~~~
 	or \code{\linkS4class{CLASSNAME}} for links to other classes
 }
 \examples{
+	## 1) Republican vote
 	## load data
 	data(pew)
 	## Run 3-way analysis of pew data
@@ -61,37 +60,232 @@
 	## variables: stnum - state
 	##            age2 - age
 	##            inc - income
-	pewMrp <- newMrp (pew$rvote, pew[, c("stnum", "age2", "inc")])
-	pewMrp <- createNWayData (pewMrp)
-	pewMrp <- setFormula (pewMrp, "cbind(response.yes, response.no) ~ 1 + (1 | stnum) + (1 | age2) + (1 | inc) + (1 | stnum:age2) + (1 | stnum:inc) + (1 | age2:inc)")
+	pewRepublicanMrp <- newMrp (pew$rvote, pew[, c("stnum", "age2", "inc")])
+	pewRepublicanMrp <- setFormula (pewRepublicanMrp, "cbind(response.yes, response.no) ~ 1 + (1 | stnum) + (1 | age2) + (1 | inc) + (1 | stnum:age2) + (1 | stnum:inc) + (1 | age2:inc)")
 	
+	pewRepublicanMrp <- mr (pewRepublicanMrp)
 	
-	pewMrp <- mr (pewMrp)
-	
-	pewMrp <- setPopulation (pewMrp, array (1, dim (pewMrp@theta.hat)))
-	(p (pewMrp))
+	(republicanSupport <- p (pewRepublicanMrp))
+	(republicanSupport.byState <- p (pewRepublicanMrp, c(TRUE, FALSE, FALSE))) 
 	
 	stateVisualizer <- newMrpStateVisualizer()
-	visualize (stateVisualizer, pewMrp)
+	visualize (stateVisualizer, pewRepublicanMrp)
+
+	## 2) School Vouchers: simple model
+	## load data: 2000
+	data (naes00)
+	data (proportionOfVoters.schoolVouchers)
+
+	## Run 3-way analysis of annenberg data
+	## response: favorVoucher - favor school vouchers
+	## variables: stateAbbreviation - state
+	##            income - categorical income variable (4 categories)
+	##            religionAndEthnicity - categorical religion and ethnicity variable (7 categories)
+	favorVoucher2000Mrp.simpleModel <- newMrp (naes00$favorVoucher, naes00[, c("stateAbbreviation", "religionAndEthnicity", "income")])
+	favorVoucher2000Mrp.simpleModel <- setFormula (favorVoucher2000Mrp.simpleModel, 
+	    paste ("cbind(response.yes, response.no) ~", 
+	    "1 + (1 | stateAbbreviation) + (1 | income)",
+	    "+ (1 | religionAndEthnicity) + (1 | income:religionAndEthnicity)",
+	    "+ (1 | income:stateAbbreviation) + (1 | religionAndEthnicity:stateAbbreviation)"))
+	
+	favorVoucher2000Mrp.simpleModel <- mr (favorVoucher2000Mrp.simpleModel)
+	favorVoucher2000Mrp.simpleModel <- setPopulation (favorVoucher2000Mrp.simpleModel, proportionOfVoters.schoolVouchers)
+	
+	(favorVoucher2000 <- p (favorVoucher2000Mrp.simpleModel))
+	(favorVoucher2000.byState <- p (favorVoucher2000Mrp.simpleModel, c(TRUE, FALSE, FALSE))) 
+	
+	#stateVisualizer <- newMrpStateVisualizer()
+	visualize (stateVisualizer, favorVoucher2000Mrp.simpleModel)
 	
 	
+	## 3) School Vouchers: full model
+	#data (naes00)
+	#data (proportionOfVoters.schoolVouchers)
+	favorVoucher2000Mrp.fullModel <- newMrp (naes00$favorVoucher, naes00[, c("stateAbbreviation", "religionAndEthnicity", "income")])
 	
-	## Run 3-way analysis of pew data
-	## response: rvote - republican vote
-	## variables: stnum - state
-	##            age2 - age
-	##            edu2 - education
-	pewMrp <- newMrp (pew$rvote, pew[, c("stnum", "age2", "edu2")])
-	pewMrp <- createNWayData (pewMrp)
-	pewMrp <- setFormula (pewMrp, "cbind(response.yes, response.no) ~ 1 + (1 | stnum) + (1 | age2) + (1 | edu2) + (1 | stnum:age2) + (1 | stnum:age2) + (1 | age2:edu2)")
+	## hierarchical data:
+	data (stateLevel)
+	
+	## augment data:
+	##    z.income - standardized household income variable
+	##    region - categorical variable indicating region
+	##    z.stateIncome - standardized state income variable
+	##    z.stateRepublicanVote2004 - support for Republican vote (in 2004)
+	favorVoucher2000Mrp.fullModel@data@data[, "z.income"] <- rescale (favorVoucher2000Mrp.fullModel@data@data[, "income"])
+	
+	stateToRegion <- function () {
+		state.abb.long <- factor(rep(NA, 51), levels=c(state.abb, "DC"))
+		state.abb.long[1:8] <- state.abb[1:8]
+		state.abb.long[9] <- "DC"
+		state.abb.long[10:51] <- state.abb[9:50]
+	
+ 	    state.region.long <- factor(rep(NA, 51), levels=c(levels(state.region), "DC"))
+	    state.region.long[1:8]   <- state.region[1:8]
+	    state.region.long[9]     <- "DC"
+	    state.region.long[10:51] <- state.region[9:50]  
+    
+	    ## modifications to the regions:
+	    ## DE, MD, and WV in the South
+	    state.region.long <- replace (state.region.long,
+            	state.abb.long == "DE" | state.abb.long == "MD" | state.abb.long == "WV",
+            	"South")
+    
+    	## rename the levels so they match common convention ("Midwest" instead of "North Central")
+    	levels (state.region.long) <- c ("Northeast", "South", "Midwest", "West", "DC")
+    
+	    return (state.region.long)
+	}  
+	favorVoucher2000Mrp.fullModel@data@data[, "region"] <- stateToRegion()[favorVoucher2000Mrp.fullModel@data@data[, "stateAbbreviation"]] 
+	favorVoucher2000Mrp.fullModel@data@data[, "z.stateIncome"] <- rescale (stateLevel$income[favorVoucher2000Mrp.fullModel@data@data[, "stateAbbreviation"]])
+	favorVoucher2000Mrp.fullModel@data@data[, "z.stateRepublicanVote2004"] <- rescale (stateLevel$republicanVote04[favorVoucher2000Mrp.fullModel@data@data[, "stateAbbreviation"]])
+	
+	favorVoucher2000Mrp.fullModel <- setFormula (favorVoucher2000Mrp.fullModel, 
+	    paste ("cbind(response.yes, response.no) ~", 
+	    "z.income*z.stateIncome + z.income*z.stateRepublicanVote2004",
+	    "+ (1 + z.income | region)",
+	    "+ (1 + z.income | stateAbbreviation)",
+	    "+ (1 | income:region)",
+	    "+ (1 + z.income | religionAndEthnicity)",
+	    "+ (1 | income:religionAndEthnicity)",
+	    "+ (1 | income:stateAbbreviation)",
+	    "+ (1 | religionAndEthnicity:region)",
+	    "+ (1 | religionAndEthnicity:stateAbbreviation)",
+	    "+ (1 | income)"))
+
+	favorVoucher2000Mrp.fullModel <- mr (favorVoucher2000Mrp.fullModel)
+	favorVoucher2000Mrp.fullModel <- setPopulation (favorVoucher2000Mrp.fullModel, proportionOfVoters.schoolVouchers)
+	## Note: This will take a lot longer than the simple model.
+	
+	(favorVoucher2000 <- p (favorVoucher2000Mrp.fullModel))
+	(favorVoucher2000.byState <- p (favorVoucher2000Mrp.fullModel, c(TRUE, FALSE, FALSE))) 
+	
+	#stateVisualizer <- newMrpStateVisualizer()
+	visualize (stateVisualizer, favorVoucher2000Mrp.fullModel)
+
+
+	#3) Health care : 2000
+	data (naes00)
+	data (propStateAgeIncome)
+	supportHealthcare2000Mrp <- newMrp (naes00$healthFavorSpendingOnUninsured, naes00[, c("stateAbbreviation", "age", "income")])
+	
+	## hierarchical data:
+	data (stateLevel)
+
+	supportHealthcare2000Mrp@data@data[, "z.income"] <- rescale (supportHealthcare2000Mrp@data@data[, "income"])
+	supportHealthcare2000Mrp@data@data[, "z.age"] <- rescale (supportHealthcare2000Mrp@data@data[, "age"])
+	
+	stateToRegion <- function () {
+		state.abb.long <- factor(rep(NA, 51), levels=c(state.abb, "DC"))
+		state.abb.long[1:8] <- state.abb[1:8]
+		state.abb.long[9] <- "DC"
+		state.abb.long[10:51] <- state.abb[9:50]
+	
+ 	    state.region.long <- factor(rep(NA, 51), levels=c(levels(state.region), "DC"))
+	    state.region.long[1:8]   <- state.region[1:8]
+	    state.region.long[9]     <- "DC"
+	    state.region.long[10:51] <- state.region[9:50]  
+    
+	    ## modifications to the regions:
+	    ## DE, MD, and WV in the South
+	    state.region.long <- replace (state.region.long,
+            	state.abb.long == "DE" | state.abb.long == "MD" | state.abb.long == "WV",
+            	"South")
+    
+    	## rename the levels so they match common convention ("Midwest" instead of "North Central")
+    	levels (state.region.long) <- c ("Northeast", "South", "Midwest", "West", "DC")
+    
+	    return (state.region.long)
+	}  
+	supportHealthcare2000Mrp@data@data[, "region"] <- stateToRegion()[supportHealthcare2000Mrp@data@data[, "stateAbbreviation"]] 
+	supportHealthcare2000Mrp@data@data[, "z.stateIncome"] <- rescale (stateLevel$income[supportHealthcare2000Mrp@data@data[, "stateAbbreviation"]])
+	supportHealthcare2000Mrp@data@data[, "z.stateRepublicanVote2004"] <- rescale (stateLevel$republicanVote04[supportHealthcare2000Mrp@data@data[, "stateAbbreviation"]])
+	
+	supportHealthcare2000Mrp <- setFormula (supportHealthcare2000Mrp, 
+	    paste ("cbind(response.yes, response.no) ~", 
+	    "z.age*z.stateIncome + z.age*z.stateRepublicanVote2004",
+	    "+ (1 + z.age | region)",
+	    "+ (1 + z.age | stateAbbreviation)",
+	    "+ (1 | age:region)",
+	    "+ (1 + z.age | income)",
+	    "+ (1 | age:income)",
+	    "+ (1 | age:stateAbbreviation)",
+	    "+ (1 | income:region)",
+	    "+ (1 | income:stateAbbreviation)",
+	    "+ (1 | age)"))
+
+	supportHealthcare2000Mrp <- mr (supportHealthcare2000Mrp)
+	missingStates <- which (dimnames (propStateAgeIncome)[[2]] %in% c("AK", "HI"))
+	supportHealthcare2000Mrp <- setPopulation (supportHealthcare2000Mrp, propStateAgeIncome["2000", -missingStates, , ])
+
+	(supportHealthcare2000 <- p (supportHealthcare2000Mrp))
+	(supportHealthcare2000.byState <- p (supportHealthcare2000Mrp, c(TRUE, FALSE, FALSE))) 
+	
+	#stateVisualizer <- newMrpStateVisualizer()
+	visualize (stateVisualizer, supportHealthcare2000Mrp)
+
+
+	
+	#3) Health care : 2004
+	data (naes04)
+	data (propStateAgeIncome)
+	supportHealthcare2004Mrp <- newMrp (naes04$healthFavorSpending, naes04[, c("stateAbbreviation", "age", "income")])
+	
+	## hierarchical data:
+	data (stateLevel)
+
+	supportHealthcare2004Mrp@data@data[, "z.income"] <- rescale (supportHealthcare2004Mrp@data@data[, "income"])
+	supportHealthcare2004Mrp@data@data[, "z.age"] <- rescale (supportHealthcare2004Mrp@data@data[, "age"])
+	
+	stateToRegion <- function () {
+		state.abb.long <- factor(rep(NA, 51), levels=c(state.abb, "DC"))
+		state.abb.long[1:8] <- state.abb[1:8]
+		state.abb.long[9] <- "DC"
+		state.abb.long[10:51] <- state.abb[9:50]
+	
+ 	    state.region.long <- factor(rep(NA, 51), levels=c(levels(state.region), "DC"))
+	    state.region.long[1:8]   <- state.region[1:8]
+	    state.region.long[9]     <- "DC"
+	    state.region.long[10:51] <- state.region[9:50]  
+    
+	    ## modifications to the regions:
+	    ## DE, MD, and WV in the South
+	    state.region.long <- replace (state.region.long,
+            	state.abb.long == "DE" | state.abb.long == "MD" | state.abb.long == "WV",
+            	"South")
+    
+    	## rename the levels so they match common convention ("Midwest" instead of "North Central")
+    	levels (state.region.long) <- c ("Northeast", "South", "Midwest", "West", "DC")
+    
+	    return (state.region.long)
+	}  
+	supportHealthcare2000Mrp@data@data[, "region"] <- stateToRegion()[supportHealthcare2000Mrp@data@data[, "stateAbbreviation"]] 
+	supportHealthcare2000Mrp@data@data[, "z.stateIncome"] <- rescale (stateLevel$income[supportHealthcare2000Mrp@data@data[, "stateAbbreviation"]])
+	supportHealthcare2000Mrp@data@data[, "z.stateRepublicanVote2004"] <- rescale (stateLevel$republicanVote04[supportHealthcare2000Mrp@data@data[, "stateAbbreviation"]])
+	
+	supportHealthcare2000Mrp <- setFormula (supportHealthcare2000Mrp, 
+	    paste ("cbind(response.yes, response.no) ~", 
+	    "z.age*z.stateIncome + z.age*z.stateRepublicanVote2004",
+	    "+ (1 + z.age | region)",
+	    "+ (1 + z.age | stateAbbreviation)",
+	    "+ (1 | age:region)",
+	    "+ (1 + z.age | income)",
+	    "+ (1 | age:income)",
+	    "+ (1 | age:stateAbbreviation)",
+	    "+ (1 | income:region)",
+	    "+ (1 | income:stateAbbreviation)",
+	    "+ (1 | age)"))
+
+	supportHealthcare2000Mrp <- mr (supportHealthcare2000Mrp)
+	missingStates <- which (dimnames (propStateAgeIncome)[[2]] %in% c("AK", "HI"))
+	supportHealthcare2000Mrp <- setPopulation (supportHealthcare2000Mrp, propStateAgeIncome["2000", -missingStates, , ])
+
+	(supportHealthcare2000 <- p (supportHealthcare2000Mrp))
+	(supportHealthcare2000.byState <- p (supportHealthcare2000Mrp, c(TRUE, FALSE, FALSE))) 
+	
+	#stateVisualizer <- newMrpStateVisualizer()
+	visualize (stateVisualizer, supportHealthcare2000Mrp)
 	
 	
-	pewMrp <- mr (pewMrp)
-	
-	pewMrp <- setPopulation (pewMrp, array (1, dim (pewMrp@theta.hat)))
-	(p (pewMrp))
-	
-	stateVisualizer <- newMrpStateVisualizer()
-	visualize (stateVisualizer, pewMrp)
+		
 }
 \keyword{classes}

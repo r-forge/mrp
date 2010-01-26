@@ -1,5 +1,5 @@
 exportClasses (mrp)
-exportMethods (setPopulation, setFormula, getFormula, mr, p, createNWayData, hasNWayData, fitMultilevelModel, hasMultilevelModel)
+exportMethods (getNumberWays, setPopulation, setFormula, getFormula, mr, p, fitMultilevelModel, hasMultilevelModel)
 export (newMrp)
 
 exportClasses (NWayData)

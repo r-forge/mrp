@@ -41,8 +41,6 @@ No methods defined with class "MrpStateVisualizer" in the signature.
 \author{ ~~who you are~~ }
 \note{ ~~further notes~~ }
 
- ~Make other sections like Warning with \section{Warning }{....} ~
-
 \seealso{
 	~~objects to See Also as \code{\link{~~fun~~}}, ~~~
 	or \code{\linkS4class{CLASSNAME}} for links to other classes

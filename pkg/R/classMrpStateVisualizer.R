@@ -87,9 +87,13 @@ setMethod (f="createStatemapsFunction",
             statemaps <- function (data, average, population) {
                 # some parameters to be pulled out
                 stopifnot (length (population) == length(data))
-                
                 data <- data - average
+
                 # Trim data to only include 48 states
+                removeIndex <- which (names (data) %in% c("DC", "AK", "HI"))
+                if (length(removeIndex) > 0) {
+                    data <- data[-removeIndex]
+                }
                 if (length(data)==51){
                     no.dc <- -9
                     data <- data[no.dc]
