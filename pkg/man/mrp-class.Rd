@@ -258,11 +258,11 @@
     
 	    return (state.region.long)
 	}  
-	supportHealthcare2000Mrp@data@data[, "region"] <- stateToRegion()[supportHealthcare2000Mrp@data@data[, "stateAbbreviation"]] 
-	supportHealthcare2000Mrp@data@data[, "z.stateIncome"] <- rescale (stateLevel$income[supportHealthcare2000Mrp@data@data[, "stateAbbreviation"]])
-	supportHealthcare2000Mrp@data@data[, "z.stateRepublicanVote2004"] <- rescale (stateLevel$republicanVote04[supportHealthcare2000Mrp@data@data[, "stateAbbreviation"]])
+	supportHealthcare2004Mrp@data@data[, "region"] <- stateToRegion()[supportHealthcare2004Mrp@data@data[, "stateAbbreviation"]] 
+	supportHealthcare2004Mrp@data@data[, "z.stateIncome"] <- rescale (stateLevel$income[supportHealthcare2004Mrp@data@data[, "stateAbbreviation"]])
+	supportHealthcare2004Mrp@data@data[, "z.stateRepublicanVote2004"] <- rescale (stateLevel$republicanVote04[supportHealthcare2004Mrp@data@data[, "stateAbbreviation"]])
 	
-	supportHealthcare2000Mrp <- setFormula (supportHealthcare2000Mrp, 
+	supportHealthcare2004Mrp <- setFormula (supportHealthcare2004Mrp, 
 	    paste ("cbind(response.yes, response.no) ~", 
 	    "z.age*z.stateIncome + z.age*z.stateRepublicanVote2004",
 	    "+ (1 + z.age | region)",
@@ -275,17 +275,14 @@
 	    "+ (1 | income:stateAbbreviation)",
 	    "+ (1 | age)"))
 
-	supportHealthcare2000Mrp <- mr (supportHealthcare2000Mrp)
+	supportHealthcare2004Mrp <- mr (supportHealthcare2004Mrp)
 	missingStates <- which (dimnames (propStateAgeIncome)[[2]] %in% c("AK", "HI"))
-	supportHealthcare2000Mrp <- setPopulation (supportHealthcare2000Mrp, propStateAgeIncome["2000", -missingStates, , ])
+	supportHealthcare2004Mrp <- setPopulation (supportHealthcare2004Mrp, propStateAgeIncome["2004", -missingStates, , ])
 
-	(supportHealthcare2000 <- p (supportHealthcare2000Mrp))
-	(supportHealthcare2000.byState <- p (supportHealthcare2000Mrp, c(TRUE, FALSE, FALSE))) 
+	(supportHealthcare2004 <- p (supportHealthcare2004Mrp))
+	(supportHealthcare2004.byState <- p (supportHealthcare2004Mrp, c(TRUE, FALSE, FALSE))) 
 	
 	#stateVisualizer <- newMrpStateVisualizer()
-	visualize (stateVisualizer, supportHealthcare2000Mrp)
-	
-	
-		
+	visualize (stateVisualizer, supportHealthcare2004Mrp)
 }
 \keyword{classes}
