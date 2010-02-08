@@ -42,14 +42,14 @@
   }
 }
 \section{Methods}{
+    getData,
+    getNumberWays,
 	setPopulation, 
 	setFormula, 
 	getFormula, 
 	mr, 
 	p, 
-	createNWayData, 
-	hasNWayData, 
-	fitMultilevelModel, 
+	fitMultilevelModel,
 	hasMultilevelModel
 }
 \references{ ~put references to the literature/web site here ~ }
