@@ -4,8 +4,7 @@ setClass(Class="mrp",
                 formula = "character",
                 multilevelModel = "mer",
                 theta.hat = "array",
-                population = "array",
-                .debug = "logical"),
+                population = "array"),
         prototype=prototype (
                 formula="cbind(response.yes, response.no) ~ 1 + (1 | var1) + (1 | var2) + (1 | var3) + (1 | var1:var2) + (1 | var1:var3) + (1 | var2:var3)"),
         validity=function (object) {
@@ -17,14 +16,12 @@ setClass(Class="mrp",
 ## Definining Methods
 
 ## Getters and Setters
-## setGeneric ("getData", function (object) { standardGeneric ("getData") })
-## setGeneric ("setData", function (object) { standardGeneric ("setData") })
-## 
-## setGeneric ("getNumberWays", function (object) { standardGeneric ("getNumberWays") })
-## ## setGeneric ("setNumberWays", function (object) { standardGeneric ("setNumberWays") })
-## 
-## setGeneric ("getDebug", function (object) { standardGeneric ("getDebug") })
-## setGeneric ("setDebug", function (object) { standardGeneric ("setDebug") })
+setMethod (f="getData",
+        signature="mrp",
+        definition=function(object) {
+            return (object@data)   
+        })
+
 
 #setGeneric ("getNumberWays", function (object) { standardGeneric ("getNumberWays") })
 setMethod (f="getNumberWays",
