@@ -1,9 +1,9 @@
 exportClasses (mrp)
-exportMethods (getNumberWays, setPopulation, setFormula, getFormula, mr, p, fitMultilevelModel, hasMultilevelModel)
+exportMethods (getNumberWays, setPopulation, setFormula, getFormula, mr, p, fitMultilevelModel, hasMultilevelModel, dataRescale, dataLookup, dataGenericAugment)
 export (newMrp)
 
 exportClasses (NWayData)
-exportMethods (getNumberWays, getYbarWeighted, getN, getDesignEffectByCell, getDataLength, getNEffective, getDesignEffect)
+exportMethods (getNumberWays, getYbarWeighted, getN, getDesignEffectByCell, getDataLength, getNEffective, getDesignEffect, dataRescale, dataLookup, dataGenericAugment)
 export (newNWayData)
 
 exportClasses (MrpVisualizer)

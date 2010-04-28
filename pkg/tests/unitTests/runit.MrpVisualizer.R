@@ -1,8 +1,4 @@
-#library (RUnit)
-#source ("MRP/MRP/R/classMrpVisualizer.R")
-
 createFakeData <- function (n=100) {
-    #library (maps)
     response <- factor (rep (c("Yes", "No"), length.out=n))
     response <- relevel (response, "Yes")
     var1 <- factor (rep (state.abb, length.out=n))
@@ -15,7 +11,7 @@ createFakeData <- function (n=100) {
 
 createMrp <- function (n=100) {
     fakeData <- createFakeData()
-    mrp <- newMrp (fakeData$response, fakeData$var1, fakeData$var2, fakeData$var3, fakeData$weight)
+    mrp <- newMrp (fakeData$response, fakeData[, c("var1", "var2", "var3")], weight=fakeData$weight)
     mrp <- mr (mrp)
     
     population <- array (1, dim=dim (mrp@theta.hat), dimnames=dimnames (mrp@theta.hat))

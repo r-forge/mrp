@@ -17,7 +17,7 @@ setClass(Class="mrp",
 
 ## Getters and Setters
 setMethod (f="getData",
-        signature="mrp",
+        signature=signature(object="mrp"),
         definition=function(object) {
             return (object@data)   
         })
@@ -25,14 +25,14 @@ setMethod (f="getData",
 
 #setGeneric ("getNumberWays", function (object) { standardGeneric ("getNumberWays") })
 setMethod (f="getNumberWays",
-        signature="mrp",
+        signature=signature(object="mrp"),
         definition=function(object) {
             return (getNumberWays(object@data))   
         })
 
 setGeneric ("setPopulation", function (object, population) { standardGeneric ("setPopulation")})
 setMethod (f="setPopulation",
-        signature="mrp",
+        signature=signature(object="mrp"),
         definition=function(object, population) {
             stopifnot (class (population) == "array")
             #stopifnot (dim (population) == dim (object@theta.hat))
@@ -44,7 +44,7 @@ setMethod (f="setPopulation",
 
 setGeneric ("setFormula", function (object, formula) { standardGeneric ("setFormula")})
 setMethod (f="setFormula",
-        signature="mrp",
+        signature=signature(object="mrp"),
         definition=function (object, formula) {
             object@formula <- formula
             return (object)
@@ -52,7 +52,7 @@ setMethod (f="setFormula",
 
 setGeneric ("getFormula", function (object) { standardGeneric ("getFormula")})
 setMethod (f="getFormula",
-        signature="mrp",
+        signature=signature(object="mrp"),
         definition=function (object) {
             return (object@formula)
         })
@@ -60,7 +60,7 @@ setMethod (f="getFormula",
 setGeneric ("mr", function (object) { standardGeneric ("mr")})
 #setGeneric ("multilevelRegression", function (object) { standardGeneric ("multilevelRegression")})
 setMethod (f="mr",
-        signature="mrp",
+        signature=signature(object="mrp"),
         definition=function(object) {
             if (hasMultilevelModel(object) == FALSE) {
                 object <- fitMultilevelModel(object)
@@ -71,7 +71,7 @@ setMethod (f="mr",
 setGeneric ("p", function (object, poststratification.specification=rep(FALSE, getNumberWays (object@data))) { standardGeneric ("p")})
 #setGeneric ("poststratify", function (object) { standardGeneric ("poststratify")})
 setMethod (f="p",
-        signature="mrp",
+        signature=signature(object="mrp"),
         definition=function (object, poststratification.specification) {
             stopifnot (object@population != numeric(0))
             stopifnot (hasMultilevelModel(object))
@@ -88,7 +88,7 @@ setMethod (f="p",
 
 setGeneric ("fitMultilevelModel", function(object) { standardGeneric ("fitMultilevelModel")})
 setMethod (f="fitMultilevelModel",
-        signature="mrp",
+        signature=signature(object="mrp"),
         definition=function (object) {
             object@multilevelModel <- 
                     glmer (formula (object@formula), data=getData(object@data), family=quasibinomial(link="logit"))  
@@ -104,9 +104,32 @@ setMethod (f="fitMultilevelModel",
 
 setGeneric ("hasMultilevelModel", function (object) { standardGeneric ("hasMultilevelModel")})
 setMethod (f="hasMultilevelModel",
-        signature="mrp",
+        signature=signature(object="mrp"),
         definition=function (object) {
             return (length (object@theta.hat) != 0)
+        })
+
+
+## Data augmentation
+setMethod (f="dataRescale",
+        signature=signature(object="mrp"),
+        definition=function (object, colName, newColName, ...) {
+            object@data <- rescaleData (object@data, colName, newColName, ...)
+            return (object)
+        })
+
+setMethod (f="dataLookup",
+        signature=signature(object="mrp"),
+        definition=function (object, colName, newColName, lookupTable, byValue=FALSE) {
+            object@data <- dataLookup (object@data, colName, newColName, lookupTable, byValue)
+            return (object)           
+        })
+
+setMethod (f="dataGenericAugment",
+        signature=signature(object="mrp"),
+        definition=function (object, colNames, newColName, func, ...) {
+            object@data <- dataGenericAugment (object@data, colNames, newColName, func, ...)
+            return (object)           
         })
 
 newMrp <- function (response, vars, population, weight=rep(1, length(response))) {

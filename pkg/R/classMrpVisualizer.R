@@ -19,7 +19,7 @@ setClass(Class="MrpVisualizer",
                 graphics.close=c)        
 )
 
-setGeneric ("visualize", function (object, mrp) { standardGeneric ("visualize")})
+setGeneric ("visualize", function (object, ...) { standardGeneric ("visualize")})
 setMethod (f="visualize",
         signature="MrpVisualizer",
         definition=function (object, mrp) {
@@ -34,10 +34,11 @@ setMethod (f="visualize",
             placeMisc (object, mrp)            
             
             object@graphics.close()
-            return (object)
+            
+            return (TRUE)
         })
 
-setGeneric ("placeMisc", function (object, mrp) { standardGeneric ("placeMisc")})
+setGeneric ("placeMisc", function (object, ...) { standardGeneric ("placeMisc")})
 setMethod (f="placeMisc",
         signature="MrpVisualizer",
         definition=function (object, mrp) {
@@ -74,7 +75,7 @@ setMethod (f="placeLabels",
             }
         })
 
-setGeneric ("prepareLayout", function (object, mrp) { standardGeneric ("prepareLayout")})
+setGeneric ("prepareLayout", function (object, ...) { standardGeneric ("prepareLayout")})
 setMethod (f="prepareLayout",
         signature="MrpVisualizer",
         definition=function (object, mrp) {

@@ -7,23 +7,48 @@ setClass(Class="NWayData",
                 dataLength="numeric",
                 data="data.frame"))
 
+setGeneric ("dataRescale", function (object, ...) { standardGeneric ("dataRescale")})
+setMethod (f="dataRescale",
+        signature="NWayData",
+        definition=function (object, colName, newColName, ...) {
+            object@data[newColName] <- rescale (object@data[colName], ...)
+            return (object)
+        })
+
+setGeneric ("dataLookup", function (object, ...) { standardGeneric ("dataLookup")})
+setMethod (f="dataLookup",
+        signature=signature(object="NWayData"),
+        definition=function (object, colName, newColName, lookupTable, byValue=FALSE) {
+            object@data[newColName] <- lookupTable[object@data[[colName]]]
+            return (object)           
+        })
+
+setGeneric ("dataGenericAugment", function (object, ...) {standardGeneric ("dataGenericAugment")})
+setMethod (f="dataGenericAugment",
+        signature=signature(object="NWayData"),
+        definition=function (object, colNames, newColName, func, ...) {
+            object@data[newColName] <- func (object@data[, colNames], ...)
+            return (object)           
+        })
+
+
 setGeneric ("getNumberWays", function (object) { standardGeneric ("getNumberWays")})
 setMethod (f="getNumberWays",
-        signature="NWayData",
+        signature=signature(object="NWayData"),
         definition=function (object) {
             return (object@numberWays)
         })
 
 setGeneric ("getYbarWeighted", function (object) { standardGeneric ("getYbarWeighted")})
 setMethod (f="getYbarWeighted",
-        signature="NWayData",
+        signature=signature(object="NWayData"),
         definition=function (object) {
             return (object@ybarWeighted)
         })
 
 setGeneric ("getN", function (object) { standardGeneric ("getN")})
 setMethod (f="getN",
-        signature="NWayData",
+        signature=signature(object="NWayData"),
         definition=function (object) {
             return (object@n)
         })
@@ -31,14 +56,14 @@ setMethod (f="getN",
 
 setGeneric ("getDesignEffectByCell", function (object) { standardGeneric ("getDesignEffectByCell")})
 setMethod (f="getDesignEffectByCell",
-        signature="NWayData",
+        signature=signature(object="NWayData"),
         definition=function (object) {
             return (object@designEffectByCell)
         })
 
 setGeneric ("getDataLength", function (object) { standardGeneric ("getDataLength")})
 setMethod (f="getDataLength",
-        signature="NWayData",
+        signature=signature(object="NWayData"),
         definition=function (object) {
             return (object@dataLength)
         })
@@ -46,28 +71,28 @@ setMethod (f="getDataLength",
 
 setGeneric ("getNEffective", function (object) { standardGeneric ("getNEffective")})
 setMethod (f="getNEffective",
-        signature="NWayData",
+        signature=signature(object="NWayData"),
         definition=function (object) {
             return (getN (object) / getDesignEffect (object))
         })
 
 setGeneric ("getDesignEffect", function (object) { standardGeneric ("getDesignEffect")})
 setMethod (f="getDesignEffect",
-        signature="NWayData",
+        signature=signature(object="NWayData"),
         definition=function (object) {
             return (weighted.mean (getDesignEffectByCell (object), getN(object), na.rm=TRUE))
         })
 
 setGeneric ("getData", function (object) { standardGeneric ("getData")})
 setMethod (f="getData",
-        signature="NWayData",
+        signature=signature(object="NWayData"),
         definition=function (object) {
             return (object@data)
         })
 
 setGeneric ("flattenData", function (object) { standardGeneric ("flattenData")})
 setMethod (f="flattenData",
-        signature="NWayData",
+        signature=signature(object="NWayData"),
         definition=function(object) {
             dimLevels <- dimnames (object@ybarWeighted)
             vars <- data.frame(array (NA, dim=c (length(object@ybarWeighted), object@numberWays), dimnames=list(list(), names(dimLevels))))

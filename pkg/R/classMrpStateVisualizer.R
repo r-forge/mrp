@@ -32,7 +32,7 @@ setClass(Class="MrpStateVisualizer",
 )
 
 setMethod (f="placeMisc",
-        signature="MrpVisualizer",
+        signature="MrpStateVisualizer",
         definition=function (object, mrp) {
             ## Place color bar
             colors <- object@colorFunction (seq (object@colorFunction.lo, object@colorFunction.hi, length.out=object@colorFunction.nShades))

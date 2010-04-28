@@ -6,13 +6,13 @@
 
 \title{Multilevel regression and poststratification object}
 \description{
-	The \code{mrp} class is the core class of the MRP package. A \code{mrp}
-	object is typically created with the data of interest and the object is
+	The \code{mrp} class is the core class of the MRP package. An \code{mrp}
+	object is created with the data of interest; the object is
 	then used to perform multilevel regression and poststratification.
 }
-\section{Objects from the Class}{
+\section{Object Creation}{
 	\code{mrp} objects are created by using the 
-	\code{newMrp (response, var1, var2, var3, weight, positiveResponse, formula)} 
+	\code{newMrp (response, vars, population, weight)} 
 	function. The required elements of the constructor are 
 	\code{response}, \code{var1}, \code{var2}, and \code{var3}. 
 	The resulting \code{mrp} object will be set up for logistic regression. } 
@@ -63,6 +63,126 @@
 	or \code{\linkS4class{CLASSNAME}} for links to other classes
 }
 \examples{
+\dontrun{
+    # Get data from BetaDataFerrett.
+    # From within BetaDataFerrett (after login) -- Step 1: Select Dataset & Variable
+    #   Left Pane:
+    #     -> American Community Survey
+    #     -> 3-Year Estimates - Public Use Microdata Sample
+    #     -> 2006-2008
+    #     -> View Variables
+    #   Right Pane:
+    #     -> Choose:
+    #       - Population - Age (AGEP)
+    #       - Housing - Household income (HINCP)
+    #       - Housing - Vehicles (VEH)
+    #       - Housing - Telephone in Unit (TEL)
+    #       - Population - Sex (SEX) (1 = Male, 2 = Female)
+    #       - Population - Recoded detailed race code (RAC1P) (1 = white, 2 = black, 3 = american india, 4= alaska native..., 6 = asian, ...)
+    #       - FIPS State Code.
+    #  Step 2: 
+    #       Download data as comma delimited
+    #       Will take a while.
+    #       Saved as "dataferret.csv" in current workspace (getwd())
+    # Load Data
+    acs2008 <- read.csv ("dataferrett.csv")
+    nrow (acs2008) # 8965060
+    
+    # Preprocess data
+    # names (acs2008)
+    # "SERIALNO" "AGEP"     "HINCP"    "VEH"      "TEL"      "SEX"      "RAC1P"    "ST"
+    
+    # Create 5 age categories
+    acs2008$age <- cut (x=acs2008$AGEP, breaks=c (0, 18, 30, 45, 65, 99), labels=c("0-17", "18-29", "30-44", "45-64", "65+"))
+    table (acs2008$age)
+    
+    # Create 5 income categories
+    acs2008$income <- cut (x=acs2008$HINCP, breaks=c (min (acs2008$HINCP), 50000, 100000, 150000, 200000, max (acs2008$HINCP)), labels=c("< $50K", "$50-100K", "$100-150K", "$150-200K", "> $200K"))
+    table (acs2008$income)
+    
+    # State: recode states
+    library (datasets)
+    states <- rep (NA, 72)
+    states[1] <- "AL"
+    states[2] <- "AK"
+    states[4] <- "AZ"
+    states[5] <- "AR"
+    states[6] <- "CA"
+    states[8] <- "CO"
+    states[9] <- "CT"
+    states[10] <- "DE"
+    states[11] <- "DC"
+    states[12] <- "FL"
+    states[13] <- "GA"
+    states[15] <- "HI"
+    states[16] <- "ID"
+    states[17] <- "IL"
+    states[18] <- "IN"
+    states[19] <- "IA"
+    states[20] <- "KS"
+    states[21] <- "KY"
+    states[22] <- "LA"
+    states[23] <- "ME"
+    states[24] <- "MD"
+    states[25] <- "MA"
+    states[26] <- "MI"
+    states[27] <- "MN"
+    states[28] <- "MS"
+    states[29] <- "MO"
+    states[30] <- "MT"
+    states[31] <- "NE"
+    states[32] <- "NV"
+    states[33] <- "NH"
+    states[34] <- "NJ"
+    states[35] <- "NM"
+    states[36] <- "NY"
+    states[37] <- "NC"
+    states[38] <- "ND"
+    states[39] <- "OH"
+    states[40] <- "OK"
+    states[41] <- "OR"
+    states[42] <- "PA"
+    states[44] <- "RI"
+    states[45] <- "SC"
+    states[46] <- "SD"
+    states[47] <- "TN"
+    states[48] <- "TX"
+    states[49] <- "UT"
+    states[50] <- "VT"
+    states[51] <- "VA"
+    states[53] <- "WA"
+    states[54] <- "WV"
+    states[55] <- "WI"
+    states[56] <- "WY"
+    states[72] <- NA # Puerto Rico
+    acs2008$state <- factor (states[acs2008$ST], levels=states)
+    
+    # Sex
+    acs2008$sex <- factor (acs2008$SEX, levels=c(1,2), labels=c("Male", "Female"))
+    
+    # Outcome vars
+    # have access to a vehicle: change to binary variable
+    acs2008$vehicle <- factor (acs2008$VEH > 0, levels=c(TRUE, FALSE), labels=c("Yes", "No"))
+    # phone in unit
+    acs2008$phone <- factor (acs2008$TEL, levels=c(1,2), labels=c("Yes", "No"))
+    
+    acs2008 <- acs2008 [, c("vehicle", "state", "age", "income", "phone")]
+    acsMrpVehicle <- newMrp (acs2008$vehicle, acs2008[, c("state", "age", "income")])
+    
+    subset <- rbinom (nrow(acs2008), 1, 0.3)==1
+    acsMrpVehicle <- newMrp (acs2008$vehicle[subset], acs2008[subset, c("state", "age", "income")])
+    acsMrpVehicle <- setFormula (acsMrpVehicle, "cbind(response.yes, response.no) ~ 1 + (1 | state) + (1 | age) + (1 | income) + (1 | state:age) + (1 | state:income) + (1 | age:income)")
+    acsMrpVehicle <- mr (acsMrpVehicle)
+    
+    (vehicle <- p (acsMrpVehicle))
+    (vehicle.byState <- p (acsMrpVehicle, c(TRUE, FALSE, FALSE))) 
+    (vehicle.byAge <- p (acsMrpVehicle, c(FALSE, TRUE, FALSE)))
+    (vehicle.byIncome <- p (acsMrpVehicle, c(FALSE, FALSE, TRUE)))
+    
+    stateVisualizer <- newMrpStateVisualizer()
+    visualize (stateVisualizer, acsMrpVehicle)
+    
+}
 	
 ## 1) Republican vote
 	## load data
