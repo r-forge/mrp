@@ -56,12 +56,12 @@
 \author{Andrew Gelman <gelman@stat.columbia.edu>,
 	Daniel Lee <bearlee@alum.mit.edu>,
 	Yu-Sung Su <ys463@columbia.edu>}
-\note{ ~~further notes~~ }
+#\note{ ~~further notes~~ }
 
-\seealso{
-	~~objects to See Also as \code{\link{~~fun~~}}, ~~~
-	or \code{\linkS4class{CLASSNAME}} for links to other classes
-}
+#\seealso{
+#	~~objects to See Also as \code{\link{~~fun~~}}, ~~~
+#	or \code{\linkS4class{CLASSNAME}} for links to other classes
+#}
 \examples{
 \dontrun{
     # Get data from BetaDataFerrett.
