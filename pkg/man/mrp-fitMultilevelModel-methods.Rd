@@ -2,10 +2,14 @@
 \docType{methods}
 \alias{fitMultilevelModel-methods}
 \alias{fitMultilevelModel,mrp-method}
+
 \title{Fit multilevel model}
+
 \description{Fits the multilevel model for the \code{\link{mrp}} object. The model 
     is fit based on the \code{data} and \code{formula} slots.}
+
 \section{Fit Multilevel Model}{
+
 \describe{
     The multilevel model is fit using the object's \code{formula} and \code{data}.
     The current version uses \code{\link[lme4]{glm}} and a \code{quasibinomial}
@@ -20,4 +24,5 @@
         will match the dimension of the data (see \code{\link{getYbarWeighted}}).}
     }
 }
+
 \keyword{methods}

@@ -4,13 +4,13 @@
 \alias{MrpStateVisualizer-class}
 
 \title{Class "MrpStateVisualizer" ~~~ }
-\description{	 ~~ A concise (1-5 lines) description of what the class is.  ~~}
+\description{  ~~ A concise (1-5 lines) description of what the class is.  ~~}
 \section{Objects from the Class}{
 Objects can be created by calls of the form \code{new("MrpStateVisualizer", ...)}.
-	 ~~ describe objects here ~~ 
+   ~~ describe objects here ~~ 
 }
 \section{Slots}{
-	 \describe{
+   \describe{
     \item{\code{colorFunction}:}{Object of class \code{"function"} ~~ }
     \item{\code{statemaps.creator}:}{Object of class \code{"function"} ~~ }
     \item{\code{colorFunction.lo}:}{Object of class \code{"numeric"} ~~ }
@@ -32,20 +32,21 @@ Objects can be created by calls of the form \code{new("MrpStateVisualizer", ...)
   }
 }
 \section{Extends}{
-Class \code{"\linkS4class{MrpVisualizer}"}, directly.
+Class \code{\linkS4class{MrpVisualizer}}, directly.
 }
 \section{Methods}{
-No methods defined with class "MrpStateVisualizer" in the signature.
+No methods defined with class \code{MrpStateVisualizer} in the signature.
 }
-\references{ ~put references to the literature/web site here ~ }
-\author{ ~~who you are~~ }
-\note{ ~~further notes~~ }
+\references{}
 
-\seealso{
-	~~objects to See Also as \code{\link{~~fun~~}}, ~~~
-	or \code{\linkS4class{CLASSNAME}} for links to other classes
+\author{
+  Andrew Gelman <gelman@stat.columbia.edu>,
+  Daniel Lee <bearlee@alum.mit.edu>,
+  Yu-Sung Su <ys463@columbia.edu>
 }
+
 \examples{
 showClass("MrpStateVisualizer")
 }
+
 \keyword{classes}

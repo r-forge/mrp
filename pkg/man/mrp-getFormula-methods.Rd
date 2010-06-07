@@ -11,7 +11,7 @@
     
     The multilevel model is fit with the formula by the 
     \code{\link{fitMultilevelModel}} method. This formula should have 
-    \code{"cbind (response.yes, response.no)"} as the left side of the formula,
+    \code{cbind (response.yes, response.no)} as the left side of the formula,
     unless the data in the \code{data} slot is modified by hand. The names of
     the formula for the right hand side should be the names of the variables
     in the \code{data} slot.}
