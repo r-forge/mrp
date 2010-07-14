@@ -1,7 +1,6 @@
-\name{getNumberWays-methods}
+\name{NWayData-getNumberWays-methods}
 \docType{methods}
-\alias{getNumberWays-methods}
-\alias{getNumberWays,NWayData-method}
+\alias{NWayData-getNumberWays-methods,NWayData-getNumberWays,NWayData-method}
 \title{ ~~ Methods for Function getNumberWays  ~~}
 \description{
  ~~ Methods for function \code{getNumberWays}  ~~

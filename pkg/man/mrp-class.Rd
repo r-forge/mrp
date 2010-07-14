@@ -21,7 +21,7 @@
         \item{\code{data}:}{This holds the transformed data 
             (class \code{NWayData}). The depth of the analysis will be 
             determined by the original data set passed into the constructor. 
-            See documentation for \code{\link{NWayData}}}
+            See documentation for \code{\link{NWayData-class}}}
       \item{\code{formula}:}{This is the formula for the multilevel model 
          fit in the regression step
          (class \code{character}, e.g. a string representation).

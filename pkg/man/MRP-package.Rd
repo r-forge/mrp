@@ -40,8 +40,9 @@ Index:
 
   Maintainer: Daniel Lee <bearlee@alum.mit.edu>
 }
-\references{
-
-}
+% TODO: Fill in references section
+%\references{
+%
+%}
 
 \keyword{ package }

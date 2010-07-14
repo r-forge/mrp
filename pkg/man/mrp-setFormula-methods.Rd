@@ -1,13 +1,12 @@
-\name{setFormula-methods}
+\name{setFormula}
 \docType{methods}
-\alias{setFormula-methods}
-\alias{setFormula,mrp-method}
-\title{Sets the formula of an \code{\link{mrp}} object}
+\alias{setFormula-methods,mrp-method}
+\title{Sets the formula of an "mrp" object}
 \description{This method sets the formula of the \code{mrp} object.}
 \section{Fit Multilevel Model}{
 \describe{
     The multilevel model is fit using the object's \code{formula} and \code{data}.
-    The current version uses \code{\link[lme4]{glm}} and a \code{quasibinomial}
+    The current version uses \code{\link[stats]{glm}} and a \code{quasibinomial}
     family. The method returns a mutated \code{mrp} object.}
 }
 \section{Mutations to the object}{

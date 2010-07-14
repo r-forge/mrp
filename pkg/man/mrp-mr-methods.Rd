@@ -1,8 +1,7 @@
 \name{mr-methods}
 \docType{methods}
-\alias{mr-methods}
-\alias{mr,mrp-method}
 \alias{mr}
+\alias{mr,mrp-method}
 \title{Multilevel regression step}
 \description{ This method fits the multilevel model if one does not exist. In order
     to force a multilevel model to be fit (and for more details), see 

@@ -1,4 +1,4 @@
-\name{getYbarWeighted-methods}
+\name{getYbarWeighted}
 \docType{methods}
 \alias{getYbarWeighted-methods}
 \alias{getYbarWeighted,NWayData-method}

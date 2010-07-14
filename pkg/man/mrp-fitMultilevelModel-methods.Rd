@@ -1,4 +1,4 @@
-\name{fitMultilevelModel-methods}
+\name{fitMultilevelModel}
 \docType{methods}
 \alias{fitMultilevelModel-methods}
 \alias{fitMultilevelModel,mrp-method}
@@ -12,7 +12,7 @@
 
 \describe{
     The multilevel model is fit using the object's \code{formula} and \code{data}.
-    The current version uses \code{\link[lme4]{glm}} and a \code{quasibinomial}
+    The current version uses \code{\link[stats]{glm}} and a \code{quasibinomial}
     family. The method returns a mutated \code{mrp} object.}
 }
 \section{Mutations to the object}{

@@ -32,7 +32,8 @@
 \section{Methods}{
   No methods defined with class \code{MrpVisualizer} in the signature.
 }
-\references{}
+% TODO: Fill in references section
+%\references{}
 
 \author{
   Andrew Gelman <gelman@stat.columbia.edu>,
