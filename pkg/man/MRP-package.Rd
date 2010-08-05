@@ -4,31 +4,15 @@
 \alias{MRP}
 \docType{package}
 \title{
-  Multilevel Regression and Poststratification
+  Multilevel Regression and Poststratification (MRP) Package
 }
 \description{
-  A user-friendly implementation of multilevel regression and poststratification. 
-  This package includes some basic display functionality for three-way analysis.
-  The visualizers are designed to be extended for extended display functionality. 
+  This package contains a user-friendly implementation of multilevel regression and poststratification.
 }
 \details{
-\tabular{ll}{
-  Package: \tab MRP\cr
-  Version: \tab 0.00.01\cr
-  Date: \tab 2009-9-21\cr
-  Depends: \tab methods, arm, lme4, maps, colorspace\cr
-  License: \tab GPL (>=2)\cr
-  Collate: \tab 'classThreeWayData.R' 'classMrp.R' 'classMrpVisualizer.R' 'classMrpStateVisualizer.R'\cr
-  Packaged: \tab 2009-12-08 20:05:30 UTC; Statistics\cr
-  Built: \tab R 2.9.1; ; 2009-12-08 20:05:33 UTC; windows\cr
-}
-
-Index:
-\preformatted{
-  colorblind              colorblind
-  createThreeWayDataset   createThreeWayDataset
-  visualizeThreewayDataset
-                        visualizeThreewayDataset
+  This package also includes implementations of basic display functionality for three-way analysis. 
+  These visualizers are designed to be extended for more complex display visual analysis.
+  For a complete list of functions, use library(help="MRP").  
 }
 
 }
@@ -44,5 +28,5 @@ Index:
 %\references{
 %
 %}
-
 \keyword{ package }
+s

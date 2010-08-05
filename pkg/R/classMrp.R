@@ -22,13 +22,21 @@ setMethod (f="getData",
             return (object@data)   
         })
 
-
 #setGeneric ("getNumberWays", function (object) { standardGeneric ("getNumberWays") })
 setMethod (f="getNumberWays",
         signature=signature(object="mrp"),
         definition=function(object) {
             return (getNumberWays(object@data))   
         })
+
+setGeneric ("getPopulation", function (object) { standardGeneric ("getPopulation")})
+setMethod (f="getPopulation",
+		signature=signature(object="mrp"),
+		definition=function(object) {
+			stopifnot (class (object) == "mrp")
+		
+			return (object@population)
+		})
 
 setGeneric ("setPopulation", function (object, population) { standardGeneric ("setPopulation")})
 setMethod (f="setPopulation",
@@ -146,7 +154,9 @@ newMrp <- function (response, vars, population, weight=rep(1, length(response)))
     # make inputs factors
     response <- factor (response)
     for (i in 1:length (vars)) {
-        vars[,i] <- factor(vars[,i])
+		if (is.factor (vars[,i]) == FALSE) {
+			vars[,i] <- factor(vars[,i])	
+		}
     }
 
     data <- newNWayData (ncol(vars), data.frame (response, vars, weight))
