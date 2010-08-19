@@ -19,7 +19,7 @@ setGeneric ("dataLookup", function (object, ...) { standardGeneric ("dataLookup"
 setMethod (f="dataLookup",
         signature=signature(object="NWayData"),
         definition=function (object, colName, newColName, lookupTable, byValue=FALSE) {
-            object@data[newColName] <- lookupTable[object@data[[colName]]]
+            object@data[newColName] <- lookupTable[object@data[[colName]],]
             return (object)           
         })
 
