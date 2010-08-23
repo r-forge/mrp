@@ -2,34 +2,38 @@
 \docType{methods}
 \alias{mrp-accessors-methods}
 
+\alias{getData}
+\alias{getNumberWays}
+\alias{getPopulation}
+\alias{getFormula}
+
+\alias{setPopulation}
+\alias{setFormula}
+
 \alias{getData,mrp-method}
 \alias{getNumberWays,mrp-method}
 \alias{getPopulation,mrp-method}
-\alias{getFormula,mrp-method}
 \alias{setPopulation,mrp,array-method}
+\alias{getFormula,mrp-method}
 \alias{setFormula,mrp,character-method}
 
 \title{Accessors for the MRP object}
 \description{These are the accessors for the MRP object.}
 \usage{
-	\code{
-		getData(object)
-		getNumberWays(object)
-		getPopulation(object)
-		getFormula(object)
-		
-		setPopulation(object, population)
-		setFormula(object, formula)}
+	getData(object)
+	getNumberWays(object)
+	getPopulation(object)
+	getFormula(object)
+	
+	setPopulation(object, population)
+	setFormula(object, formula)
 }
 \arguments{
-	\item{object}{the \code{mrp} object.}
-	\item{population}{the population distribution of the data (class \code{array}). 
-		This is intended to be a probability mass table, but will also work with unnormalized population distributions.}
+	\item{object}{the \code{mrp} object}
+	\item{population}{the population distribution of the data (class \code{array}).
+		This is intended to be a probability mass table, but will also work with unnormalized population distributions}
 	\item{formula}{the formula for the multilevel regression (class \code{character}). The left side of the formula
-		should be 	}
-	
-}
-\value{
-	\item{}{}
+		should be "c(response.yes, response.no) ~ " and the right side should be the regression formula based
+		on the names of the variates included in the data}
 }
 \keyword{methods}

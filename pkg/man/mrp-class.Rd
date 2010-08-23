@@ -1,6 +1,7 @@
 \name{mrp}
 \Rdversion{1.1}
 \docType{class}
+\alias{mrp}
 \alias{mrp-class}
 
 \title{Multilevel regression and poststratification object}

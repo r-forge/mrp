@@ -14,9 +14,6 @@
   These visualizers are designed to be extended for more complex display visual analysis.
   For a complete list of functions, use library(help="MRP").  
 }
-
-}
-
 \author{
   Andrew Gelman <gelman@stat.columbia.edu>,
   Daniel Lee <bearlee@alum.mit.edu>,
@@ -29,4 +26,3 @@
 %
 %}
 \keyword{ package }
-s
