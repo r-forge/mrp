@@ -18,16 +18,13 @@
 \alias{getDataLength}
 \alias{getDesignEffect}
 \alias{getDesignEffectByCell}
-%\alias{getFormula}
 \alias{getN}
 \alias{getNEffective}
-%\alias{getNumberWays}
 \alias{getNumberWays,NWayData-method}
 \alias{getYbarWeighted}
 \alias{hasMultilevelModel}
 \alias{newMrpStateVisualizer}
 \alias{newMrpVisualizer}
-\alias{p}
 \alias{placeCharts}
 \alias{placeCharts,MrpVisualizer-method}
 \alias{placeLabels}

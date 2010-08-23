@@ -70,9 +70,14 @@ setGeneric ("mr", function (object) { standardGeneric ("mr")})
 setMethod (f="mr",
         signature=signature(object="mrp"),
         definition=function(object) {
-            if (hasMultilevelModel(object) == FALSE) {
-                object <- fitMultilevelModel(object)
-            }   
+            object@multilevelModel <- 
+                    glmer (formula (object@formula), data=getData(object@data), family=quasibinomial(link="logit"))  
+                           
+            theta.hat <- rep (NA, length (getYbarWeighted (object@data)))
+            theta.hat[complete.cases(object@data@data)] <- fitted(object@multilevelModel)
+            object@theta.hat <- array (theta.hat, dim (getYbarWeighted(object@data)),
+                    dimnames=dimnames (getYbarWeighted(object@data)))
+            
             return (object)
         })
 
@@ -91,23 +96,6 @@ setMethod (f="p",
             } else {
                 return (apply (poststratified, groups, sum, na.rm=TRUE) / apply (object@population, groups, sum)) ## population should never have NAs
             }
-        })
-
-
-setGeneric ("fitMultilevelModel", function(object) { standardGeneric ("fitMultilevelModel")})
-setMethod (f="fitMultilevelModel",
-        signature=signature(object="mrp"),
-        definition=function (object) {
-            object@multilevelModel <- 
-                    glmer (formula (object@formula), data=getData(object@data), family=quasibinomial(link="logit"))  
-                           
-            
-            theta.hat <- rep (NA, length (getYbarWeighted (object@data)))
-            theta.hat[complete.cases(object@data@data)] <- fitted(object@multilevelModel)
-            object@theta.hat <- array (theta.hat, dim (getYbarWeighted(object@data)),
-                    dimnames=dimnames (getYbarWeighted(object@data)))
-            
-            return (object)
         })
 
 setGeneric ("hasMultilevelModel", function (object) { standardGeneric ("hasMultilevelModel")})
@@ -167,6 +155,8 @@ newMrp <- function (response, vars, population, weight=rep(1, length(response)))
     if (all (dim(data@ybarWeighted) == dim (population)) == FALSE) {
         stop (paste ("dim (population) must match dim (data@ybarWeighted).\n\tExpected:", dim (data@ybarWeighted)," but found: ", dim (population)))
     }
+
+	formula <- paste ("cbind (response.yes, response.no) ~ 1 +", paste ("(1 | ", names (vars), ")", sep="", collapse=" + "))
     
-    return (new(Class="mrp", data=data, population=population))
+    return (new(Class="mrp", data=data, population=population, formula=formula))
 }
