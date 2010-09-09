@@ -70,33 +70,37 @@ setGeneric ("mr", function (object) { standardGeneric ("mr")})
 setMethod (f="mr",
         signature=signature(object="mrp"),
         definition=function(object) {
-            object@multilevelModel <- 
-                    glmer (formula (object@formula), data=getData(object@data), family=quasibinomial(link="logit"))  
-                           
-            theta.hat <- rep (NA, length (getYbarWeighted (object@data)))
-            theta.hat[complete.cases(object@data@data)] <- fitted(object@multilevelModel)
-            object@theta.hat <- array (theta.hat, dim (getYbarWeighted(object@data)),
-                    dimnames=dimnames (getYbarWeighted(object@data)))
-            
-            return (object)
+          object@multilevelModel <- 
+            glmer (formula (object@formula),
+                   data=getData(object@data),
+                   family=quasibinomial(link="logit"))  
+          
+          theta.hat <- rep (NA, length (getYbarWeighted (object@data)))
+          theta.hat[complete.cases(object@data@data)] <- fitted(object@multilevelModel)
+          object@theta.hat <- array (theta.hat,
+                                     dim (getYbarWeighted(object@data)),
+                                     dimnames=dimnames (getYbarWeighted(object@data)))
+          return (object)
         })
 
 setGeneric ("p", function (object, poststratification.specification=rep(FALSE, getNumberWays (object@data))) { standardGeneric ("p")})
 #setGeneric ("poststratify", function (object) { standardGeneric ("poststratify")})
 setMethod (f="p",
-        signature=signature(object="mrp"),
-        definition=function (object, poststratification.specification) {
-            stopifnot (object@population != numeric(0))
-            stopifnot (hasMultilevelModel(object))
-            
-            poststratified <- object@theta.hat * object@population
-            groups <- which (poststratification.specification == TRUE)
-            if (length(groups) == 0) {
-                return (sum (poststratified, na.rm=TRUE) / sum (object@population)) 
-            } else {
-                return (apply (poststratified, groups, sum, na.rm=TRUE) / apply (object@population, groups, sum)) ## population should never have NAs
-            }
-        })
+           signature=signature(object="mrp"),
+           definition=function (object, poststratification.specification) {
+             stopifnot (object@population != numeric(0)) 
+             stopifnot (hasMultilevelModel(object))
+             
+             poststratified <- object@theta.hat * object@population
+             groups <- which (poststratification.specification == TRUE)
+             if (length(groups) == 0) {
+               return (sum (poststratified, na.rm=TRUE) / sum (object@population)) 
+             } else {
+               ## population should never have NAs ## Should this have an error check on it??
+               return (apply (poststratified, groups, sum, na.rm=TRUE) /
+                       apply (object@population, groups, sum))
+             }
+           })
 
 setGeneric ("hasMultilevelModel", function (object) { standardGeneric ("hasMultilevelModel")})
 setMethod (f="hasMultilevelModel",
@@ -134,7 +138,7 @@ newMrp <- function (response, vars, population, weight=rep(1, length(response)))
         stop ("vars must be a data.frame.")
     }
     if (length(response) != nrow(vars)) {
-        stop ("response must have the same length as the rows as the vars.")
+        stop ("response must have the same length as the vars.")
     }
     if (nlevels(response) != 2) {
         stop (paste ("response must have 2 levels, found:", nlevels(response)))
@@ -153,10 +157,10 @@ newMrp <- function (response, vars, population, weight=rep(1, length(response)))
     }
     
     if (all (dim(data@ybarWeighted) == dim (population)) == FALSE) {
-        stop (paste ("dim (population) must match dim (data@ybarWeighted).\n\tExpected:", dim (data@ybarWeighted)," but found: ", dim (population)))
+      stop (paste ("dim (population) must match dim (data@ybarWeighted).\n\tExpected:", dim (data@ybarWeighted)," but found: ", dim (population)))
     }
-
-	formula <- paste ("cbind (response.yes, response.no) ~ 1 +", paste ("(1 | ", names (vars), ")", sep="", collapse=" + "))
     
+    formula <- paste ("cbind (response.yes, response.no) ~ 1 +",
+                      paste ("(1 | ", names (vars), ")", sep="", collapse=" + "))
     return (new(Class="mrp", data=data, population=population, formula=formula))
-}
+  }
