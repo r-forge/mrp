@@ -26,18 +26,10 @@
   }
 }
 \section{Methods}{
-	No methods defined with class "NWayData" in the signature.
+	dataRescale, dataLookup, dataGenericAugment, getNumberWays, getYbarWeighted, getN, getDesignEffectByCell,
+	getDataLength, getNEffective, getDesignEffect, getData, flattenData
 }
-\references{ ~put references to the literature/web site here ~ }
-
-\author{
-  Andrew Gelman <gelman@stat.columbia.edu>,
-  Daniel Lee <bearlee@alum.mit.edu>,
-  Yu-Sung Su <ys463@columbia.edu>
-}
-
 \examples{
-showClass("NWayData")
+	showClass("NWayData")
 }
-
 \keyword{classes}
