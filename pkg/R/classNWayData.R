@@ -105,7 +105,6 @@ setMethod (f="flattenData",
             ybarWeighted <- as.vector (replace (object@ybarWeighted, getNEffective(object)==0, 0.5))
             nEffective <- as.vector (getNEffective (object))
             
-            
             object@data <- data.frame (response.yes=ybarWeighted*nEffective, response.no=(1-ybarWeighted)*nEffective, vars)
             return (object)
         })
