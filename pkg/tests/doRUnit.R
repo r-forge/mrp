@@ -1,8 +1,7 @@
 ## unit tests will not be done if RUnit is not available
 if(require("RUnit", quietly=TRUE)) {
  
-  ## --- Setup ---
- 
+  ## --- Setup --
   pkg <- "MRP" # <-- Change to package name!
   if(Sys.getenv("RCMDCHECK") == "") {
     ## Path to unit tests for standalone running under Makefile (not R CMD check)

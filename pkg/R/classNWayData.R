@@ -7,6 +7,7 @@ setClass(Class="NWayData",
                 dataLength="numeric",
                 data="data.frame"))
 
+
 setGeneric ("dataRescale", function (object, ...) { standardGeneric ("dataRescale")})
 setMethod (f="dataRescale",
         signature="NWayData",
@@ -15,6 +16,7 @@ setMethod (f="dataRescale",
             return (object)
         })
 
+## probably kill, merge/join.
 setGeneric ("dataLookup", function (object, ...) { standardGeneric ("dataLookup")})
 setMethod (f="dataLookup",
         signature=signature(object="NWayData"),
@@ -23,6 +25,9 @@ setMethod (f="dataLookup",
             return (object)           
         })
 
+
+
+#### Probably kill this, just a merge() / join.
 setGeneric ("dataGenericAugment", function (object, ...) {standardGeneric ("dataGenericAugment")})
 setMethod (f="dataGenericAugment",
         signature=signature(object="NWayData"),
