@@ -33,7 +33,7 @@ test.creation <- function () {
     mrp <- newMrp (fakeData$response, fakeData[,2:4], fakePopulation)
     
     checkEquals (3, mrp@data@numberWays)
-    checkEquals (numeric(0), mrp@theta.hat)
+    checkEqualsNumeric (numeric(0), mrp@theta.hat)
     checkEquals (fakePopulation, mrp@population)
 }
 
