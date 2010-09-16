@@ -2,7 +2,9 @@
 tag <- function(x) attr(x, "Rd_tag")
 
 untag <- function(x) {
-  attr(x, "Rd_tag") <- "TEXT"
+  if (!is.null(x)){
+	attr(x, "Rd_tag") <- "TEXT"
+  }
   x
 }
 

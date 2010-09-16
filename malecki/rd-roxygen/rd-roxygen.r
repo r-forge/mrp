@@ -22,13 +22,14 @@ parse_file <- function(path) {
   out$name <- reconstruct(rd$name)
   out$aliases <- unname(sapply(rd[names(rd) == "alias"], "[[", 1))
   # If the only alias is the name, then skip it
-  if (identical(aliases, name)) {
-    aliases <- NULL
+  if (identical(out$aliases, out$name)) {
+    out$aliases <- NULL
   }
   out$keywords <- unname(sapply(rd[names(rd) == "keyword"], "[[", 1))
 
   # Pull apart arguments
   arguments <- rd$arguments
+  browser()
   arguments <- arguments[sapply(arguments, tag) != "TEXT"]
   out$params <- sapply(arguments, function(argument) {
     paste(argument[[1]], reconstruct(argument[[2]]))
@@ -60,7 +61,13 @@ create_roxygen <- function(info) {
 }
 
 parse_and_save <- function(path) {
-  parsed <- parse_file(path)
-  roxygen <- create_roxygen(parsed)
-  cat(paste(output, collapse = "\n"))
+  list_of_files <- dir (path, pattern="*.rd", ignore.case=TRUE, full.names=TRUE)
+  if (length (list_of_files) == 0) {
+	list_of_files <- path
+  }
+	for (file in list_of_files) {
+		parsed <- parse_file(file)
+		roxygen <- create_roxygen(parsed)
+		cat(paste(roxygen, collapse = "\n"))
+	  }  
 }
