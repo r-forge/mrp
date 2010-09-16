@@ -1,5 +1,5 @@
 # Parse input Rd file -------------------------------------------------------
-parse_file <- fuction(path) {
+parse_file <- function(path) {
   rd <- tools::parse_Rd(path)
 
   tags <- sapply(rd, tag)
