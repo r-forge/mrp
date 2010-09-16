@@ -7,7 +7,6 @@ setClass(Class="NWayData",
                 dataLength="numeric",
                 data="data.frame"))
 
-
 setGeneric ("dataRescale", function (object, ...) { standardGeneric ("dataRescale")})
 setMethod (f="dataRescale",
         signature="NWayData",
@@ -36,13 +35,15 @@ setMethod (f="dataGenericAugment",
             return (object)           
         })
 
-
+## Returns the number of ways of the analysis. The user may augement the data with additional columns, 
+## which is why this is stored rather than calculated each time. 
 setGeneric ("getNumberWays", function (object) { standardGeneric ("getNumberWays")})
 setMethod (f="getNumberWays",
         signature=signature(object="NWayData"),
         definition=function (object) {
             return (object@numberWays)
         })
+
 
 setGeneric ("getYbarWeighted", function (object) { standardGeneric ("getYbarWeighted")})
 setMethod (f="getYbarWeighted",
@@ -66,6 +67,9 @@ setMethod (f="getDesignEffectByCell",
             return (object@designEffectByCell)
         })
 
+
+## Returns the number of observations (unweighted observations) that was used to create the data set.
+## TODO: remove this method -- not useful. Perhaps a weighted number of observations would be more useful
 setGeneric ("getDataLength", function (object) { standardGeneric ("getDataLength")})
 setMethod (f="getDataLength",
         signature=signature(object="NWayData"),
@@ -116,7 +120,7 @@ setMethod (f="flattenData",
 
 newNWayData <- function (numberWays, mrp.data) {
     if ("data.frame" != class (mrp.data)) {
-        stop ("Correct usage (data.frame): <response> <var 1> <var 2> ... <var n> <weights>\n")
+        stop ("Correct usage (data.frame): <response> <covariates> <weights>\n")
     } 
     if (numberWays + 2 != ncol(mrp.data)) {
         stop (cat ("mrp.data must have", numberWays+2, "columns. Found: ", length(mrp.data), "\n",
