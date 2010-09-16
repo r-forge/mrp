@@ -29,7 +29,6 @@ parse_file <- function(path) {
 
   # Pull apart arguments
   arguments <- rd$arguments
-  browser()
   arguments <- arguments[sapply(arguments, tag) != "TEXT"]
   out$params <- sapply(arguments, function(argument) {
     paste(argument[[1]], reconstruct(argument[[2]]))
@@ -69,5 +68,7 @@ parse_and_save <- function(path) {
 		parsed <- parse_file(file)
 		roxygen <- create_roxygen(parsed)
 		cat(paste(roxygen, collapse = "\n"))
+		
+		write (roxygen, file=paste (file, ".Roxy", sep=""))
 	  }  
 }
