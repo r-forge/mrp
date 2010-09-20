@@ -150,14 +150,16 @@ the#1\endcsname\quad}}
 <<setup>>=
 options(width=100)
 library(lattice)
-library(Hmisc)
+library(latticeExtra) # for useOuterStrips
 ## sp has plot methods for lattice. It may be overkill, but it
-## also helps with binding data into maps.
+## also helps with binding data into maps. loaded by maptools.
 library(maptools)
+library(rgdal) #optional, for projections.
 library(arm)
 library(MRP)
 ## used for melt/cast
-library(reshape)
+library(reshape2)
+library(colorRamps) # another set of color ramps
 load("~/Desktop/censusMRP/naes00.Rdata")
 @ 
 
@@ -278,11 +280,15 @@ favorVoucher2000 <- p (favorVoucher2000Mrp.simpleModel)
 ### Get full melted 'p' by income
 favorVoucher2000.byState <- melt(p (favorVoucher2000Mrp.simpleModel, c(TRUE, FALSE, TRUE))) 
 favorVoucher2000.byState$value <- favorVoucher2000.byState$value - favorVoucher2000
-favorVoucher2000.byState <- cast(favorVoucher2000.byState, stateAbbreviation~income)
+favorVoucher2000.byState$income <- as.ordered(relevel(favorVoucher2000.byState$income,
+                                                      "under $25,000",ordered=T))
+favorVoucher2000.byState <- dcast(favorVoucher2000.byState, stateAbbreviation~income)
 ## make relative to national average:
 ##spmap.states <- readShapeSpatial("~/mrp/malecki/fe_2007_us_state")
 ## this one is smaller
 spmap.states <- readShapeSpatial("~/mrp/malecki/s_01au07",proj4string=CRS("+proj=longlat +datum=NAD27"))
+spmap.states <- spTransform(spmap.states, CRS("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96"))
+
 ## One in this has no 2letter abbrev.
 spmap.states <- spmap.states[-4,]
 ## Going to use abbrev as rownames, need to change feature ids.
@@ -307,11 +313,14 @@ spmap.states@data <- cbind(spmap.states@data,
                       )
 
 ## the reshaped data has invalid column names. 
-spmap.states@data <- spmap.states@data[,c(1:6,11,7:10)]
 prettyNames <- colnames(spmap.states@data)[7:11]
 names(spmap.states@data)[7:11] <- c("one","two","three","four","five")
 
 @ 
+
+\subsection{P only by income}
+\label{sec:p-only-income}
+
 
 \begin{figure}
   \centering
@@ -349,6 +358,10 @@ state ~ age + income
 \end{verbatim}
 We will need to keep track of the dimensions of both of these, and then layout the plot in the right number of rows and columns. We will also want to make custom labels based on the original \texttt{levels} of the conditioning variables.
 
+\subsection{Modifying the display, round one}
+\label{sec:modify-displ-round}
+
+
 The biggest reason to do things this way is how easy it becomes to customize the plot. Here I change the color scheme by subbing in another list of colors of arbitrary length -- by default it is 100 which is perceptually continuous -- but doing it this way lets the graphics package rather than the user do the mapping of levels into cutpoints into colors. 
 
 \begin{figure}
@@ -357,6 +370,8 @@ The biggest reason to do things this way is how easy it becomes to customize the
   \label{fig:lattice-sp-vouchers-altcolors}
 \setkeys{Gin}{width=7in}
 <<lattice-sp-vouchers-altcolors, fig=TRUE,eps=FALSE,width=10,height=2.5>>=
+quartzFonts(gotham=quartzFont(c(
+              "Gotham-Book","Gotham-Bold","Gotham-BookItalic","Gotham-BoldItalic")))
 print(
       spplot(spmap.states, 
              8:11, # columns of the @data to plot.
@@ -364,7 +379,7 @@ print(
                    # and set layout automatically.
              layout=c(4,1),
              names.attr=prettyNames[2:5], # should use levels of original 'p' df
-          
+             main="Support for School Vouchers by Income",
              at=seq(-.1,.1,.002),
              ## details that are hard in base graphics
              colorkey=list(
@@ -373,8 +388,9 @@ print(
                ),
              between=list(x=.25,y=.25),
              par.settings=list(
+               par.main.text=list(fontfamily="gotham"),
                add.line=list(col="#00000000",lwd=0), # state borders
-               add.text=list(cex=.7,fontface="bold"),
+               add.text=list(cex=.7,fontface="italic",fontfamily="gotham"),
                axis.line=list(lwd=0),
                layout.heights=list(strip=1.2),
                strip.background=list(col="transparent"),
@@ -386,50 +402,135 @@ print(
 @ 
 \end{figure}
 
-<<prepare-data-2way>>=
+\subsection{Two-way Poststratification ‘by hand’}
+\label{sec:two-way-poststr}
+
+
+<<prepare-data-2way,eval=TRUE>>=
 favorVoucher2000 <- p (favorVoucher2000Mrp.simpleModel)
 ### Demo use of ordered factor on levels:
 ### Get full melted 'p' by religionAndEthnicity and income
 favorVoucher2000.byState <- melt(p (favorVoucher2000Mrp.simpleModel, c(TRUE, TRUE, TRUE))) 
 favorVoucher2000.byState$value <- favorVoucher2000.byState$value - favorVoucher2000
-favorVoucher2000.byState$income <- as.ordered(relevel(favorVoucher2000.byState$income,"under $25,000",ordered=T))
-
-plotframe <- cast(favorVoucher2000.byState, stateAbbreviation~religionAndEthnicity+income)
-names(plotframe)[2:6]
-
+favorVoucher2000.byState$income <- as.ordered(relevel(favorVoucher2000.byState$income,
+                                                      "under $25,000",ordered=T))
+## hold on to levelnames for plotting
+dimlabels <- sapply(favorVoucher2000.byState, levels)
+plotframe <- dcast(favorVoucher2000.byState, stateAbbreviation~religionAndEthnicity+income)
+## args: dcast data frame and previously extracted list of labels
+## returns: levels associated with known dimensions
+pretty.names <- function(plotframe, dimlabels){
+  statedim <- which(names(plotframe)==names(dimlabels))
+  firstdim <- which(sapply(sapply(unlist(sapply(dimlabels, function(x) {x[1]})), 
+                                  function(x){
+                                    grep(paste("^",x,sep=""),
+                                         names(plotframe),perl=TRUE) }),
+                           length)!=0)
+  lastdim <- which(sapply(sapply(unlist(sapply(dimlabels, function(x) {x[length(x)]})), 
+                                 function(x){
+                                   grep(paste("\\Q",x,"\\E","$",sep=""),
+                                        names(plotframe),perl=TRUE) }),
+                          length)!=0)
+  if(length(dimlabels)==5){
+    middledim <- which(!names(dimlabels) %in% 
+                       c(names(dimlabels)[c(statedim,firstdim,seconddim)],"value"))
+    prettynames <- list(page=dimlabels[[firstdim]],row=dimlabels[[middledim]],
+                        col=dimlabels[[lastdim]],state=dimlabels[[statedim]])
+  } else {
+    prettynames <- list(row=dimlabels[[firstdim]],
+                        col=dimlabels[[lastdim]],
+                        state=dimlabels[[statedim]])
+  }
+  return(prettynames)
+}
+## get variable names
+plotframe.names <- pretty.names(plotframe,dimlabels)
+## Have to sanitize names of object for spplot
+names(plotframe) <- make.names(names(plotframe))
 
 ## make relative to national average:
 ##spmap.states <- readShapeSpatial("~/mrp/malecki/fe_2007_us_state")
 ## this one is smaller
 spmap.states <- readShapeSpatial("~/mrp/malecki/s_01au07",proj4string=CRS("+proj=longlat +datum=NAD27"))
+spmap.states <- spTransform(spmap.states, CRS("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96"))
 ## One in this has no 2letter abbrev.
 spmap.states <- spmap.states[-4,]
 ## Going to use abbrev as rownames, need to change feature ids.
-spmap.states <- spChFIDs(spmap.states, levels(spmap.states@data$STATE)[spmap.states@data$STATE])
+spmap.states <- spChFIDs(spmap.states, 
+                         levels(spmap.states@data$STATE)[spmap.states@data$STATE])
 rownames(spmap.states@data) <- levels(spmap.states@data$STATE)[spmap.states@data$STATE]
-rownames(favorVoucher2000.byState) <- favorVoucher2000.byState$stateAbbreviation
+rownames(plotframe) <- plotframe$stateAbbreviation
 
 
 ## Factors are a bit of a pain here, get rid of them in two places.
-favorVoucher2000.byState$stateAbbreviation <- as.character(levels(favorVoucher2000.byState$stateAbbreviation)[favorVoucher2000.byState$stateAbbreviation])
+plotframe$stateAbbreviation <- as.character(levels(plotframe$stateAbbreviation)[plotframe$stateAbbreviation])
 spmap.states$STATE <- as.character(levels(spmap.states$STATE)[spmap.states$STATE])
 
 
 ## remove DC,AK,HI from fitted model, and then pare the sp object to match.
-favorVoucher2000.byState <- subset(favorVoucher2000.byState, 
+plotframe <- subset(plotframe, 
                                    !(stateAbbreviation %in% c("DC","AK","HI")))
-spmap.states <- spmap.states[spmap.states$STATE %in% favorVoucher2000.byState$stateAbbreviation,]
+spmap.states <- spmap.states[spmap.states$STATE %in% plotframe$stateAbbreviation,]
 
 ## the main trick of working with sp objects is the order of the data.
 spmap.states@data <- cbind(spmap.states@data, 
-                      favorVoucher2000.byState[rownames(spmap.states@data),]
+                      plotframe[rownames(spmap.states@data),]
                       )
 
 ## the reshaped data has invalid column names. 
-spmap.states@data <- spmap.states@data[,c(1:6,11,7:10)]
-prettyNames <- colnames(spmap.states@data)[7:11]
-names(spmap.states@data)[7:11] <- c("one","two","three","four","five")
+
+\begin{figure}
+  \centering
+  \caption{Simplified Census map from shapefile using packages sp and maptools, plotted using Lattice. Support for vouchers by income and race.}
+  \label{fig:lattice-sp-vouchers-full}
 
 @ 
+<<voucher-income-race,fig=TRUE,pdf=FALSE,png=TRUE,width=9,height=8>>=
+plotframe.names$row[4:7] <- c("White\nCatholics","White\nEvangelicals","White\nNon-E. Protestant", "White\nOther/None")
+print(
+      spplot(spmap.states, 
+             7:41, # columns of the @data to plot.
+                   # TODO : keep track of 2way conditioning and order
+                   # and set layout automatically.
+             layout=c(
+               length(plotframe.names$col),
+               length(plotframe.names$row)),
+             #names.attr=paste(rep(plotframe.names$row,each=length(plotframe.names$col)),
+             #  "\n",plotframe.names$col,sep=""), # should use levels of original 'p' df
+             main="Support for School Vouchers by Income",
+             strip=strip.custom(
+               factor.levels=rep(plotframe.names$col,
+                 each=length(plotframe.names$row))),
+             strip.left=strip.custom(horizontal=FALSE,
+               factor.levels=rep(plotframe.names$row,
+                length(plotframe.names$col))),
+             #at=seq(-.1,.1,.002),
+             ## details that are hard in base graphics
+             #colorkey=list(
+             #  labels=list(labels=c("-10%","","National Avg.","","+10%")),
+             #  space="bottom",height=.5,width=.5
+             #  ),
+             between=list(x=.25,y=.25),
+             par.settings=list(
+               par.main.text=list(fontfamily="gotham"),
+               add.line=list(col="#00000000",lwd=0), # state borders
+               add.text=list(cex=.7,fontface="italic",
+                 fontfamily="gotham"),
+               axis.line=list(lwd=0),
+               ## Here we are going to do some
+               ## strip and strip.left magic.
+               layout.heights=list(strip = 
+                 c(rep(0, length(plotframe.names$row)-1), 
+                   1)), # should by dynamic for linebreaks
+               layout.widths=list(strip.left=
+                 c(2, rep(0,length(plotframe.names$col)-1))),
+               strip.background=list(col="transparent"),
+               strip.border=list(col="transparent"),
+               regions=list(col=(blue2green2red(100)))
+               )
+             )
+      )
+@ 
+
 
 \end{document}
