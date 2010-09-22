@@ -1,0 +1,554 @@
+\documentclass[12pt]{article} %%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%% Load (.Rdata) results from several irt models of EP
+%%% and all supporting , rc objects (vote.data, legis.data)
+%%% 
+%%% 
+%%%
+%%% mjm / 2008-10-24 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% options to change font. If you want to play with MinionPro,
+%%% come bug me sometime. --mike
+%%% LOTS OF COOL FONT INFO AT http://www.tug.dk/FontCatalogue/
+%%% NO NEED EVER TO USE COMPUTER MODERN, AN ABOMINATION
+\usepackage{times}
+%\usepackage{cmbright}
+%\renewcommand\sfdefault{phv}% use helvetica for sans serif
+%\renewcommand\familydefault{\sfdefault}% use sans serif by default
+%\usepackage[opticals,textosf,minionint,footnotefigures,medfamily]{MinionPro}
+ \usepackage{bm}
+% \DeclareMathAlphabet\mathbf {T1} {MinionPro-OsF}{b}{n}
+% \SetMathAlphabet\mathit  {bold}{T1} {MinionPro-OsF}{b}{it}
+% \SetSymbolFont{operators}{bold}{T1} {MinionPro-OsF}{b}{n}
+% \SetSymbolFont{letters}  {bold}{OML}{MinionPro-TOsF} {b}{it}
+% \DeclareMathVersion{boldtabular}
+% \SetSymbolFont{operators}{boldtabular}{T1} {MinionPro-OsF}{b}{n}
+% \SetSymbolFont{letters}  {boldtabular}{OML}{MinionPro-TOsF}  {b}{it}
+% \SetMathAlphabet\mathit  {boldtabular}{T1} {MinionPro-OsF}{b}{it}
+% \DeclareMathAlphabet\mathebf {T1} {MinionPro-OsF}{eb}{n}
+\usepackage[no-math]{fontspec}
+\usepackage{xltxtra}
+%% Alter some LaTeX defaults for better treatment of figures:
+%% This is from the first result of google: "latex dumb defaults"
+    \renewcommand{\topfraction}{0.9}	
+    \renewcommand{\bottomfraction}{0.8}	
+    %   Parameters for TEXT pages (not float pages):
+    \setcounter{topnumber}{2}
+    \setcounter{bottomnumber}{2}
+    \setcounter{totalnumber}{4}     
+    \setcounter{dbltopnumber}{2}    
+    \renewcommand{\dbltopfraction}{0.9}	
+    \renewcommand{\textfraction}{0.07}	
+    %   Parameters for FLOAT pages (not text pages):
+    \renewcommand{\floatpagefraction}{0.7}	% require fuller float pages
+	% N.B.: floatpagefraction MUST be less than topfraction !!
+    \renewcommand{\dblfloatpagefraction}{0.7}	% require fuller float pages
+
+%%% Enable the bibliography
+%%%     see  http://merkel.zoneo.net/Latex/natbib.php
+%%% 
+%%% round: use () for in-text cites (other options square, curly, angle)
+%%% sort: orders multiple citations into the sequence in which they 
+%%%       appear in the list of references;
+%%% sort&compress: as sort but in addition multiple numerical
+%%%                citations are compressed if possible (as 3-6, 15);
+%%% numbers: for numerica citations
+%%% super:   superscripted numbers as in Nature
+\usepackage[round]{natbib}
+%%% Want to change the section head of the bib??
+%\AtBeginDocument{\renewcommand\refname{LITERATURE CITED}}
+
+%%% Set up the margins: "right" and "bottom" are computed
+%%% by adding the things specified here, so
+%%%  .5in + 7.5in = 8in = .5 right margin
+\oddsidemargin=0in
+\textwidth=6.5in
+\topmargin=-.25in
+\headheight=0.0in
+\headsep=0.0in
+\textheight=8.7in
+
+%%% This is how you set  line spacing globally inside []
+%%% Options are "singlespacing","onehalfspacing","doublespacing"
+%%% To change WITHIN the document (you want a section single spaced)
+%%% just drop in, where needed, \singlespacing
+%%% and then \doublespacing again when finished.
+\usepackage[onehalfspacing]{setspace} 
+
+%\usepackage{egameps} % See Martin Osborne's documentation!
+%\usepackage{sgame} % See Osborne
+\usepackage{hyperref} % \href{http://link.com}{link text}
+\usepackage{graphicx} % for figures of all kinds
+
+%% Caption labels bold. Always left-align, do not center short ones.
+%% Use . instead of : after label. Size option.
+\usepackage[bf,nooneline,labelsep=period,footnotesize]{caption}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{dcolumn}  % enable decimal align tables
+%\usepackage{wrapfig}  % wrappable figures
+
+%%% How to treat new paragraphs: units are anything that latex
+%%% understands: in, mm, pt, cm, [em, ex (typographic units!)]
+\setlength{\parindent}{1em} % 1em  indent first line
+\setlength{\parskip}{0.5ex} % half x-height space between para
+
+%%% Working Example of how you specify shortcut macros:
+\newcommand{\ybar}{\ensuremath{\overline{y}}}
+
+%%% Other options: Options>Soft wordwrap for easy viewing
+%%% Italics and Bold: ctrl+C,F,I (C-c, C-f, C-i) for inserting italicized text. 
+%%% CFB for bold.
+%%% rm sf tt md bf up it sl sc 
+%%% Drag citations from Bibdesk
+%%% single - for intraword hyphen. Anything longer, use two -- or three ---
+
+%%% Figures. Wrapfigure at Right Left or Center.
+%%% Set bounding box size (same as figure size).
+%%% Insert your figure BEFORE the text. 
+%%% Subsequent text will wrap around the figure.
+
+%%% Normally, just use figure environment.
+%%% To insert a figure, drag the icon (without typing the command!) 
+%%% from the finder and it will insert.
+%%% Type width= or height= in the [options] before the {argument}.
+%%% Latex>Insert Envt>Figure (figure* means no number)
+%%% "Figure #." is handled by latex, not you. Just type.
+%%% To refer to a figure (or any \label) type \ref{thelabel}
+%%% in text or use Ref menu, "C-c )" emacs will do it for you.
+
+
+% converts LaTeX specials (``quotes'' --- dashes etc.) to unicode
+\defaultfontfeatures{Ligatures={Common},Mapping=tex-text} 
+\setromanfont [Mapping=tex-text,Ligatures={Common}, BoldFont={* Bold}, ItalicFont={* Italic}]{Times New Roman}
+%\setromanfont [Mapping=tex-text,Ligatures={Common},BoldFont={ElectraLH-Bold},ItalicFont={ElectraLH-CursiveOsF},BoldItalicFont={ElectraLH-BoldCursiveOsF},SmallCapsFont={ElectraLH-RegularSC}]{ElectraLH-RegularOsF}
+\setsansfont[Mapping=tex-text,BoldFont={Delicious-Bold},ItalicFont={Delicious-Italic},SmallCapsFont={Delicious-SmallCaps}] {Delicious-Roman}
+\setmonofont[Scale=0.8]{Monaco} 
+%\usepackage[final,expansion=true,protrusion=true,spacing=true,kerning=true]{microtype}
+
+
+%%% Section headings
+\usepackage{sectsty} 
+\usepackage[normalem]{ulem} 
+\sectionfont{\sffamily\mdseries\upshape\Large}
+\subsectionfont{\sffamily\bfseries\upshape\normalsize} 
+\subsubsectionfont{\sffamily\mdseries\upshape\normalsize} 
+%%% Hang section numbers in the left margin
+\makeatletter 
+\def\@seccntformat#1{\protect\makebox[0pt][r]{\csname 
+the#1\endcsname\quad}} 
+\makeatother 
+
+
+\usepackage{Sweave}
+\begin{document}
+
+\thispagestyle{empty} % No page number first page
+
+\SweaveOpts{keep.source=TRUE}
+<<setup>>=
+options(width=100)
+library(lattice)
+library(latticeExtra) # for useOuterStrips
+## sp has plot methods for lattice. It may be overkill, but it
+## also helps with binding data into maps. loaded by maptools.
+library(maptools)
+library(rgdal) #optional, for projections.
+library(arm)
+library(MRP)
+## used for melt/cast
+library(reshape2)
+library(colorRamps) # another set of color ramps
+
+load("~/mrp/malecki/naes08.Rdata")
+load("")
+naes.vars <- c(316,356,353,232,210,211)
+naes.ways <- c(1010,1011,1012,1021,1019,1020,1026:1032,1009,1010,1039,1040)
+names(naes08) <- make.names(attributes(naes08)$var.labels)
+names(naes08)[naes.ways]
+names(naes08)[naes.vars]
+within(naes08, function(){
+  levels(state) <- sub(".*\\(([a-z]{2})\\)$",
+                       "\\U\\1", # "florida (fl)" to "FL"
+                       levels(state.of.residency),perl=TRUE)
+  age2 <- age
+  age2[age2>900] <- NA
+  age <- cut(age2, c(0,29,44,64,900),
+             labels=c("18-29","30-44","45-64","65+"))
+  race2 <- race
+  race[race2=="american indian" | 
+       race2=="mixed race"] <- "other"
+  race[of.hispanic.descent=="yes"] <- "hispanic"
+  race[race2=="don't know" | 
+       race2=="no answer"] <- NA
+  
+})
+daply(naes08, .(state.of.residency,age), sum(favor.same.sex.marriage.or.civil.unions==1)
+
+@ 
+
+\section{Quickly Getting MRP Going}
+\label{sec:quickly-getting-mrp}
+
+Match variable names and factor levels among objects, and use the \texttt{daply} function from \texttt{plyr} to quickly cast 
+
+<<look-data,echo=FALSE,include=FALSE,eval=FALSE>>=
+## 
+
+### This is the current state of affairs:  
+pewRepublicanMrp <- newMrp (pew$rvote, pew[, c("stnum", "age2", "inc")])
+pewRepublicanMrp <- setFormula (pewRepublicanMrp, "cbind(response.yes, response.no) ~ 1 + (1 | stnum) + (1 | age2) + (1 | inc) + (1 | stnum:age2) + (1 | stnum:inc) + (1 | age2:inc)")
+  
+  pewRepublicanMrp <- mr (pewRepublicanMrp)
+
+### WHAT I WOULD LIKE THIS TO LOOK LIKE: 
+
+## This should transform the data, check that all the conditioning vars
+## exist with same names in data and pop, and run a model.
+
+##pewRepMrp <- mrp(rvote ~ 1 + (1 | stnum) + (1 | age2) + (1 | inc), 
+##                 data=pew, population=pop)
+
+## Suppose we want to update the formula: this should be implemented using
+## lme4:::update / stats:::update.formula so the full model would be done:
+## pewRepMrp <- update( pewRepMrp, . ~ . +(1 | stnum:age2) + (1 | stnum:inc) + (1 | age2:inc))
+
+## Note that update(signature='mrp') will again have to check that terms exist in both 
+## data and population of the original object (or have this check overridden)
+
+
+## This obviates the 'mr' step and replaces 'setFormula'
+## p as a function name should be renamed something like 'mrp.p' or mathematica-style
+## full 'poststratify' with an alias or two.
+
+#y ~ age*stateIncome + age*repubVote04 +
+#  (1+age | state) + (1+age | region) + (1+age | income)
+## On Fri, Sep 10, 2010 at 1:40 PM, Daniel Lee <bearlee@alum.mit.edu> wrote:
+## > Yes. We have to augment the dataset with region and other variables
+## > first, though.
+## > For example, this is the model we've been running for 3 way analysis
+## > for health care support:
+## >  threeway.fit <-
+## >            glmer (data.v ~ z.age.v*z.stateIncome.v +
+## > z.age.v*z.stateRepublicanVote2004.v +
+## >                            (1 + z.age.v | region.v) +
+## >                            (1 + z.age.v | state.v) +
+## >                            (1 | age.v:region.v) +
+## >                            (1 + z.age.v| income.v) +
+## >                            (1 | age.v:income.v) +
+## >                            (1 | age.v:state.v) +
+## >                            (1 | income.v:region.v) +
+## >                            (1 | income.v:state.v) +
+## >                            (1 | age.v) , family=quasibinomial(link="logit"))
+  
+@ 
+
+<<pewMrp,eval=FALSE,echo=FALSE>>=
+pewRepublicanMrp <- newMrp (pew$rvote, 
+                            pew[, c("stnum", "age2", "inc")]
+                            )
+pewRepublicanMrp <- setFormula (pewRepublicanMrp, "cbind(response.yes, response.no) ~ 1 + (1 | stnum) + (1 | age2) + (1 | inc) + (1 | stnum:age2) + (1 | stnum:inc) + (1 | age2:inc)")
+pewRepublicanMrp <- mr (pewRepublicanMrp)
+
+(republicanSupport <- p (pewRepublicanMrp))
+
+(republicanSupport.byState <- melt(p (pewRepublicanMrp, c(TRUE, TRUE, FALSE))) )
+
+
+#stateVisualizer <- newMrpStateVisualizer()
+#visualize (stateVisualizer, pewRepublicanMrp)
+## I like sp. it does a lot. it merges auto based on abbr.
+m <- map('state', proj='bonne', param=25, fill=TRUE, plot=FALSE)
+
+@ 
+
+We know how to run the simple model of support for school vouchers; this code is not shown. This demonstrates how to get data out of it and prepare it for mapping with external packages. I begin with the fullest-featured mapping package I know, \texttt{sp}, which provides S4 classes for “spatial data frames” as well as reading and writing \textsc{esri} shapefiles such as the US Census \textsc{tiger}/Line ones.
+
+This will be important later on -- there are \textsc{tiger}/Line shapefiles for zip codes, MSAs, and congressional districts! The built-in ‘state’ dataset is not easy to merge with other things!
+
+<<naes-ex,echo=FALSE,eval=TRUE>>=
+## Not run: 
+## 2) School Vouchers: simple model
+## load data: 2000
+##data (naes00)
+data (proportionOfVoters.schoolVouchers)
+## Run 3-way analysis of annenberg data
+## response: favorVoucher - favor school vouchers
+## variables: stateAbbreviation - state
+##            income - categorical income variable (4 categories)
+##            religionAndEthnicity - categorical religion and ethnicity variable (7 categories)
+favorVoucher2000Mrp.simpleModel <- newMrp (naes00$favorVoucher, naes00[, c("stateAbbreviation", "religionAndEthnicity", "income")])
+favorVoucher2000Mrp.simpleModel <- setFormula (favorVoucher2000Mrp.simpleModel, 
+                                               paste ("cbind(response.yes, response.no) ~", 
+                                                      "1 + (1 | stateAbbreviation) + (1 | income)",
+                                                      "+ (1 | religionAndEthnicity) + (1 | income:religionAndEthnicity)",
+                                                      "+ (1 | income:stateAbbreviation) + (1 | religionAndEthnicity:stateAbbreviation)"))
+favorVoucher2000Mrp.simpleModel <- mr (favorVoucher2000Mrp.simpleModel)
+
+@ 
+
+Here is where things get interesting. We begin by simply getting the data out of the \texttt{mrp} object. I use Wickham's \texttt{reshape} tools to convert this array into a data frame that we'll use to bind onto the map.
+
+The \textit{SpatialPolygonsDataFrame} object contains (among a couple others) a \texttt{data} slot separate from the \texttt{polygons}. 
+<<prepare-data>>=
+favorVoucher2000 <- p (favorVoucher2000Mrp.simpleModel)
+### Get full melted 'p' by income
+favorVoucher2000.byState <- melt(p (favorVoucher2000Mrp.simpleModel, c(TRUE, FALSE, TRUE))) 
+favorVoucher2000.byState$value <- favorVoucher2000.byState$value - favorVoucher2000
+favorVoucher2000.byState$income <- as.ordered(relevel(favorVoucher2000.byState$income,
+                                                      "under $25,000",ordered=T))
+favorVoucher2000.byState <- dcast(favorVoucher2000.byState, stateAbbreviation~income)
+## make relative to national average:
+##spmap.states <- readShapeSpatial("~/mrp/malecki/fe_2007_us_state")
+## this one is smaller
+spmap.states <- readShapeSpatial("~/mrp/malecki/s_01au07",proj4string=CRS("+proj=longlat +datum=NAD27"))
+spmap.states <- spTransform(spmap.states, CRS("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96"))
+
+## One in this has no 2letter abbrev.
+spmap.states <- spmap.states[-4,]
+## Going to use abbrev as rownames, need to change feature ids.
+spmap.states <- spChFIDs(spmap.states, levels(spmap.states@data$STATE)[spmap.states@data$STATE])
+rownames(spmap.states@data) <- levels(spmap.states@data$STATE)[spmap.states@data$STATE]
+rownames(favorVoucher2000.byState) <- favorVoucher2000.byState$stateAbbreviation
+
+
+## Factors are a bit of a pain here, get rid of them in two places.
+favorVoucher2000.byState$stateAbbreviation <- as.character(levels(favorVoucher2000.byState$stateAbbreviation)[favorVoucher2000.byState$stateAbbreviation])
+spmap.states$STATE <- as.character(levels(spmap.states$STATE)[spmap.states$STATE])
+
+
+## remove DC,AK,HI from fitted model, and then pare the sp object to match.
+favorVoucher2000.byState <- subset(favorVoucher2000.byState, 
+                                   !(stateAbbreviation %in% c("DC","AK","HI")))
+spmap.states <- spmap.states[spmap.states$STATE %in% favorVoucher2000.byState$stateAbbreviation,]
+
+## the main trick of working with sp objects is the order of the data.
+spmap.states@data <- cbind(spmap.states@data, 
+                      favorVoucher2000.byState[rownames(spmap.states@data),]
+                      )
+
+## the reshaped data has invalid column names. 
+prettyNames <- colnames(spmap.states@data)[7:11]
+names(spmap.states@data)[7:11] <- c("one","two","three","four","five")
+
+@ 
+
+\subsection{P only by income}
+\label{sec:p-only-income}
+
+
+\begin{figure}
+  \centering
+  \caption{Simplified Census map from shapefile using packages sp and maptools, plotted using Lattice. Support for vouchers by income.}
+  \label{fig:lattice-sp-vouchers}
+\setkeys{Gin}{width=7in}
+<<lattice-sp-vouchers, fig=TRUE,eps=FALSE,width=10,height=2.5>>=
+print(
+      spplot(spmap.states, 
+             8:11, # columns of the @data to plot.
+                   # TODO : keep track of 2way conditioning and order
+                   # and set layout automatically.
+             layout=c(4,1),
+             at=seq(-.1,.1,.002),
+             
+             names.attr=prettyNames[2:5], # should use levels of original 'p' df
+             between=list(x=.25,y=.25),
+             par.settings=list(
+               add.line=list(col="#00000044",lwd=.2), # state borders
+               add.text=list(cex=.5), # strip text
+               axis.line=list(lwd=0), # boxes around each
+               layout.heights=list(strip=1.2), 
+               strip.background=list(col="transparent"),
+               strip.border=list(col="transparent"),
+               regions=list(col=bpy.colors())
+               )
+             )
+      )
+@ 
+\end{figure}
+
+The \texttt{spplot} function of \texttt{sp} uses Lattice and facets or conditions plots based on $z$ values in columns of the \texttt{@data} slot of the \texttt{SpatialPolygonsDataFrame} object. For our purposes we will generally want to reshape and “cast” the data using something like
+\begin{verbatim}
+state ~ age + income
+\end{verbatim}
+We will need to keep track of the dimensions of both of these, and then layout the plot in the right number of rows and columns. We will also want to make custom labels based on the original \texttt{levels} of the conditioning variables.
+
+\subsection{Modifying the display, round one}
+\label{sec:modify-displ-round}
+
+
+The biggest reason to do things this way is how easy it becomes to customize the plot. Here I change the color scheme by subbing in another list of colors of arbitrary length -- by default it is 100 which is perceptually continuous -- but doing it this way lets the graphics package rather than the user do the mapping of levels into cutpoints into colors. 
+
+\begin{figure}
+  \centering
+  \caption{Support for vouchers by income, with alternate color scheme, no state border lines, and scale displayed at bottom.}
+  \label{fig:lattice-sp-vouchers-altcolors}
+\setkeys{Gin}{width=7in}
+<<lattice-sp-vouchers-altcolors, fig=TRUE,eps=FALSE,width=10,height=2.5>>=
+quartzFonts(gotham=quartzFont(c(
+              "Gotham-Book","Gotham-Bold","Gotham-BookItalic","Gotham-BoldItalic")))
+print(
+      spplot(spmap.states, 
+             8:11, # columns of the @data to plot.
+                   # TODO : keep track of 2way conditioning and order
+                   # and set layout automatically.
+             layout=c(4,1),
+             names.attr=prettyNames[2:5], # should use levels of original 'p' df
+             main="Support for School Vouchers by Income",
+             at=seq(-.1,.1,.002),
+             ## details that are hard in base graphics
+             colorkey=list(
+               labels=list(labels=c("-10%","","National Avg.","","+10%")),
+               space="bottom",height=.5,width=.5
+               ),
+             between=list(x=.25,y=.25),
+             par.settings=list(
+               par.main.text=list(fontfamily="gotham"),
+               add.line=list(col="#00000000",lwd=0), # state borders
+               add.text=list(cex=.7,fontface="italic",fontfamily="gotham"),
+               axis.line=list(lwd=0),
+               layout.heights=list(strip=1.2),
+               strip.background=list(col="transparent"),
+               strip.border=list(col="transparent"),
+               regions=list(col=(blue2green2red(100)))
+               )
+             )
+      )
+@ 
+\end{figure}
+
+\subsection{Two-way Poststratification ‘by hand’}
+\label{sec:two-way-poststr}
+
+
+<<prepare-data-2way,eval=TRUE>>=
+favorVoucher2000 <- p (favorVoucher2000Mrp.simpleModel)
+### Demo use of ordered factor on levels:
+### Get full melted 'p' by religionAndEthnicity and income
+favorVoucher2000.byState <- melt(p (favorVoucher2000Mrp.simpleModel, c(TRUE, TRUE, TRUE))) 
+favorVoucher2000.byState$value <- favorVoucher2000.byState$value - favorVoucher2000
+favorVoucher2000.byState$income <- as.ordered(relevel(favorVoucher2000.byState$income,
+                                                      "under $25,000",ordered=T))
+## hold on to levelnames for plotting
+dimlabels <- sapply(favorVoucher2000.byState, levels)
+plotframe <- dcast(favorVoucher2000.byState, stateAbbreviation~religionAndEthnicity+income)
+## args: dcast data frame and previously extracted list of labels
+## returns: levels associated with known dimensions
+pretty.names <- function(plotframe, dimlabels){
+  statedim <- which(names(plotframe)==names(dimlabels))
+  firstdim <- which(sapply(sapply(unlist(sapply(dimlabels, function(x) {x[1]})), 
+                                  function(x){
+                                    grep(paste("^",x,sep=""),
+                                         names(plotframe),perl=TRUE) }),
+                           length)!=0)
+  lastdim <- which(sapply(sapply(unlist(sapply(dimlabels, function(x) {x[length(x)]})), 
+                                 function(x){
+                                   grep(paste("\\Q",x,"\\E","$",sep=""),
+                                        names(plotframe),perl=TRUE) }),
+                          length)!=0)
+  if(length(dimlabels)==5){
+    middledim <- which(!names(dimlabels) %in% 
+                       c(names(dimlabels)[c(statedim,firstdim,seconddim)],"value"))
+    prettynames <- list(page=dimlabels[[firstdim]],row=dimlabels[[middledim]],
+                        col=dimlabels[[lastdim]],state=dimlabels[[statedim]])
+  } else {
+    prettynames <- list(row=dimlabels[[firstdim]],
+                        col=dimlabels[[lastdim]],
+                        state=dimlabels[[statedim]])
+  }
+  return(prettynames)
+}
+## get variable names
+plotframe.names <- pretty.names(plotframe,dimlabels)
+## Have to sanitize names of object for spplot
+names(plotframe) <- make.names(names(plotframe))
+
+## make relative to national average:
+##spmap.states <- readShapeSpatial("~/mrp/malecki/fe_2007_us_state")
+## this one is smaller
+spmap.states <- readShapeSpatial("~/mrp/malecki/s_01au07",proj4string=CRS("+proj=longlat +datum=NAD27"))
+spmap.states <- spTransform(spmap.states, CRS("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96"))
+## One in this has no 2letter abbrev.
+spmap.states <- spmap.states[-4,]
+## Going to use abbrev as rownames, need to change feature ids.
+spmap.states <- spChFIDs(spmap.states, 
+                         levels(spmap.states@data$STATE)[spmap.states@data$STATE])
+rownames(spmap.states@data) <- levels(spmap.states@data$STATE)[spmap.states@data$STATE]
+rownames(plotframe) <- plotframe$stateAbbreviation
+
+
+## Factors are a bit of a pain here, get rid of them in two places.
+plotframe$stateAbbreviation <- as.character(levels(plotframe$stateAbbreviation)[plotframe$stateAbbreviation])
+spmap.states$STATE <- as.character(levels(spmap.states$STATE)[spmap.states$STATE])
+
+
+## remove DC,AK,HI from fitted model, and then pare the sp object to match.
+plotframe <- subset(plotframe, 
+                                   !(stateAbbreviation %in% c("DC","AK","HI")))
+spmap.states <- spmap.states[spmap.states$STATE %in% plotframe$stateAbbreviation,]
+
+## the main trick of working with sp objects is the order of the data.
+spmap.states@data <- cbind(spmap.states@data, 
+                      plotframe[rownames(spmap.states@data),]
+                      )
+
+## the reshaped data has invalid column names. 
+
+\begin{figure}
+  \centering
+  \caption{Simplified Census map from shapefile using packages sp and maptools, plotted using Lattice. Support for vouchers by income and race.}
+  \label{fig:lattice-sp-vouchers-full}
+
+@ 
+<<voucher-income-race,fig=TRUE,pdf=FALSE,png=TRUE,width=9,height=8>>=
+plotframe.names$row[4:7] <- c("White\nCatholics","White\nEvangelicals","White Non-E.\nProtestant", "White\nOther/None")
+plotframe.names$col <- gsub("between ","",plotframe.names$col)
+plotframe.names$col <- gsub(" and ","–",plotframe.names$col)
+
+print(
+      spplot(spmap.states, 
+             7:41, # columns of the @data to plot.
+                   # TODO : keep track of 2way conditioning and order
+                   # and set layout automatically.
+             layout=c(
+               length(plotframe.names$col),
+               length(plotframe.names$row)
+               ),
+             main="Support for School Vouchers by Income",
+             strip=strip.custom(
+               factor.levels=rep(plotframe.names$col,
+                 length(plotframe.names$row))),
+             strip.left=strip.custom(horizontal=FALSE,
+               factor.levels=rep(plotframe.names$row,
+                 each=length(plotframe.names$col))),
+             #at=seq(-.1,.1,.002),
+             ## details that are hard in base graphics
+             #colorkey=list(
+             #  labels=list(labels=c("-10%","","National Avg.","","+10%")),
+             #  space="bottom",height=.5,width=.5
+             #  ),
+             between=list(x=.25,y=.25),
+             par.settings=list(
+               par.main.text=list(fontfamily="gotham"),
+               add.line=list(col="#00000000",lwd=0), # state borders
+               add.text=list(cex=.7,fontface="italic",
+                 fontfamily="gotham"),
+               axis.line=list(lwd=0),
+               ## Here we are going to do some
+               ## strip and strip.left magic.
+               layout.heights=list(strip = 
+                 c(rep(0, length(plotframe.names$row)-1), 
+                   1)), # should by dynamic for linebreaks
+               layout.widths=list(strip.left=
+                 c(2, rep(0,length(plotframe.names$col)-1))),
+               strip.background=list(col="transparent"),
+               strip.border=list(col="transparent"),
+               regions=list(col=(blue2green2red(100)))
+               )
+             )
+      )
+@ 
+
+
+\end{document}
