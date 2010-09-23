@@ -371,7 +371,8 @@ The biggest reason to do things this way is how easy it becomes to customize the
 \setkeys{Gin}{width=7in}
 <<lattice-sp-vouchers-altcolors, fig=TRUE,eps=FALSE,width=10,height=2.5>>=
 quartzFonts(gotham=quartzFont(c(
-              "Gotham-Book","Gotham-Bold","Gotham-BookItalic","Gotham-BoldItalic")))
+              "Gotham-Book","Gotham-Bold",
+              "Gotham-BookItalic","Gotham-BoldItalic")))
 print(
       spplot(spmap.states, 
              8:11, # columns of the @data to plot.
@@ -478,13 +479,13 @@ spmap.states@data <- cbind(spmap.states@data,
                       )
 
 ## the reshaped data has invalid column names. 
-
+@ 
 \begin{figure}
   \centering
   \caption{Simplified Census map from shapefile using packages sp and maptools, plotted using Lattice. Support for vouchers by income and race.}
   \label{fig:lattice-sp-vouchers-full}
 
-@ 
+
 <<voucher-income-race,fig=TRUE,pdf=FALSE,png=TRUE,width=9,height=8>>=
 plotframe.names$row[4:7] <- c("White\nCatholics","White\nEvangelicals","White\nNon-E. Protestant", "White\nOther/None")
 print(
