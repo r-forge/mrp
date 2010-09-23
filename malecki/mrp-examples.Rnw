@@ -369,7 +369,7 @@ The biggest reason to do things this way is how easy it becomes to customize the
   \caption{Support for vouchers by income, with alternate color scheme, no state border lines, and scale displayed at bottom.}
   \label{fig:lattice-sp-vouchers-altcolors}
 \setkeys{Gin}{width=7in}
-<<lattice-sp-vouchers-altcolors, fig=TRUE,eps=FALSE,width=10,height=2.5>>=
+<<lattice-sp-vouchers-altcolors, fig=TRUE,png=TRUE,pdf=FALSE,width=10,height=2.5>>=
 quartzFonts(gotham=quartzFont(c(
               "Gotham-Book","Gotham-Bold",
               "Gotham-BookItalic","Gotham-BoldItalic")))
@@ -533,5 +533,5 @@ print(
       )
 @ 
 
-
+\end{figure}
 \end{document}
