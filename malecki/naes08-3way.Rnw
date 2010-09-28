@@ -162,30 +162,127 @@ library(reshape2)
 library(colorRamps) # another set of color ramps
 
 load("~/mrp/malecki/naes08.Rdata")
-load("")
+
+load("~/Desktop/censusMRP/census.Rdata")
 naes.vars <- c(316,356,353,232,210,211)
 naes.ways <- c(1010,1011,1012,1021,1019,1020,1026:1032,1009,1010,1039,1040)
 names(naes08) <- make.names(attributes(naes08)$var.labels)
 names(naes08)[naes.ways]
 names(naes08)[naes.vars]
-within(naes08, function(){
-  levels(state) <- sub(".*\\(([a-z]{2})\\)$",
+ 
+  levels(naes08$state.of.residency) <- sub(".*\\(([a-z]{2})\\)$",
                        "\\U\\1", # "florida (fl)" to "FL"
-                       levels(state.of.residency),perl=TRUE)
-  age2 <- age
-  age2[age2>900] <- NA
-  age <- cut(age2, c(0,29,44,64,900),
-             labels=c("18-29","30-44","45-64","65+"))
-  race2 <- race
-  race[race2=="american indian" | 
-       race2=="mixed race"] <- "other"
-  race[of.hispanic.descent=="yes"] <- "hispanic"
-  race[race2=="don't know" | 
-       race2=="no answer"] <- NA
+                       levels(naes08$state.of.residency),perl=TRUE)
+  naes08$state <- naes08$state.of.residency
   
-})
-daply(naes08, .(state.of.residency,age), sum(favor.same.sex.marriage.or.civil.unions==1)
+  age2 <- naes08$age
+  age2[age2>900] <- NA
+  naes08$age <- addNA(cut(age2, c(0,29,44,64,900),
+             labels=c("18-29","30-44","45-64","65+")))
+  
+  race <- naes08$race
+  race <- addNA(race)
+  race[race=="american indian" | 
+       race=="mixed race" |
+       race=="asian"] <- "other"
+  race[race=="don't know" | 
+       race=="no answer"] <- NA
+  race <- factor(race)
+  levels(race) <- c("White","Black","Hispanic","Other",NA)
+  #relevel(race,NA)
+  race[naes08$of.hispanic.descent=="yes"] <- "Hispanic"
+naes08$race <- addNA(race)
+            
+naes08$gays <- NA
+naes08$gays <- ifelse(naes08$favor.same.sex.marriage.or.civil.unions==
+                      "full marriage rights",
+                      1,
+                      ifelse(naes08$favor.same.sex.marriage.or.civil.unions %in%  
+                             c("don't know","no answer",NA),
+                             NA,
+                             0))
 
+naes08$stemcells <- NA
+naes08$stemcells <- ifelse(naes08$favor.federal.stem.cell.research.funding %in% 
+levels(naes08$favor.federal.stem.cell.research.funding)[c(1,2)],
+1,
+ifelse(naes08$favor.federal.stem.cell.research.funding %in%
+       c("don't know","no answer",NA),
+       NA,
+       0))
+naes08$vouchers <- NA
+naes08$vouchers <- ifelse(naes08$favor.school.vouchers %in%
+levels(naes08$favor.school.vouchers)[c(1,2)],
+                            1,
+ifelse(naes08$favor.school.vouchers %in% 
+       c("don't know","no answer",NA),
+       NA,
+       0))
+  
+                      
+
+income <- as.integer(naes08$household.income..wording..1.)
+income[income<=3] <- 1
+income[income==4|income==5] <- 2
+income[income==6] <- 3
+income[income==7|income==8] <- 4
+income[income==9] <- 5
+income[income>9] <- NA
+naes08[,"income"] <- factor(income,
+                        ordered=TRUE,exclude=NULL,
+                        levels=c(NA,1,2,3,4,5),
+                        labels=levels(census$income))
+
+rm(income)
+
+makeNway <- function(cell, response="response", 
+                     weights=c(1,"weight"))
+{
+  cell <- na.omit(cell)
+  if(nrow(cell)==0) {
+    return(c(N=0,ybar.w=0.5,design.effect.cell=0))
+  }
+  y <- cell[,response]
+  ## quietly allow easy noweight
+  if(weights==1) {
+    cell$weight <- rep(1,nrow(cell))
+    weight="weight"
+  }
+  w <- cell[,weight]
+  ## do weighted mean
+  ybar.w <- weighted.mean(y, w)
+  ybar.w[is.nan(ybar.w)] <- 0
+  ## do design effect with cases N=0,1 only if weights provided
+  N <- nrow(cell)
+  if(weights!=1) {
+    design.effect.cell <- 1+ var(w/mean(w))
+    design.effect.cell <- ifelse(N>1,
+                            design.effect,
+                            ifelse(N==0, 0 ,1)
+                            )
+  } else {
+    design.effect.cell <- 1
+  }
+  
+  ans <- c(N=N,ybar.w=ybar.w,design.effect.cell=design.effect.cell)
+  #print(ans)
+  return(ans)
+}
+flattenNway <- function(v) {
+  ## do n.eff
+  N.eff <- v["N"] / weighted.mean(v["design.effect.cell"], v["N"])
+  
+  ## do ybar.w with cases
+  ybar.w <- as.vector(replace(v["ybar.w"], N.eff==0, 0.5))
+  response.yes <- ybar.w*N.eff
+  response.no <- (1-ybar.w)*N.eff
+  ans <- c(response.yes,response.no,N.eff=N.eff,N=v["N"])
+  return(ans)
+## make response.yes and response.no
+}
+foo <- naes08[sample(1:nrow(naes08),1000),names(foo) %in% c("race","age","income","state","gays")]
+bar <- daply(foo, .(age,income), makeNway, response="gays", weights=1,.progress="text") 
+baz <- adply(bar, .margins=(1:(length(attr(bar,"dim"))-1)), flattenNway,.progress="text") 
 @ 
 
 \section{Quickly Getting MRP Going}
