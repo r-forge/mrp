@@ -46,7 +46,7 @@ create_roxygen <- function(info) {
     comment_line(info$details),
     comment_line(),
     comment_tag("@param", info$params),
-    comment_tag("@value", info$value),
+    comment_tag("@return", info$value),
     comment_tag("@keywords", paste(info$keywords, collapse = " ")),
     comment_tag("@aliases", paste(info$aliases, collapse = " ")),
     if (!is.null(info$examples)) {
