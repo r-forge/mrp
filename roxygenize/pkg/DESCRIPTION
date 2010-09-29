@@ -1,0 +1,13 @@
+Package: MRP
+Version: 0.00.02
+Date: 2009-12-22
+Title: Multilevel Regression and Poststratification
+Author:
+  Andrew Gelman <gelman@stat.columbia.edu>,
+  Daniel Lee <bearlee@alum.mit.edu>,
+  Yu-Sung Su <ys463@columbia.edu>,
+Maintainer: Daniel Lee <bearlee@alum.mit.edu>
+Depends: methods, arm, lme4, maps, colorspace, mapproj
+Description: Multilevel Regressions and Poststratification
+License: GPL (>=2)
+Collate: 'load.first.R' 'classNWayData.R' 'classMrp.R' 'classMrpVisualizer.R' 'classMrpStateVisualizer.R'
