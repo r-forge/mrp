@@ -177,7 +177,7 @@ names(naes08)[naes.vars]
   
   age2 <- naes08$age
   age2[age2>900] <- NA
-  naes08$age <- addNA(cut(age2, c(0,29,44,64,900),
+  naes08$age <- (cut(age2, c(0,29,44,64,900),
              labels=c("18-29","30-44","45-64","65+")))
   
   race <- naes08$race
@@ -187,11 +187,11 @@ names(naes08)[naes.vars]
        race=="asian"] <- "other"
   race[race=="don't know" | 
        race=="no answer"] <- NA
-  race <- factor(race)
+  race <- factor(race,exclude=NA)
   levels(race) <- c("White","Black","Hispanic","Other",NA)
   #relevel(race,NA)
   race[naes08$of.hispanic.descent=="yes"] <- "Hispanic"
-naes08$race <- addNA(race)
+naes08$race <- race; rm(race)
             
 naes08$gays <- NA
 naes08$gays <- ifelse(naes08$favor.same.sex.marriage.or.civil.unions==
@@ -229,19 +229,15 @@ income[income==7|income==8] <- 4
 income[income==9] <- 5
 income[income>9] <- NA
 naes08[,"income"] <- factor(income,
-                        ordered=TRUE,exclude=NULL,
-                        levels=c(NA,1,2,3,4,5),
-                        labels=levels(census$income))
+                        ordered=TRUE,exclude=NA,
+                        levels=c(1,2,3,4,5),
+                        labels=na.omit(levels(census$income)))
 
 rm(income)
-
 makeNway <- function(cell, response="response", 
                      weights=c(1,"weight"))
 {
-  cell <- na.omit(cell)
-  if(nrow(cell)==0) {
-    return(c(N=0,ybar.w=0.5,design.effect.cell=0))
-  }
+  N <- nrow(cell)
   y <- cell[,response]
   ## quietly allow easy noweight
   if(weights==1) {
@@ -250,39 +246,58 @@ makeNway <- function(cell, response="response",
   }
   w <- cell[,weight]
   ## do weighted mean
-  ybar.w <- weighted.mean(y, w)
-  ybar.w[is.nan(ybar.w)] <- 0
+
   ## do design effect with cases N=0,1 only if weights provided
-  N <- nrow(cell)
   if(weights!=1) {
     design.effect.cell <- 1+ var(w/mean(w))
     design.effect.cell <- ifelse(N>1,
                             design.effect,
                             ifelse(N==0, 0 ,1)
                             )
+    ybar.w <- weighted.mean(y, w)
   } else {
+    ybar.w <- mean(y)
     design.effect.cell <- 1
   }
+  ybar.w[is.nan(ybar.w)] <- 0
   
-  ans <- c(N=N,ybar.w=ybar.w,design.effect.cell=design.effect.cell)
-  #print(ans)
+  ans <- c(N=N,
+           design.effect.cell=design.effect.cell,
+           ybar.w=ybar.w)
+  #print(str(ans))
   return(ans)
 }
-flattenNway <- function(v) {
+flattenNway <- function(v,design.effect) {
+  if(sum(is.na(v))>0) { 
+    v <- c(N=0,
+           design.effect.cell=0,
+           ybar.w=.5) 
+  }
+  print(v)
   ## do n.eff
-  N.eff <- v["N"] / weighted.mean(v["design.effect.cell"], v["N"])
+  N.eff <- v["N"] / design.effect
   
+  ybar.w <- v["ybar.w"]
   ## do ybar.w with cases
-  ybar.w <- as.vector(replace(v["ybar.w"], N.eff==0, 0.5))
   response.yes <- ybar.w*N.eff
   response.no <- (1-ybar.w)*N.eff
   ans <- c(response.yes,response.no,N.eff=N.eff,N=v["N"])
   return(ans)
-## make response.yes and response.no
 }
-foo <- naes08[sample(1:nrow(naes08),1000),names(foo) %in% c("race","age","income","state","gays")]
-bar <- daply(foo, .(age,income), makeNway, response="gays", weights=1,.progress="text") 
-baz <- adply(bar, .margins=(1:(length(attr(bar,"dim"))-1)), flattenNway,.progress="text") 
+foo <- na.omit(naes08[sample(1:nrow(naes08),1000),{names(naes08) %in% c("race","age","income","state","gays")}])
+
+bar <- daply(foo, .(age,race,income), makeNway, response="gays",weights=1)
+## Do overall design effect for later effective N
+subsN <- 1:{prod(dim(bar))/3}
+subsD <- {length(subsN)+1}:{length(subsN)*2}
+design.effect <- weighted.mean(bar[subsD],
+                               bar[subsN],na.rm=TRUE)
+## Ply back into a data.frame for the MR-step
+baz <- adply(bar, .margins=(1:(length(attr(bar,"dim"))-1)), flattenNway,
+             design.effect=design.effect)
+foo$gayz <- factor(foo$gays,ordered=TRUE,levels=c(1,0),labels=c("Yes","No"))
+zoo <- newMrp (foo$gayz, 
+        foo[, c("age", "race", "income")])
 @ 
 
 \section{Quickly Getting MRP Going}
