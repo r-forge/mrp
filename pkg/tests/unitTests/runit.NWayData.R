@@ -53,3 +53,8 @@ test.getters <- function () {
 
     ## getNEffective
 }
+
+
+loadTestData <- function () {
+	print (getWd)
+}
