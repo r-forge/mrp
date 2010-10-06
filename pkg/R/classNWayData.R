@@ -1,11 +1,30 @@
-setClass(Class="NWayData",
-            representation=representation(
-                numberWays="numeric",
-                ybarWeighted = "array", 
-                n="array",
-                designEffectByCell="array", 
-                dataLength="numeric",
-                data="data.frame"))
+## setClass(Class="NWayData",
+##             representation=representation(
+##                 numberWays="numeric",
+##                 ybarWeighted = "array", 
+##                 n="array",
+##                 designEffectByCell="array", 
+##                 dataLength="numeric",
+##                 data="data.frame"))
+setClass("NWayData",representation(type="character",levels="list"),contains="array")
+## save the levels on the original data for when it is plyd back
+## in poststratification
+## match on names of ways
+saveNWayLevels <- function(df){
+  fac <- sapply(df,is.factor)
+  lev <- lapply(df[,fac],attributes)
+  return(lev)
+}
+restoreNWayLevels <- function(df=df,nway=nway){
+  pos <- na.omit(names(nway@levels)[match(names(df),names(nway@levels))])
+  df[,pos] <- as.data.frame(lapply(pos, function(col) {
+    df[,col] <- factor(df[,col],
+                       levels=nway@levels[[col]]$levels,
+                       ordered=nway@levels[[col]]$class[1]=="ordered")
+  }))
+  return(df)
+}
+
 
 setGeneric ("dataRescale", function (object, ...) { standardGeneric ("dataRescale")})
 setMethod (f="dataRescale",
@@ -39,33 +58,41 @@ setMethod (f="dataGenericAugment",
 ## which is why this is stored rather than calculated each time. 
 setGeneric ("getNumberWays", function (object) { standardGeneric ("getNumberWays")})
 setMethod (f="getNumberWays",
-        signature=signature(object="NWayData"),
-        definition=function (object) {
-            return (object@numberWays)
-        })
+           signature=signature(object="array"),
+           definition=function(array){
+             w <- length(attr(array,"dim"))-1
+             return(c("number.ways"=w))
+           })
 
 
 setGeneric ("getYbarWeighted", function (object) { standardGeneric ("getYbarWeighted")})
 setMethod (f="getYbarWeighted",
-        signature=signature(object="NWayData"),
+        signature=signature(object="array"),
         definition=function (object) {
             return (object@ybarWeighted)
         })
 
 setGeneric ("getN", function (object) { standardGeneric ("getN")})
 setMethod (f="getN",
-        signature=signature(object="NWayData"),
-        definition=function (object) {
-            return (object@n)
-        })
+        signature=signature(object="array"),
+        definition=function(object){
+  N <- do.call("[",c(x=quote(object), 
+                     as.list(rep(TRUE,getNumberWays(object))),
+                     "N"))
+  N[is.na(N)] <- 0
+  return(N)
+}  )
 
 
 setGeneric ("getDesignEffectByCell", function (object) { standardGeneric ("getDesignEffectByCell")})
 setMethod (f="getDesignEffectByCell",
-        signature=signature(object="NWayData"),
+        signature=signature(object="array"),
         definition=function (object) {
-            return (object@designEffectByCell)
-        })
+          D <- do.call("[",c(x=quote(object), 
+                             as.list(rep(TRUE,getNumberWays(object))),
+                             "design.effect.cell"))
+          return(D)
+})
 
 
 ## Returns the number of observations (unweighted observations) that was used to create the data set.
@@ -80,10 +107,10 @@ setMethod (f="getDataLength",
 
 setGeneric ("getNEffective", function (object) { standardGeneric ("getNEffective")})
 setMethod (f="getNEffective",
-        signature=signature(object="NWayData"),
-        definition=function (object) {
-            return (getN (object) / getDesignEffect (object))
-        })
+           signature=signature(object="NWayData"),
+           definition=function(object){
+             getN(object) / getDesignEffect(object)
+           })
 
 setGeneric ("getDesignEffect", function (object) { standardGeneric ("getDesignEffect")})
 setMethod (f="getDesignEffect",

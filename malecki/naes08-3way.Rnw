@@ -157,6 +157,7 @@ library(maptools)
 library(rgdal) #optional, for projections.
 library(arm)
 library(MRP)
+library(plyr)
 ## used for melt/cast
 library(reshape2)
 library(colorRamps) # another set of color ramps
@@ -234,70 +235,167 @@ naes08[,"income"] <- factor(income,
                         labels=na.omit(levels(census$income)))
 
 rm(income)
-makeNway <- function(cell, response="response", 
-                     weights=c(1,"weight"))
-{
-  N <- nrow(cell)
-  y <- cell[,response]
-  ## quietly allow easy noweight
-  if(weights==1) {
-    cell$weight <- rep(1,nrow(cell))
-    weight="weight"
-  }
-  w <- cell[,weight]
-  ## do weighted mean
 
-  ## do design effect with cases N=0,1 only if weights provided
-  if(weights!=1) {
-    design.effect.cell <- 1+ var(w/mean(w))
-    design.effect.cell <- ifelse(N>1,
-                            design.effect,
-                            ifelse(N==0, 0 ,1)
-                            )
-    ybar.w <- weighted.mean(y, w)
-  } else {
-    ybar.w <- mean(y)
-    design.effect.cell <- 1
-  }
-  ybar.w[is.nan(ybar.w)] <- 0
-  
-  ans <- c(N=N,
-           design.effect.cell=design.effect.cell,
-           ybar.w=ybar.w)
-  #print(str(ans))
-  return(ans)
-}
-flattenNway <- function(v,design.effect) {
-  if(sum(is.na(v))>0) { 
-    v <- c(N=0,
-           design.effect.cell=0,
-           ybar.w=.5) 
-  }
-  print(v)
-  ## do n.eff
-  N.eff <- v["N"] / design.effect
-  
-  ybar.w <- v["ybar.w"]
-  ## do ybar.w with cases
-  response.yes <- ybar.w*N.eff
-  response.no <- (1-ybar.w)*N.eff
-  ans <- c(response.yes,response.no,N.eff=N.eff,N=v["N"])
-  return(ans)
-}
-foo <- na.omit(naes08[sample(1:nrow(naes08),1000),{names(naes08) %in% c("race","age","income","state","gays")}])
 
-bar <- daply(foo, .(age,race,income), makeNway, response="gays",weights=1)
-## Do overall design effect for later effective N
-subsN <- 1:{prod(dim(bar))/3}
-subsD <- {length(subsN)+1}:{length(subsN)*2}
-design.effect <- weighted.mean(bar[subsD],
-                               bar[subsN],na.rm=TRUE)
+
+regions <- data.frame(state=levels(foo$state),region=NA)
+  regions[regions$state %in% c("CT","ME","MA","NH","RI","VT","NJ","NY","PA"),"region"] <- "Northeast"
+  regions[regions$state %in% c("IN","IL","MI","OH","WI","IA","KS","MO","MN","NE","ND","SD"),"region"] <- "Midwest"
+  regions[regions$state %in% c("DE","DC","FL","GA","MD","NC","SC","VA","WV","AL","KY","MS","TN","AR","LA","OK","TX"),"region"] <- "South"
+  regions[regions$state %in% c("AZ","CO","ID","NM","MT","UT","NV","WY","AK","CA","HI","OR","WA"),"region"] <- "West"
+regions$region <- factor(regions$region)
+
+
+foo <- na.omit(naes08[sample(1:nrow(naes08),10000),{names(naes08) %in% c("race","age","income","state","gays")}])
+
+
+
+## by default mrp.formula will build 
+bar <- daply(foo, .variables=attr(mrp.terms,"term.labels"), 
+             .fun=makeNway, 
+             response=as.character(mrp.formula[[2]]), weights=1)
+
+
+bar <- new("NWayData",bar,type="poll",levels=saveNWayLevels(foo))
+
 ## Ply back into a data.frame for the MR-step
-baz <- adply(bar, .margins=(1:(length(attr(bar,"dim"))-1)), flattenNway,
-             design.effect=design.effect)
+baz <- adply(blah, .margins=1:getNumberWays(bar), 
+             flattenNway,
+             design.effect=getDesignEffect(bar))
+baz <- restoreNWayLevels(df=baz,nway=bar)
+
+cen <- na.omit(census[, {
+  names(census) %in% c("race","age","income","state","gays", "weighted2008")}])
+
+cenNway <- daply(cen, .variables=attr(mrp.terms,"term.labels"),
+                 .fun=makeNway,pop=TRUE,weights="weighted2008")
+
+cenNway <- new("NWayData",cenNway,type="pop",levels=saveNWayLevels(cen))
+
+cen.sample <- cen[sample(100000, 1:nrow(cen)),]
 foo$gayz <- factor(foo$gays,ordered=TRUE,levels=c(1,0),labels=c("Yes","No"))
 zoo <- newMrp (foo$gayz, 
-        foo[, c("age", "race", "income")])
+        foo[, c("age", "state", "income")])
+
+cen.pruned <- cen[cen$state %in% foo$state,]
+cen.pruned$state <- factor(cen.pruned$state)
+
+mrp.gays <- mrp(## a formula. LHS is a binary variable
+                ## that is NWay'd into response.yes/no cols
+                gays ~ age + state + income,
+                poll=foo,
+                ## pop is a census data.frame with names
+                ## and levels matching those of poll. 'use' is
+                ## the name of the column to use for NWay sums.
+                pop=cen.pruned,use="weighted2008",
+                add=list(
+                  ## expressions are evaluated 'within' the
+                  ## flattened nway data
+                  expression(z.age <- rescale(age)),
+                  ## regions is a data.frame left joined onto
+                  ## the flattened nway data
+                  regions),
+                ## an updated formula for the regression. 
+                ## LHS should always be "."; RHS may contain
+                ## "." for default = (1|{mrpterms})
+                #mr= . ~ (1+z.age|region) + (1+z.age|state) + (1+z.age|income) + (1|age),
+                ## logical. Go ahead and run the MR-step?
+                run=TRUE
+                )
+                
+mrp <- function(formula,
+                poll, pop=NULL, use=NULL,
+                add=NULL, mr=NULL, run=FALSE,
+                ...) {
+  
+  mrp.formula <- as.formula(formula)
+  mrp.terms <- terms(mrp.formula)  
+  mrp.varnames <- attr(mrp.terms,"term.labels")
+  ## Set up and store poll NWayData
+  cat("\nMaking NWay poll data:\n")
+  if (sum(mrp.varnames %in% names(poll)) != length(mrp.varnames) ) {
+       stop(paste("\nVariable ",sQuote(mrp.varnames[!(mrp.varnames %in% names(poll))])," not found in poll data."))
+     }
+  poll.nway <- daply(poll, .variables=mrp.varnames, 
+             .fun=makeNway, .progress="text",
+             response=as.character(mrp.formula[[2]]), weights=1)
+  poll.nway <- new("NWayData",poll.nway,type="poll",
+                   levels=saveNWayLevels(poll))
+  data <- adply(poll.nway, .margins=1:getNumberWays(poll.nway), 
+             flattenNway,
+             design.effect=getDesignEffect(poll.nway))
+  data <- restoreNWayLevels(df=data,nway=poll.nway)
+  ## Do merges and eval expressions on the data
+  data.expressions <- add[sapply(add, is.expression)]
+  data.merges <- add[sapply(add, is.data.frame)]
+  if(length(data.expressions)>0){
+    data <- within(data,sapply(data.expressions, eval.parent, n=2))
+  }
+  ## Attempt merges. 
+  if(length(data.merges)>0){
+    for(d in 1:length(data.merges)){
+      data <- merge(data,data.merges[[d]],all.x=TRUE,all.y=FALSE)
+    }
+  }
+  data <- as.data.frame(data)
+  
+  if (!is.null(pop)) { ## set up and store population NWayData
+    na.omit(pop[, {names(pop) %in% c(mrp.varnames, use)}])
+    cat("\nMaking NWay population data:\n")    
+    if (sum(mrp.varnames %in% names(pop)) != length(mrp.varnames) ) {
+       stop(paste("\nVariable ",sQuote(mrp.varnames[!(mrp.varnames %in% names(pop))])," not found in population."))
+     }
+    if(!(identical(sapply(poll[,mrp.varnames], levels), 
+                    sapply(pop[,mrp.varnames],levels)) )) {
+      warning("Non-conformable population array. Poststratification will not work unless factor levels are identical.")
+      
+      sapply(mrp.varnames,function(x){
+        if(length(levels(poll[,x])) != length(levels(pop[,x]))){
+          warning(paste("For ",sQuote(x),
+                        " poll has ", length(levels(poll[,x])),
+                        "; pop has ",length(levels(pop[,x]))),call.=FALSE)
+        }})
+      
+    }
+    pop.nway <- daply(pop, .variables=mrp.varnames,
+                      .fun=makeNway,pop=TRUE,weights=use,
+                      .progress="text"
+                      )
+    pop.nway <- new("NWayData",pop.nway,type="pop",
+                    levels=saveNWayLevels(pop))
+  } else { pop.nway <- NULL }
+  ## build the default formula unless one has been supplied
+  
+  mr.formula <- formula(paste("response ~",
+                                 paste(paste("(1|",
+                                             mrp.varnames,")"),
+                                       collapse="+")))
+  if (!is.null(mr)){ 
+    mr.formula <- update.formula(mr.formula, mr)
+  }
+  mrp <- new("mrp",
+             poll=poll.nway,
+             data=data,
+             formula=formula(mr.formula)
+             )
+  if(!is.null(pop.nway)){
+    mrp@population <- pop.nway
+  }
+  if (run==TRUE) {
+    response <- getResponse(mrp)
+    fit <- lmer(formula=as.formula(mr.formula,env=parent.frame(2)),
+               data=data,
+               family=quasibinomial(link="logit"))
+    mrp@multilevelModel <- fit
+    mrp@theta.hat <- getThetaHat(mrp)
+    
+    
+  }
+  
+return(mrp)
+}
+
+
 @ 
 
 \section{Quickly Getting MRP Going}

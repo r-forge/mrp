@@ -1,14 +1,21 @@
 setClass(Class="mrp",
-        representation=representation(
-                data = "NWayData", 
-                formula = "character",
-                multilevelModel = "mer",
-                theta.hat = "array",
-                population = "array"),
-        prototype=prototype (
-                formula="cbind(response.yes, response.no) ~ 1 + (1 | var1) + (1 | var2) + (1 | var3) + (1 | var1:var2) + (1 | var1:var3) + (1 | var2:var3)"),
-        validity=function (object) {
-            if (is.null (object@data)) { stop ("[mrp: validation] data must not be null") }
+         representation=representation(
+           poll = "NWayData", 
+           data = "data.frame",
+           formula = "formula",
+           multilevelModel = "mer",
+           theta.hat = "array",
+           population = "NWayData"),
+         prototype=prototype (
+           formula=as.formula("cbind(response.yes, response.no) ~ 1 + (1 | var1) + (1 | var2) + (1 | var3) + (1 | var1:var2) + (1 | var1:var3) + (1 | var2:var3)")),
+         validity=function (object) {
+            if (is.null (object@data)) {
+              stop ("[mrp: validation] data must not be null")
+            }
+            if (!is.null(object@population) &
+                getNumberWays(object@poll)==getNumberWays(object@population)){
+              stop ("[mrp: validation] the number of ways must be the same for poll and population.")
+            }
             return(TRUE)
         }
 )
