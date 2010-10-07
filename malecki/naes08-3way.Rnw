@@ -180,7 +180,10 @@ names(naes08)[naes.vars]
   age2[age2>900] <- NA
   naes08$age <- (cut(age2, c(0,29,44,64,900),
              labels=c("18-29","30-44","45-64","65+")))
-  
+
+
+naes08$would.vote.today.for.mccain..obama..nader..or.barr
+
   race <- naes08$race
   race <- addNA(race)
   race[race=="american indian" | 
@@ -189,7 +192,7 @@ names(naes08)[naes.vars]
   race[race=="don't know" | 
        race=="no answer"] <- NA
   race <- factor(race,exclude=NA)
-  levels(race) <- c("White","Black","Hispanic","Other",NA)
+  levels(race) <- c("White","Black","Hispanic","Other")
   #relevel(race,NA)
   race[naes08$of.hispanic.descent=="yes"] <- "Hispanic"
 naes08$race <- race; rm(race)
@@ -245,7 +248,7 @@ regions <- data.frame(state=levels(foo$state),region=NA)
   regions[regions$state %in% c("AZ","CO","ID","NM","MT","UT","NV","WY","AK","CA","HI","OR","WA"),"region"] <- "West"
 regions$region <- factor(regions$region)
 
-
+set.seed(as.numeric(as.Date("1981-04-05")))
 foo <- na.omit(naes08[sample(1:nrow(naes08),10000),{names(naes08) %in% c("race","age","income","state","gays")}])
 
 
@@ -277,13 +280,20 @@ foo$gayz <- factor(foo$gays,ordered=TRUE,levels=c(1,0),labels=c("Yes","No"))
 zoo <- newMrp (foo$gayz, 
         foo[, c("age", "state", "income")])
 
+
 cen.pruned <- cen[cen$state %in% foo$state,]
 cen.pruned$state <- factor(cen.pruned$state)
 
+mrp.vouchers <- mrp(vouchers ~ state + race + income,
+                    poll=naes08,
+                    add=list(regions),
+                    run=TRUE)
+
+moo <- naes08[sample(1:nrow(naes08),10000),]
 mrp.gays <- mrp(## a formula. LHS is a binary variable
                 ## that is NWay'd into response.yes/no cols
                 gays ~ age + state + income,
-                poll=foo,
+                poll=moo,
                 ## pop is a census data.frame with names
                 ## and levels matching those of poll. 'use' is
                 ## the name of the column to use for NWay sums.
@@ -298,7 +308,7 @@ mrp.gays <- mrp(## a formula. LHS is a binary variable
                 ## an updated formula for the regression. 
                 ## LHS should always be "."; RHS may contain
                 ## "." for default = (1|{mrpterms})
-                #mr= . ~ (1+z.age|region) + (1+z.age|state) + (1+z.age|income) + (1|age),
+                mr= . ~ z.age + (1+z.age|region) + (1+z.age|state) + (1+z.age|income) + (1|age),
                 ## logical. Go ahead and run the MR-step?
                 run=TRUE
                 )
@@ -311,6 +321,8 @@ mrp <- function(formula,
   mrp.formula <- as.formula(formula)
   mrp.terms <- terms(mrp.formula)  
   mrp.varnames <- attr(mrp.terms,"term.labels")
+  allvars <- unlist(c(as.character(mrp.formula[[2]]),mrp.varnames))
+  poll <- na.omit(poll[,allvars])
   ## Set up and store poll NWayData
   cat("\nMaking NWay poll data:\n")
   if (sum(mrp.varnames %in% names(poll)) != length(mrp.varnames) ) {
@@ -328,16 +340,18 @@ mrp <- function(formula,
   ## Do merges and eval expressions on the data
   data.expressions <- add[sapply(add, is.expression)]
   data.merges <- add[sapply(add, is.data.frame)]
+  data$finalrow <- 1:nrow(data)
   if(length(data.expressions)>0){
     data <- within(data,sapply(data.expressions, eval.parent, n=2))
   }
   ## Attempt merges. 
   if(length(data.merges)>0){
     for(d in 1:length(data.merges)){
-      data <- merge(data,data.merges[[d]],all.x=TRUE,all.y=FALSE)
+      data <- merge(data,data.merges[[d]],
+                    all.x=TRUE,all.y=FALSE,sort=FALSE)
     }
   }
-  data <- as.data.frame(data)
+  data <- data[order(data$finalrow),]
   
   if (!is.null(pop)) { ## set up and store population NWayData
     na.omit(pop[, {names(pop) %in% c(mrp.varnames, use)}])
@@ -363,29 +377,35 @@ mrp <- function(formula,
                       )
     pop.nway <- new("NWayData",pop.nway,type="pop",
                     levels=saveNWayLevels(pop))
-  } else { pop.nway <- NULL }
-  ## build the default formula unless one has been supplied
-  
+  } else { 
+    pop.nway <-  array (1,
+                        dim(getYbarWeighted(poll.nway)),
+                        dimnames=dimnames(getYbarWeighted(poll.nway)))
+    pop.nway <- new("NWayData",pop.nway,type="pop",
+                    levels=poll.nway@levels)
+  }
+   ## build the default formula unless one has been supplied
   mr.formula <- formula(paste("response ~",
-                                 paste(paste("(1|",
-                                             mrp.varnames,")"),
-                                       collapse="+")))
+                              paste(paste("(1|",
+                                          mrp.varnames,")"),
+                                    collapse="+"))
+                        )
   if (!is.null(mr)){ 
     mr.formula <- update.formula(mr.formula, mr)
   }
   mrp <- new("mrp",
              poll=poll.nway,
              data=data,
-             formula=formula(mr.formula)
+             formula=formula(mr.formula),
+             population=pop.nway
              )
-  if(!is.null(pop.nway)){
-    mrp@population <- pop.nway
-  }
+
   if (run==TRUE) {
-    response <- getResponse(mrp)
-    fit <- lmer(formula=as.formula(mr.formula,env=parent.frame(2)),
-               data=data,
-               family=quasibinomial(link="logit"))
+    cat("\nRunning Multilevel Regression step.\n")
+    response <- as.matrix(getResponse(mrp))
+    fit <- lmer(mrp@formula,
+                data=mrp@data,
+                family=quasibinomial(link="logit"))
     mrp@multilevelModel <- fit
     mrp@theta.hat <- getThetaHat(mrp)
     
@@ -394,7 +414,10 @@ mrp <- function(formula,
   
 return(mrp)
 }
-
+res <- cbind(mrp.gays@data$response.yes,mrp.gays@data$response.no)
+ fit <- glmer(res ~ (1 | age) + (1 | state) + (1 | income),
+                data=mrp.gays@data,
+                family=quasibinomial(link="logit"))
 
 @ 
 
