@@ -191,3 +191,8 @@ setMethod (f="makeOnesNWay",
                              levels=object@levels)
              return(pop.nway)
            } )
+
+## Convenience 
+is.NWayData <- function(x) {
+  inherits(x,"NWayData")
+}

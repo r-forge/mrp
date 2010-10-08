@@ -1,24 +1,23 @@
 exportClasses (mrp)
 exportMethods (getNumberWays, setPopulation,
                setFormula, getFormula,
-               mr, p, hasMultilevelModel,
-               dataRescale, dataLookup, dataGenericAugment)
-export (newMrp)
+               mr, poststratify, hasMultilevelModel,
+               getResponse, setPopOnes, getThetaHat)
+export (mrp)
 
 exportClasses (NWayData)
 exportMethods (getNumberWays, getYbarWeighted, getN,
-               getDesignEffectByCell, getDataLength,
-               getNEffective, getDesignEffect,
-               dataRescale, dataLookup, dataGenericAugment)
-export (newNWayData)
+               getDesignEffectByCell, 
+               getNEffective, getDesignEffect)
+export (is.NWayData)
 
-exportClasses (MrpVisualizer)
-exportMethods (visualize, placeMisc,
-               placeCharts, placeLabels,
-               prepareLayout, createMatForLayout)
-export (newMrpVisualizer)
+#exportClasses (MrpVisualizer)
+#exportMethods (visualize, placeMisc,
+#               placeCharts, placeLabels,
+#               prepareLayout, createMatForLayout)
+#export (newMrpVisualizer)
 
-exportClasses (MrpStateVisualizer)
-exportMethods (setPlotFunction, setColorFunction,
-               createColorFunction, createStatemapsFunction)
-export (newMrpStateVisualizer)
+#exportClasses (MrpStateVisualizer)
+#exportMethods (setPlotFunction, setColorFunction,
+#               createColorFunction, createStatemapsFunction)
+#export (newMrpStateVisualizer)

@@ -25,7 +25,7 @@ setClass(Class="mrp",
 )
 
 mrp <- function(formula,
-                poll, pop=NULL, use=NULL, prune=FALSE,
+                poll, pop=NULL, use=NULL,
                 add=NULL, mr=NULL,
                 ...) {
   
@@ -65,31 +65,43 @@ mrp <- function(formula,
   data <- data[order(data$finalrow),]
   
   if (!is.null(pop)) { ## set up and store population NWayData
-    na.omit(pop[, {names(pop) %in% c(mrp.varnames, use)}])
-    cat("\nMaking NWay population data:\n")    
-    if (sum(mrp.varnames %in% names(pop)) != length(mrp.varnames) ) {
-      stop(paste("\nVariable ",sQuote(mrp.varnames[!(mrp.varnames %in% names(pop))])," not found in population."))
+    if(is.data.frame(pop)) {
+      
+      na.omit(pop[, {names(pop) %in% c(mrp.varnames, use)}])
+      cat("\nMaking NWay population data:\n")    
+      if (sum(mrp.varnames %in% names(pop)) != length(mrp.varnames) ) {
+        stop(paste("\nVariable ",sQuote(mrp.varnames[!(mrp.varnames %in% names(pop))])," not found in population."))
+      }
+      if(!(identical(sapply(poll[,mrp.varnames], levels), 
+                     sapply(pop[,mrp.varnames],levels)) )) {
+        sapply(mrp.varnames, function(x) {
+          if(length(levels(poll[,x])) != length(levels(pop[,x]))){
+            warning("Non-conformable population array. Poststratification will not work unless factor levels are identical. To replace with ones, try setPopOnes",call.=FALSE)
+            warning(paste("For",sQuote(x),
+                          "poll has", length(levels(poll[,x])),
+                          "; pop has",length(levels(pop[,x]))),call.=FALSE)
+          }
+        })}
+      pop.nway <- daply(pop, .variables=mrp.varnames,
+                        .fun=makeNWay,pop=TRUE,weights=use,
+                        .progress="text"
+                        )
+      pop.nway <- new("NWayData",pop.nway,type="pop",
+                      levels=saveNWayLevels(pop))
     }
-    if(!(identical(sapply(poll[,mrp.varnames], levels), 
-                   sapply(pop[,mrp.varnames],levels)) )) {
-      sapply(mrp.varnames, function(x) {
-        if(length(levels(poll[,x])) != length(levels(pop[,x]))){
-          warning("Non-conformable population array. Poststratification will not work unless factor levels are identical. To replace with ones, try setPopOnes",call.=FALSE)
-          warning(paste("For",sQuote(x),
-                        "poll has", length(levels(poll[,x])),
-                        "; pop has",length(levels(pop[,x]))),call.=FALSE)
-        }
-      })}
-  pop.nway <- daply(pop, .variables=mrp.varnames,
-                    .fun=makeNWay,pop=TRUE,weights=use,
-                    .progress="text"
-                    )
-  pop.nway <- new("NWayData",pop.nway,type="pop",
-                  levels=saveNWayLevels(pop))
-} else { ## No population supplied
-  pop.nway <- makeOnesNWay(poll.nway)
-}
-   ## build the default formula unless one has been supplied
+    if (is.NWayData(pop)) {
+      if(!identical(getNumberWays(pop), getNumberWays(poll))){
+        warning(paste("Population (",
+                      paste(attr(getNumberWays(pop),"ways"),collapse=" + "),
+                      ")\nis different from poll (",
+                      paste(attr(getNumberWays(poll),"ways"),collapse=" + "),")",sep=""))
+      }
+      pop.nway <- pop
+    }
+  } else { ## No population supplied
+    pop.nway <- makeOnesNWay(poll.nway)
+  }
+  ## build the default formula unless one has been supplied
   mr.formula <- formula(paste("response ~",
                               paste(paste("(1|",
                                           mrp.varnames,")"),
@@ -262,57 +274,36 @@ setMethod (f="hasMultilevelModel",
         })
 
 
-## Data augmentation
-setMethod (f="dataRescale",
-        signature=signature(object="mrp"),
-        definition=function (object, colName, newColName, ...) {
-            object@data <- rescaleData (object@data, colName, newColName, ...)
-            return (object)
-        })
 
-setMethod (f="dataLookup",
-        signature=signature(object="mrp"),
-        definition=function (object, colName, newColName, lookupTable, byValue=FALSE) {
-            object@data <- dataLookup (object@data, colName, newColName, lookupTable, byValue)
-            return (object)           
-        })
+## newMrp <- function (response, vars, population, weight=rep(1, length(response))) {
+##     # check inputs
+##     if ("data.frame" != class(vars)) {
+##         stop ("vars must be a data.frame.")
+##     }
+##     if (length(response) != nrow(vars)) {
+##         stop ("response must have the same length as the vars.")
+##     }
+##     if (nlevels(response) != 2) {
+##         stop (paste ("response must have 2 levels, found:", nlevels(response)))
+##     }
+##     # make inputs factors
+##     response <- factor (response)
+##     for (i in 1:length (vars)) {
+## 		if (is.factor (vars[,i]) == FALSE) {
+## 			vars[,i] <- factor(vars[,i])	
+## 		}
+##     }
 
-setMethod (f="dataGenericAugment",
-        signature=signature(object="mrp"),
-        definition=function (object, colNames, newColName, func, ...) {
-            object@data <- dataGenericAugment (object@data, colNames, newColName, func, ...)
-            return (object)           
-        })
-
-newMrp <- function (response, vars, population, weight=rep(1, length(response))) {
-    # check inputs
-    if ("data.frame" != class(vars)) {
-        stop ("vars must be a data.frame.")
-    }
-    if (length(response) != nrow(vars)) {
-        stop ("response must have the same length as the vars.")
-    }
-    if (nlevels(response) != 2) {
-        stop (paste ("response must have 2 levels, found:", nlevels(response)))
-    }
-    # make inputs factors
-    response <- factor (response)
-    for (i in 1:length (vars)) {
-		if (is.factor (vars[,i]) == FALSE) {
-			vars[,i] <- factor(vars[,i])	
-		}
-    }
-
-    data <- newNWayData (ncol(vars), data.frame (response, vars, weight))
-    if (missing(population)) {
-        population <- array (1, dim(data@ybarWeighted)) 
-    }
+##     data <- newNWayData (ncol(vars), data.frame (response, vars, weight))
+##     if (missing(population)) {
+##         population <- array (1, dim(data@ybarWeighted)) 
+##     }
     
-    if (all (dim(data@ybarWeighted) == dim (population)) == FALSE) {
-      stop (paste ("dim (population) must match dim (data@ybarWeighted).\n\tExpected:", dim (data@ybarWeighted)," but found: ", dim (population)))
-    }
+##     if (all (dim(data@ybarWeighted) == dim (population)) == FALSE) {
+##       stop (paste ("dim (population) must match dim (data@ybarWeighted).\n\tExpected:", dim (data@ybarWeighted)," but found: ", dim (population)))
+##     }
     
-    formula <- paste ("cbind (response.yes, response.no) ~ 1 +",
-                      paste ("(1 | ", names (vars), ")", sep="", collapse=" + "))
-    return (new(Class="mrp", data=data, population=population, formula=formula))
-  }
+##     formula <- paste ("cbind (response.yes, response.no) ~ 1 +",
+##                       paste ("(1 | ", names (vars), ")", sep="", collapse=" + "))
+##     return (new(Class="mrp", data=data, population=population, formula=formula))
+##   }
