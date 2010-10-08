@@ -1,57 +1,19 @@
 \name{mrp}
-\docType{class}
-\alias{mrp-class}
-
-\alias{getData,mrp-method}
-\alias{getResponse,mrp-method}
-\alias{getNumberWays,mrp-method}
-\alias{getThetaHat,mrp-method}
-
-\alias{getPopulation,mrp-method}
-\alias{setPopulation,mrp-method}
-\alias{setPopOnes,mrp-method}
-\alias{getFormula,mrp-method}
-\alias{setFormula,mrp-method}
-\alias{hasMultilevelModel,mrp-method}
+\alias{mrp}
+\alias{mr,mrp-method}
+\alias{poststratify,mrp-method}
 
 
 \title{Multilevel regression and poststratification}
 \description{
-  The \code{mrp} class holds N-dimensional cross-classified arrays for a survey
-  and a population, a 2-dimensional summary of survey data used to fit a
-  multilevel model, and a fitted model. Methods described here operate
-  on \code{mrp} objects which are typically created by calling the
-  \code{\link{mrp}} function.
+  Set up survey and population data, and a multilevel regression model
+  used for poststratifying by an arbitrary number of strata or \dQuote{ways}.
 }
 
-\section{Slots}{
-  \describe{
-    \item{\code{data}:}{ the
-      \code{data.frame} used in the multilevel regression step. This is
-      created by summarizing the NWayData array in poll, and optionally
-      joining additional columns of other predictors. \bold{Note:} the row
-      order of the data object, which will be the row order of the fitted
-      values, matters because it corresponds to the NWayData arrays used
-      in poststratification. If you \code{\link{merge}} columns, ensure
-      that \code{sort=FALSE} or that the rows are reordered by the special
-      column \code{finalrow}. This is done automatically when data.frames are
-      joined by the \code{add} argument to \code{\link{mrp()}}.}
-    \item{\code{formula}:}{ The formula used in the multilevel
-      regression. The left-hand side is always \squote{response}.}
-    \item{\code{multilevelModel}:}{ The multilevel regression model 
-      (class \code{mer} created by \code{\link[lme4]{glmer}})}
-    \item{\code{poll}:}{ An N-way cross-classified array (class
-      \code{\link{NWayData}}) constructed from a survey.}
-    \item{\code{population}:}{ The population distribution, also of
-      class \code{\link{NWayData}}, of dimension matching that of
-      \code{poll}. This is intended to be a probability 
-      mass table (all entries sum to 1), but the package will 
-      also work with unnormalized population distributions. 
-      The population is not used for the multilevel regression step. 
-      It is used only in poststratification.}
-  }
-}
-\usage{
+\usage{mrp (formula,
+            poll, pop=NULL, use=NULL,
+            add=NULL, mr=NULL,
+            ...)
 \S4method{mr}{mrp}(object,formula)
 \S4method{poststratify}{mrp}(object,formula)
 }
