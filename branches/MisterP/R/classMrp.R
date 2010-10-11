@@ -14,7 +14,7 @@ setClass(Class="mrp",
             if (is.null (object@poll)) {
               stop("[mrp: validation] poll NWayData is missing.")
             }
-            if (is.null (object@pop)) {
+            if (is.null (object@population)) {
               stop("[mrp: validation] pop NWayData is missing.")
             }
             if (is.null (object@formula)) {
@@ -40,7 +40,7 @@ mrp <- function(formula,
   if (sum(mrp.varnames %in% names(poll)) != length(mrp.varnames) ) {
        stop(paste("\nVariable ",sQuote(mrp.varnames[!(mrp.varnames %in% names(poll))])," not found in poll data."))
      }
-  poll.nway <- daply(poll, .variables=mrp.varnames,
+  poll.nway <- daply(poll, .variables=mrp.varnames, pop=FALSE,
              .fun=makeNWay, .progress="text",
              response=as.character(mrp.formula[[2]]), weights=poll.weights)
   poll.nway <- new("NWayData",poll.nway,type="poll",
@@ -90,15 +90,15 @@ mrp <- function(formula,
       pop.nway <- new("NWayData",pop.nway,type="pop",
                       levels=saveNWayLevels(pop))
     }
-    if (is.NWayData(pop)) {
-      if(!identical(getNumberWays(pop), getNumberWays(poll))){
-        warning(paste("Population (",
-                      paste(attr(getNumberWays(pop),"ways"),collapse=" + "),
-                      ")\nis different from poll (",
-                      paste(attr(getNumberWays(poll),"ways"),collapse=" + "),")",sep=""))
-      }
-      pop.nway <- pop
-    }
+    ## if (is.NWayData(pop)) {
+    ##   if(!identical(getNumberWays(pop), getNumberWays(poll))){
+    ##     warning(paste("Population (",
+    ##                   paste(attr(getNumberWays(pop),"ways"),collapse=" + "),
+    ##                   ")\nis different from poll (",
+    ##                   paste(attr(getNumberWays(poll),"ways"),collapse=" + "),")",sep=""))
+    ##   }
+    ##   pop.nway <- pop
+    ## }
   } else { ## No population supplied
     pop.nway <- makeOnesNWay(poll.nway)
   }
