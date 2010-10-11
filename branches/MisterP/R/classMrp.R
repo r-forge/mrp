@@ -25,8 +25,9 @@ setClass(Class="mrp",
 )
 
 mrp <- function(formula,
-                poll, pop=NULL, use=NULL,
-                add=NULL, mr=NULL,
+                poll, poll.weights=1,
+                pop=NULL, use=NULL,
+                add=NULL, mr.formula=NULL,
                 ...) {
   
   mrp.formula <- as.formula(formula)
@@ -39,9 +40,9 @@ mrp <- function(formula,
   if (sum(mrp.varnames %in% names(poll)) != length(mrp.varnames) ) {
        stop(paste("\nVariable ",sQuote(mrp.varnames[!(mrp.varnames %in% names(poll))])," not found in poll data."))
      }
-  poll.nway <- daply(poll, .variables=mrp.varnames, 
+  poll.nway <- daply(poll, .variables=mrp.varnames,
              .fun=makeNWay, .progress="text",
-             response=as.character(mrp.formula[[2]]), weights=1)
+             response=as.character(mrp.formula[[2]]), weights=poll.weights)
   poll.nway <- new("NWayData",poll.nway,type="poll",
                    levels=saveNWayLevels(poll))
   data <- adply(poll.nway, .margins=1:getNumberWays(poll.nway), 
@@ -102,18 +103,18 @@ mrp <- function(formula,
     pop.nway <- makeOnesNWay(poll.nway)
   }
   ## build the default formula unless one has been supplied
-  mr.formula <- formula(paste("response ~",
+  mr.f <- formula(paste("response ~",
                               paste(paste("(1|",
                                           mrp.varnames,")"),
                                     collapse="+"))
                         )
-  if (!is.null(mr)){ 
-    mr.formula <- update.formula(mr.formula, mr)
+  if (!is.null(mr.formula)){ 
+    mr.f <- update.formula(mr.f, mr.formula)
   }
   mrp <- new("mrp",
              poll=poll.nway,
              data=data,
-             formula=mr.formula,
+             formula=mr.f,
              population=pop.nway
              )
   
@@ -147,7 +148,6 @@ setMethod( f="getResponse",
             return(as.matrix(object@data[,c("response.yes","response.no")]))
           })
           
-#setGeneric ("getNumberWays", function (object) { standardGeneric ("getNumberWays") })
 setMethod (f="getNumberWays",
         signature=signature(object="mrp"),
         definition=function(object) {
@@ -181,7 +181,7 @@ setGeneric ("setPopOnes", function (object) { standardGeneric ("setPopOnes")})
 setMethod (f="setPopOnes",
         signature=signature(object="mrp"),
            definition=function(object) {
-             if(object@population@type)=="pop") {
+             if(object@population@type=="pop") {
                warning("Population appears to contain real data. Replacing with ones!")
              }
              object@population <- makeOnesNWay(object@poll)
@@ -219,7 +219,7 @@ setGeneric ("mr", function (object,formula,...) { standardGeneric ("mr")})
                                         #setGeneric ("multilevelRegression", function (object) { standardGeneric ("multilevelRegression")})
 setMethod (f="mr",
 signature=signature(object="mrp"),
-definition=function(object,formula=NULL,...) {
+definition=function(object,mr.formula=NULL,...) {
   if(is.null(formula)) {
     fm <- object@formula
   } else {
@@ -234,12 +234,12 @@ definition=function(object,formula=NULL,...) {
 })
 
 
-setGeneric ("poststratify", function (object, poststratification.specification=NULL) { standardGeneric ("poststratify")})
+setGeneric ("poststratify", function (object, formula) { standardGeneric ("poststratify")})
 #setGeneric ("poststratify", function (object) { standardGeneric ("poststratify")})
 setMethod (f="poststratify",
            signature=signature(object="mrp"),
-           definition=function (object, poststratification.specification) {
-             spec <- poststratification.specification
+           definition=function (object, formula=NULL) {
+             spec <- formula
              if(is.null(spec)){
                spec <- rep(FALSE,getNumberWays(object@poll))
              }

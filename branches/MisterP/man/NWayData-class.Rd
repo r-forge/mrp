@@ -1,35 +1,53 @@
-\name{NWayData}
-\Rdversion{1.1}
+\name{NWayData-class}
 \docType{class}
-\alias{NWayData}
 \alias{NWayData-class}
 
+\alias{getDesignEffect,NWayData-method}
+\alias{getN,NWayData-method}
+\alias{getNEffective,NWayData-method}
+\alias{getYbarWeighted,NWayData-method}
+\alias{is.NWayData}
 
-\title{Represents an n-way data set}
+\alias{getDesignEffect}
+\alias{getN}
+\alias{getNEffective}
+\alias{getYbarWeighted}  
+
+\title{N-Dimensional Arrays for Multilevel Regression and Poststratification}
 \description{
-	The \code{NWayData} class is a representation of a data set with a
-	binary response variable and n variables of interest
+  Arrays used in multilevel regression and poststratification are
+  low-dimensional (usually 2 or 3) slices of survey respondents or
+  population frequencies. For the multilevel regression step, dimensions
+  of such arrays are then summarized using methods here taking
+  into account survey weights and associated design effects.
 }
-\section{Object Creation}{
-  Objects can be created by calls of the form \code{\link{newNWayData}} function.  
-  The resulting \code{NWayData} object will be a representation of the data set that
-  can be used for generalized linear regression using \link{glmer}} 
+
 \section{Slots}{
-	\describe{
-		\item{\code{data}:}{On creation, this will be a \code{data.frame} with n+2 columns.
-			  The number of rows will be the combinatorial expansion of the covariates}
-    	\item{\code{numberWays}:}{The number of ways for this analysis}
-    	\item{\code{ybarWeighted}:}{The percent of yes in the data, weighted}
-    	\item{\code{n}:}{number of observations}
-    	\item{\code{designEffectByCell}:}{the design effect by cell}
-    	\item{\code{dataLength}:}{The length of the original data (only complete cases are counted).}
+  \describe{
+    \item{.Data}{An array.}
+    \item{type}{Character, either \sQuote{poll} or \sQuote{pop}
+      indicating the origin of the data contained in the array.}
+    \item{levels}{When the array is collapsed back to a two-dimensional
+      form, array dimension labels become character and any ordering of the
+      original factor levels is lost. To restore level names and order,
+      those attributes (in a \code{list}) are stored here.}
   }
 }
 \section{Methods}{
-	dataRescale, dataLookup, dataGenericAugment, getNumberWays, getYbarWeighted, getN, getDesignEffectByCell,
-	getDataLength, getNEffective, getDesignEffect, getData, flattenData
+  \describe{
+    \item{getNumberWays}{}
+    \item{getYbarWeighted}{}
+    \item{getDesignEffect}{}
+    \item{getN}{}
+    \item{getNEffective}{}
+    \item{getDesignEffectByCell}{}
+    }}
+\seealso{\code{\link{mrp-class}}}
+\author{Andrew Gelman <gelman@stat.columbia.edu>,
+  Daniel Lee <bearlee@alum.mit.edu>,
+  Yu-Sung Su <ys463@columbia.edu>,
+  Michael Malecki <malecki@wustl.edu>
 }
 \examples{
-	showClass("NWayData")
 }
 \keyword{classes}

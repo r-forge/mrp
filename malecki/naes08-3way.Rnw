@@ -183,10 +183,16 @@ names(naes08)[naes.vars]
 
 naes08$rvote <- NA
 naes08$rvote <- ifelse(naes08$primary.election.status=="interviewed after state's presidential primary election",
-                       ifelse( 
-       naes08$would.vote.today.for.mccain..obama..nader..or.barr=="mccain", 1, 0),
-                       NA)
-
+)
+after <- naes08[naes08$interview.date>20080903,]
+rvote.items <- grep("would.vote.today",names(naes08),value=TRUE)[5:6]
+rvote.items <- matrix(unlist(lapply(rvote.items, function(i) { after[,i]=="mccain" & after[,"primary.election.status"]=="interviewed after state's presidential primary election" })),nrow=nrow(after))
+rvote <- rep(FALSE,nrow(rvote.items))
+rvote <- replace(rvote, apply( rvote.items, 1, any ), TRUE)
+rvote <- replace(rvote, apply(rvote.items, 1, function(x) sum(is.na(x))==2), NA)
+after$rvote <- rvote
+                       
+                       
   race <- naes08$race
   race <- addNA(race)
   race[race=="american indian" | 
@@ -290,12 +296,13 @@ cen.pruned$state <- factor(cen.pruned$state)
 
 mrp.gays <- mrp(## a formula. LHS is a binary variable
                 ## that is NWay'd into response.yes/no cols
-                gays ~ age + state + race,
+                gays ~ state + age + race,
                 poll=foo,
                 ## pop is a census data.frame with names
                 ## and levels matching those of poll. 'use' is
                 ## the name of the column to use for NWay sums.
-                #pop=cen.pruned,use="weighted2008",
+                pop=thepop,
+                #cen.pruned,use="weighted2008",
                 add=list(
                   ## expressions are evaluated 'within' the
                   ## flattened nway data
@@ -306,15 +313,19 @@ mrp.gays <- mrp(## a formula. LHS is a binary variable
                 ## an updated formula for the regression. 
                 ## LHS should always be "."; RHS may contain
                 ## "." for default = (1|{mrpterms})
-                mr= . ~ . + (1|region),
+                mr= . ~ . + (1|region)
                 )
                 
 
 
-mrp.gays <- mrp(gays~state+age+income,
-                 poll=naes08,
-                 pop=cen,use="weighted2008"
-                 run=TRUE)
+mrp.rvote <- mrp(rvote~state+income+age,
+                add=list(regions),
+                 poll=after,
+                 pop=cen.pruned,use="weighted2008"
+)
+mrp.rvote <- mr(mrp.rvote, .~.+region)
+poststratify(mrp.rvote)
+
 @ 
 
 \section{Quickly Getting MRP Going}

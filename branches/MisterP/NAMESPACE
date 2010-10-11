@@ -6,10 +6,11 @@ exportMethods (getNumberWays, setPopulation,
 export (mrp)
 
 exportClasses (NWayData)
-exportMethods (getNumberWays, getYbarWeighted, getN,
-               getDesignEffectByCell, 
-               getNEffective, getDesignEffect)
-export (is.NWayData)
+exportMethods (getNumberWays,
+               getYbarWeighted, getN,
+               getNEffective,
+               getDesignEffect)
+S3Method(is.NWayData)
 
 #exportClasses (MrpVisualizer)
 #exportMethods (visualize, placeMisc,

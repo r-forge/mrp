@@ -22,9 +22,9 @@ restoreNWayLevels <- function(df=df,nway=nway){
 
 ## Returns the number of ways of the analysis and an attribute "ways"
 ## a character vector of names of 'ways' variables.
-setGeneric ("getNumberWays", function (object) { standardGeneric ("getNumberWays")})
+setGeneric ("getNumberWays", function (object) { standardGeneric ("getNumberWays") })
 setMethod (f="getNumberWays",
-           signature=signature(object="array"),
+           signature=signature(object="NWayData"),
            definition=function(object){
              ## Poll has an extra dimension containing
              ## computed values (ybar, N, design.effect.cell)
@@ -38,7 +38,7 @@ setMethod (f="getNumberWays",
 
 setGeneric ("getYbarWeighted", function (object) { standardGeneric ("getYbarWeighted")})
 setMethod (f="getYbarWeighted",
-        signature=signature(object="array"),
+        signature=signature(object="NWayData"),
         definition=function (object) {
           ybar.w <- do.call("[",c(x=quote(object), 
                                   as.list(rep(TRUE,getNumberWays(object))),
@@ -48,7 +48,7 @@ setMethod (f="getYbarWeighted",
 
 setGeneric ("getN", function (object) { standardGeneric ("getN")})
 setMethod (f="getN",
-        signature=signature(object="array"),
+        signature=signature(object="NWayData"),
         definition=function(object){
   N <- do.call("[",c(x=quote(object), 
                      as.list(rep(TRUE,getNumberWays(object))),
@@ -59,7 +59,7 @@ setMethod (f="getN",
 
 setGeneric ("getDesignEffect", function (object) { standardGeneric ("getDesignEffect")})
 setMethod (f="getDesignEffect",
-        signature=signature(object="array"),
+        signature=signature(object="NWayData"),
         definition=function (object) {
           D <- getDesignEffectByCell(object)
           N <- getN(object)
@@ -141,7 +141,7 @@ setMethod (f="makeNWay",
              if(weights!=1) {
                design.effect.cell <- 1+ var(w/mean(w))
                design.effect.cell <- ifelse(N>1,
-                                            design.effect,
+                                            design.effect.cell,
                                             ifelse(N==0, 0 ,1)
                                             )
                ybar.w <- weighted.mean(y, w)
@@ -193,6 +193,6 @@ setMethod (f="makeOnesNWay",
            } )
 
 ## Convenience 
-is.NWayData <- function(x) {
-  inherits(x,"NWayData")
+is.NWayData <- function(object) {
+  inherits(object,"NWayData")
 }
