@@ -33,7 +33,7 @@ mrp <- function(formula,
   mrp.formula <- as.formula(formula)
   mrp.terms <- terms(mrp.formula)  
   mrp.varnames <- attr(mrp.terms,"term.labels")
-  allvars <- unlist(c(as.character(mrp.formula[[2]]),mrp.varnames))
+  allvars <- all.vars(mrp.formula)
   poll <- na.omit(poll[,allvars])
   ## Set up and store poll NWayData
   cat("\nMaking NWay poll data:\n")
@@ -220,10 +220,10 @@ setGeneric ("mr", function (object,formula,...) { standardGeneric ("mr")})
 setMethod (f="mr",
 signature=signature(object="mrp"),
 definition=function(object,mr.formula=NULL,...) {
-  if(is.null(formula)) {
+  if(is.null(mr.formula)) {
     fm <- object@formula
   } else {
-    fm <- update.formula(object@formula, formula)
+    fm <- update.formula(object@formula, mr.formula)
     object@formula <- fm
   }
   response <- as.matrix(getResponse(object))
@@ -234,7 +234,7 @@ definition=function(object,mr.formula=NULL,...) {
 })
 
 
-setGeneric ("poststratify", function (object, formula) { standardGeneric ("poststratify")})
+setGeneric ("poststratify", function (object, formula=NULL) { standardGeneric ("poststratify")})
 #setGeneric ("poststratify", function (object) { standardGeneric ("poststratify")})
 setMethod (f="poststratify",
            signature=signature(object="mrp"),
@@ -260,8 +260,10 @@ setMethod (f="poststratify",
              if (length(groups) == 0) {
                return (sum (poststratified, na.rm=TRUE) / sum (object@population)) 
              } else {
-               return (apply (poststratified, groups, sum, na.rm=TRUE) /
-                       apply (object@population, groups, sum))
+               ans <- (apply (poststratified, groups, sum, na.rm=TRUE) /
+                       apply(object@population, groups, sum))
+               ans[is.nan(ans)] <- NA
+               return(ans)
              }
            })
 
