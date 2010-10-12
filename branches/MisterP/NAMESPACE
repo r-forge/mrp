@@ -4,7 +4,8 @@ exportMethods (getNumberWays, setPopulation,
                mr, poststratify, hasMultilevelModel,
                getResponse, setPopOnes, getThetaHat)
 export (mrp)
-importFrom(sp,panel.polygonsplot)
+importFrom("sp",panel.polygonsplot, sp.panel.layout)
+importFrom("grid",grid.polygon, gpar)
 export(panel.polygonsplot)
 
 exportClasses (NWayData)
