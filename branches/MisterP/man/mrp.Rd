@@ -122,6 +122,97 @@
 
 \examples{
 \dontrun{
-  
+library("foreign")
+
+#read in megapoll and attach
+marriage.data <- read.dta("http://www.princeton.edu/~jkastell/MRP_primer/gay_marriage_megapoll.dta", convert.underscore = TRUE) 
+
+#read in state-level dataset
+Statelevel <-
+read.dta("http://www.princeton.edu/~jkastell/MRP_primer/state_level_update.dta",
+convert.underscore = TRUE)
+
+#read in Census data
+Census <- read.dta("http://www.princeton.edu/~jkastell/MRP_primer/poststratification%202000.dta",convert.underscore = TRUE)
+Census <- Census[order(Census$cstate),]
+
+#Create index variables
+
+  #At level of megapoll
+marriage.data <- within(marriage.data, {
+  state <- factor(state,exclude=NA)
+race.female <- factor(((female *3) + race.wbh), exclude=NA)# from 1 for white males to 6 for hispanic females
+age.edu.cat <- factor( (4 * (age.cat -1) + edu.cat),exclude=NA)# from 1 for 18-29 with low edu to 16 for 65+ with high edu
+poll <- factor(poll,exclude=NA)
+}
+                        )
+Statelevel <- within(Statelevel, {
+  state <- sstate
+  state.initnum <- sstate.initnum
+p.evang.full<- p.evang[state.initnum]# proportion of evangelicals in respondent's state
+p.mormon.full <- p.mormon[state.initnum]# proportion of mormon's in respondent's state
+p.relig.full <- p.evang.full + p.mormon.full# combined evangelical + mormom proportions
+p.kerry.full <- kerry.04[state.initnum]# kerry's % of 2-party vote in respondent's state in 2004
+})
+  #At census level (same coding as above for all variables)
+## crace.female <- (cfemale *3) + crace.WBH 
+## cage.edu.cat <- 4 * (cage.cat -1) + cedu.cat 
+## cp.evang.full<- p.evang[cstate.initnum]
+## cp.mormon.full <- p.mormon[cstate.initnum]
+## cp.relig.full <- cp.evang.full + cp.mormon.full
+## cp.kerry.full <- kerry.04[cstate.initnum]
+
+library(MisterP,lib="~/R")
+
+
+mrp.simple <- mrp(yes.of.all ~ state +race.female+poll,
+    poll=marriage.data)
+spplot.mrp ( state ~ poll + race.female , spmap, "STATE", ...)
+mrp.statelevel <- mrp(yes.of.all~state+age.cat+edu.cat+poll,
+                      poll=marriage.data,
+                      add=list(#Statelevel,
+                        expression(z.age.cat <- rescale(age.cat))),
+                      mr=.~.+z.age.cat
+                      )
+
+#run individual-level opinion model
+
+individual.model <- glmer(formula = yes.of.all ~ (1|race.female) + (1|age.cat) 
+  + (1|edu.cat) + (1|age.edu.cat) + (1|state) + (1|region) + (1|poll) + p.relig.full 
+        + p.kerry.full, family=binomial(link="logit"))
+display(individual.model)
+
+#examine random effects and standard errors for race-female
+ranef(individual.model)$race.female
+se.ranef(individual.model)$race.female
+
+#create vector of state ranefs and then fill in missing ones
+state.ranefs <- array(NA,c(51,1))
+dimnames(state.ranefs) <- list(c(sstate),"effect")
+for(i in sstate){
+    state.ranefs[i,1] <- ranef(individual.model)$state[i,1]
+}
+state.ranefs[,1][is.na(state.ranefs[,1])] <- 0
+
+
+#create a prediction for each cell in Census data
+cellpred <- invlogit(fixef(individual.model)["(Intercept)"]
+            +ranef(individual.model)$race.female[crace.female,1]
+            +ranef(individual.model)$age.cat[cage.cat,1]
+            +ranef(individual.model)$edu.cat[cedu.cat,1]
+            +ranef(individual.model)$age.edu.cat[cage.edu.cat,1]
+            +ranef(individual.model)$age.edu.cat[cage.edu.cat,1]
+            +state.ranefs[cstate,1]
+            +ranef(individual.model)$region[cregion,1]   
+            +(fixef(individual.model)["p.relig.full"] *cp.relig.full)
+            +(fixef(individual.model)["p.kerry.full"] *cp.kerry.full)
+               )
+
+#weights the prediction by the freq of cell                                       
+cellpredweighted <- cellpred * cpercent.state
+
+#calculates the percent within each state (weighted average of responses)
+statepred <- 100* as.vector(tapply(cellpredweighted,cstate,sum))
+statepred
 }
 }
