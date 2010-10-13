@@ -144,8 +144,12 @@ marriage.data <- within(marriage.data, {
 race.female <- factor(((female *3) + race.wbh), exclude=NA)# from 1 for white males to 6 for hispanic females
 age.edu.cat <- factor( (4 * (age.cat -1) + edu.cat),exclude=NA)# from 1 for 18-29 with low edu to 16 for 65+ with high edu
 poll <- factor(poll,exclude=NA)
-}
-                        )
+  age.cat <- factor(age.cat,exclude=NA,labels=c("young","middleage","older","old"))
+  edu.cat <- factor(edu.cat,exclude=NA,labels=c("nohs","hs","college","toomuch"))
+})
+marriage.data <- subset(marriage.data,!is.na(state) & state!="" )
+marriage.data$state <- factor(marriage.data$state)
+
 Statelevel <- within(Statelevel, {
   state <- sstate
   state.initnum <- sstate.initnum
@@ -154,6 +158,8 @@ p.mormon.full <- p.mormon[state.initnum]# proportion of mormon's in respondent's
 p.relig.full <- p.evang.full + p.mormon.full# combined evangelical + mormom proportions
 p.kerry.full <- kerry.04[state.initnum]# kerry's % of 2-party vote in respondent's state in 2004
 })
+
+
   #At census level (same coding as above for all variables)
 ## crace.female <- (cfemale *3) + crace.WBH 
 ## cage.edu.cat <- 4 * (cage.cat -1) + cedu.cat 
@@ -162,18 +168,28 @@ p.kerry.full <- kerry.04[state.initnum]# kerry's % of 2-party vote in respondent
 ## cp.relig.full <- cp.evang.full + cp.mormon.full
 ## cp.kerry.full <- kerry.04[cstate.initnum]
 
+
+regions <- data.frame(state=levels(marriage.data$state),region=NA)
+  regions[regions$state %in% c("CT","ME","MA","NH","RI","VT","NJ","NY","PA"),"region"] <- "Northeast"
+  regions[regions$state %in% c("IN","IL","MI","OH","WI","IA","KS","MO","MN","NE","ND","SD"),"region"] <- "Midwest"
+  regions[regions$state %in% c("DE","DC","FL","GA","MD","NC","SC","VA","WV","AL","KY","MS","TN","AR","LA","OK","TX"),"region"] <- "South"
+  regions[regions$state %in% c("AZ","CO","ID","NM","MT","UT","NV","WY","AK","CA","HI","OR","WA"),"region"] <- "West"
+regions$region <- factor(regions$region)
+
 library(MisterP,lib="~/R")
 
 
 mrp.simple <- mrp(yes.of.all ~ state +race.female+poll,
     poll=marriage.data)
 spplot.mrp ( state ~ poll + race.female , spmap, "STATE", ...)
-mrp.statelevel <- mrp(yes.of.all~state+age.cat+edu.cat+poll,
+
+mrp.statelevel <- mrp(yes.of.all~state+age.cat+edu.cat+race.female+poll,
                       poll=marriage.data,
-                      add=list(#Statelevel,
-                        expression(z.age.cat <- rescale(age.cat))),
-                      mr=.~.+z.age.cat
+                      add=list(Statelevel,regions,
+                        expression(z.age <- rescale(age.cat))),
+                      mr=.~.+z.age+p.relig.full+p.kerry.full+(1|region)+(1|poll)
                       )
+mrp.statelevel <- mr(mrp.statelevel, .~.+z.age+p.relig.full+p.kerry.full+(1|region)+(1|poll))
 
 #run individual-level opinion model
 
