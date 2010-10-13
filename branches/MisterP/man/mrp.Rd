@@ -182,7 +182,7 @@ library(MisterP,lib="~/R")
 mrp.simple <- mrp(yes.of.all ~ state +race.female+poll,
     poll=marriage.data)
 spplot.mrp ( state ~ poll + race.female , spmap, "STATE", ...)
-
+ 
 mrp.statelevel <- mrp(yes.of.all~state+age.cat+edu.cat+race.female+poll,
                       poll=marriage.data,
                       add=list(Statelevel,regions,
