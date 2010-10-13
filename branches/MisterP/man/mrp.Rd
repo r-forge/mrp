@@ -171,7 +171,8 @@ p.kerry.full <- kerry.04[state.initnum]# kerry's % of 2-party vote in respondent
 
 regions <- data.frame(state=levels(marriage.data$state),region=NA)
   regions[regions$state %in% c("CT","ME","MA","NH","RI","VT","NJ","NY","PA"),"region"] <- "Northeast"
-  regions[regions$state %in% c("IN","IL","MI","OH","WI","IA","KS","MO","MN","NE","ND","SD"),"region"] <- "Midwest"
+
+regions[regions$state %in% c("IN","IL","MI","OH","WI","IA","KS","MO","MN","NE","ND","SD"),"region"] <- "Midwest"
   regions[regions$state %in% c("DE","DC","FL","GA","MD","NC","SC","VA","WV","AL","KY","MS","TN","AR","LA","OK","TX"),"region"] <- "South"
   regions[regions$state %in% c("AZ","CO","ID","NM","MT","UT","NV","WY","AK","CA","HI","OR","WA"),"region"] <- "West"
 regions$region <- factor(regions$region)
@@ -179,15 +180,31 @@ regions$region <- factor(regions$region)
 library(MisterP,lib="~/R")
 
 
-mrp.simple <- mrp(yes.of.all ~ state +race.female+poll,
+mrp.simple <- mrp(yes.of.all ~ state +age.cat+race.female+poll+region,
     poll=marriage.data)
-spplot.mrp ( state ~ poll + race.female , spmap, "STATE", ...)
+
+library(maptools)
+library(rgdal)
+library(colorRamps)
+spmap.states <- readShapeSpatial("~/mrp/malecki/s_01au07",proj4string=CRS("+proj=longlat +datum=NAD27"))
+spmap.states <- spTransform(spmap.states, CRS("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96"))
+## One in this has no 2letter abbrev.
+spmap.states <- spmap.states[-4,]
+
+## NEED TO DO: the 'maps' state map as an sp object!
+
+
+quartzFonts(gotham=quartzFont(c(
+              "Gotham-Book","Gotham-Bold",
+              "Gotham-BookItalic","Gotham-BoldItalic")))
+
+spplot ( mrp.simple, state ~ poll + age.cat , spmap.states, "STATE", exclude=c("AK","DC","HI"))
  
 mrp.statelevel <- mrp(yes.of.all~state+age.cat+edu.cat+race.female+poll,
                       poll=marriage.data,
                       add=list(Statelevel,regions,
                         expression(z.age <- rescale(age.cat))),
-                      mr=.~.+z.age+p.relig.full+p.kerry.full+(1|region)+(1|poll)
+                      #mr=.~.+z.age+p.relig.full+p.kerry.full+(1|region)+(1|poll)
                       )
 mrp.statelevel <- mr(mrp.statelevel, .~.+z.age+p.relig.full+p.kerry.full+(1|region)+(1|poll))
 

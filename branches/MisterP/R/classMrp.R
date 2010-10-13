@@ -208,7 +208,7 @@ setGeneric ("getThetaHat", function (object) { standardGeneric ("getThetaHat")})
 setMethod(f="getThetaHat",signature(object="mrp"),
           definition=function(object) {
             theta.hat <- rep (NA, length (getYbarWeighted (object@poll)))
-#            theta.hat[complete.cases(object@data)] <- fitted(object@multilevelModel)
+#           theta.hat[complete.cases(object@data)] <- fitted(object@multilevelModel)
             theta.hat <- fitted(object@multilevelModel)
             theta.hat <- array (theta.hat,
                                        dim (getYbarWeighted(object@poll)),
