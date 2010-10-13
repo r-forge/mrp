@@ -180,6 +180,7 @@ names(naes08)[naes.vars]
   age2[age2>900] <- NA
   naes08$age <- (cut(age2, c(0,29,44,64,900),
              labels=c("18-29","30-44","45-64","65+")))
+naes08$age <- ordered(naes08$age)
 
 naes08$rvote <- NA
 #naes08$rvote <- ifelse(naes08$primary.election.status=="interviewed after state's presidential primary election",)
@@ -296,7 +297,7 @@ cen.pruned$state <- factor(cen.pruned$state)
 mrp.gays <- mrp(## a formula. LHS is a binary variable
                 ## that is NWay'd into response.yes/no cols
                 gays ~ state + age + race,
-                poll=foo,
+                poll=naes08,
                 ## pop is a census data.frame with names
                 ## and levels matching those of poll. 'use' is
                 ## the name of the column to use for NWay sums.
@@ -307,13 +308,15 @@ mrp.gays <- mrp(## a formula. LHS is a binary variable
                   expression(z.age <- rescale(age)),
                   ## regions is a data.frame left joined onto
                   ## the flattened nway data
-                  regions),
+                  regions)
                 ## an updated formula for the regression. 
                 ## LHS should always be "."; RHS may contain
                 ## "." for default = (1|{mrpterms})
-                mr= . ~ . + (1|region)
+                ## mr= . ~ . + (1|region)
                 )
-                
+print(poststratify(mrp.gays),digits=2)
+mrp.gays <- mr(mrp.gays, .~.+(1|region))
+print(poststratify(mrp.gays),digits=2)
 
 
 ## mrp.rvote <- mrp(rvote~state+income+age,
@@ -325,6 +328,96 @@ mrp.gays <- mrp(## a formula. LHS is a binary variable
 ## poststratify(mrp.rvote)
 
 @ 
-                                            
+
+<<setup-plot>>=
+
+library(maptools)
+library(rgdal)
+spmap.states <- readShapeSpatial("~/mrp/malecki/s_01au07",proj4string=CRS("+proj=longlat +datum=NAD27"))
+spmap.states <- spTransform(spmap.states, CRS("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96"))
+## One in this has no 2letter abbrev.
+spmap.states <- spmap.states[-4,]
+
+## NEED TO DO: the 'maps' state map as an sp object!
+
+spplot.mrp <- function(formula, object, spmap=NULL, FID="state", exclude=NULL, ...) {
+  object.p <- melt(poststratify(object, all.vars(formula)))
+  object.p <- MisterP:::restoreNWayLevels(object.p, object@poll)
+  plot.terms <- terms(formula,keep.order=TRUE)
+    
+  plotdf <- dcast(object.p, formula)
+  names(plotdf) <- make.names(names(plotdf))
+  
+  plotdf[,1] <- as.character(levels(plotdf[,1])[plotdf[,1]])
+  spmap@data[,FID] <- as.character(levels(spmap@data[,FID])[spmap@data[,FID]])
+  
+  
+  ## remove excludes list from fitted model, and then pare the sp object to match.
+  if(!is.null(exclude)) {
+    plotdf <- subset(plotdf, 
+                     !(plotdf[,1] %in% exclude))
+  }
+  spmap <- spmap[spmap@data[,FID] %in% plotdf[,1],]
+  ## set feature ids and rownames to match 
+  
+  spmap <- spChFIDs(spmap, 
+                    spmap@data[,FID])
+  rownames(spmap@data) <- spmap@data[,FID]
+  rownames(plotdf) <- plotdf[,1]
+  
+  startcol <- ncol(spmap@data)+2
+  spmap@data <- cbind(spmap@data,
+                      plotdf[rownames(spmap@data),])
+  endcol <- ncol(spmap@data)
+
+dimlabels <- lapply(object@poll@levels[attr(plot.terms,"term.labels")],function(x) { return(x$levels) })
+theplot <- spplot(spmap,
+                  startcol:endcol,
+                  layout=c(length(dimlabels[[1]]), length(dimlabels[[2]])),
+                  panel=panel.polygonsplot,
+                  strip=strip.custom(
+                    factor.levels=rep(dimlabels[[2]],
+                      length(dimlabels[[1]]))),
+                  strip.left=strip.custom(horizontal=FALSE,
+                    factor.levels=rep(dimlabels[[1]],
+                      each=length(dimlabels[[2]]))),
+                  between=list(x=.25,y=.25),
+                  par.settings=list(
+                    par.main.text=list(fontfamily="gotham"),
+                    add.line=list(col="#00000000",lwd=0), # state borders
+                    add.text=list(cex=.7,fontface="italic",
+                      fontfamily="gotham"),
+                    axis.line=list(lwd=0),
+                    ## Here we are going to do some
+                    ## strip and strip.left magic.
+                    layout.heights=list(strip = 
+                      c(rep(0, length(dimlabels[[1]])-1), 
+                        1)), # should by dynamic for linebreaks
+                    layout.widths=list(strip.left=
+                      c(1, rep(0,length(dimlabels[[2]])-1))),
+                    strip.border=list(col="transparent"),
+                    regions=list(col=blue2green2red(100))
+                    ),...
+                  )
+
+                    
+  
+  return(list(plotdf,spmap,theplot))
+} 
+quartzFonts(gotham=quartzFont(c(
+              "Gotham-Book","Gotham-Bold",
+              "Gotham-BookItalic","Gotham-BoldItalic")))
+
+
+
+mapme <- spplot.mrp(state~race+age, mrp.gays, 
+               spmap=spmap.states, FID="STATE",
+               exclude=c("DC","HI","AK"),emptycolor="#00000044")
+
+print(mapme[[3]])
+
+
+@ 
 
 \end{document}
+ 

@@ -41,7 +41,7 @@
     \setcounter{dbltopnumber}{2}    
     \renewcommand{\dbltopfraction}{0.9}	
     \renewcommand{\textfraction}{0.07}	
-    %   Parameters for FLOAT pages (not text pages):
+    %   Parameters for FLOAT Pages (not text pages):
     \renewcommand{\floatpagefraction}{0.7}	% require fuller float pages
 	% N.B.: floatpagefraction MUST be less than topfraction !!
     \renewcommand{\dblfloatpagefraction}{0.7}	% require fuller float pages
