@@ -31,7 +31,10 @@ setMethod("spplot", signature("mrp"),
             
             dimlabels <- lapply(obj@poll@levels[attr(plot.terms,"term.labels")],function(x) { return(x$levels) })
             if(length(dimlabels)==1) {
-              dimlabels[[2]] <- 1 }
+              dimlabels[[2]] <- "" }
+            if(length(attr(plot.terms,"term.labels"))==1) {
+              dimlabels <- rev(dimlabels)
+            }
             theplot <- spplot(spmap,
                               startcol:endcol,
                               layout=c(length(dimlabels[[2]]), length(dimlabels[[1]])),

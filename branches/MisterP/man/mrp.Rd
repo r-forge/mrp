@@ -180,7 +180,7 @@ regions$region <- factor(regions$region)
 library(MisterP,lib="~/R")
 
 
-mrp.simple <- mrp(yes.of.all ~ state +age.cat+race.female+poll+region,
+mrp.simple <- mrp(yes.of.all ~ state +age.cat+race.female+poll,
     poll=marriage.data)
 
 library(maptools)
@@ -198,13 +198,15 @@ quartzFonts(gotham=quartzFont(c(
               "Gotham-Book","Gotham-Bold",
               "Gotham-BookItalic","Gotham-BoldItalic")))
 
-spplot ( mrp.simple, state ~ poll + age.cat , spmap.states, "STATE", exclude=c("AK","DC","HI"))
+spplot ( mrp.statelevel, state ~ poll+age.cat , spmap.states, "STATE", exclude=c("AK","DC","HI"))
+spplot ( mrp.simple, state ~ age.cat +poll, spmap.states, "STATE", exclude=c("AK","DC","HI"))
+
  
-mrp.statelevel <- mrp(yes.of.all~state+age.cat+edu.cat+race.female+poll,
+mrp.statelevel <- mrp(yes.of.all~state+age.cat+edu.cat+poll,
                       poll=marriage.data,
                       add=list(Statelevel,regions,
                         expression(z.age <- rescale(age.cat))),
-                      #mr=.~.+z.age+p.relig.full+p.kerry.full+(1|region)+(1|poll)
+                      mr=.~.+z.age+p.relig.full+p.kerry.full+(1|region)+(1|poll)
                       )
 mrp.statelevel <- mr(mrp.statelevel, .~.+z.age+p.relig.full+p.kerry.full+(1|region)+(1|poll))
 

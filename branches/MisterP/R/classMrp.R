@@ -63,7 +63,11 @@ mrp <- function(formula,
                     all.x=TRUE,all.y=FALSE,sort=FALSE)
     }
   }
+
+  ## These are an obnoxious hack but we *really* don't want it
+  ## to get confused about the order of the data.
   data <- data[order(data$finalrow),]
+  rownames(data) <- data$finalrow
   
   if (!is.null(pop)) { ## set up and store population NWayData
     if(is.data.frame(pop)) {
