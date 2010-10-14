@@ -1,12 +1,12 @@
 Package: MisterP
 Version: 0.1.0
-Date: 2010-10-07
+Date: 2010-10-14
 Title: Multilevel Regression and Poststratification
 Author:
   Andrew Gelman <gelman@stat.columbia.edu>,
+  Michael Malecki <malecki@wustl.edu>
   Daniel Lee <bearlee@alum.mit.edu>,
   Yu-Sung Su <ys463@columbia.edu>,
-  Michael Malecki <malecki@wustl.edu>
 Maintainer: Daniel Lee <bearlee@alum.mit.edu>
 Depends: R (>= 2.11), methods, arm, lme4, maps, sp, lattice, plyr, reshape2,colorRamps
 Description: Multilevel Regressions and Poststratification
