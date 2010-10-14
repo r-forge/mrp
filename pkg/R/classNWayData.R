@@ -1,0 +1,198 @@
+
+setClass("NWayData",representation(type="character",levels="list"),contains="array")
+
+
+## save the levels on the original data for when it is plyd back
+## in poststratification
+## match on names of ways
+saveNWayLevels <- function(df){
+  fac <- sapply(df,is.factor)
+  lev <- lapply(df[,fac],attributes)
+  return(lev)
+}
+restoreNWayLevels <- function(df=df,nway=nway){
+  pos <- na.omit(names(nway@levels)[match(names(df),names(nway@levels))])
+  df[,pos] <- as.data.frame(lapply(pos, function(col) {
+    df[,col] <- factor(df[,col],
+                       levels=nway@levels[[col]]$levels,
+                       ordered=nway@levels[[col]]$class[1]=="ordered")
+  }))
+  return(df)
+}
+
+## Returns the number of ways of the analysis and an attribute "ways"
+## a character vector of names of 'ways' variables.
+setGeneric ("getNumberWays", function (object) { standardGeneric ("getNumberWays") })
+setMethod (f="getNumberWays",
+           signature=signature(object="NWayData"),
+           definition=function(object){
+             ## Poll has an extra dimension containing
+             ## computed values (ybar, N, design.effect.cell)
+             is.poll <- ifelse(attr(object,"type")=="poll",
+                               TRUE,FALSE)
+             w <- length(attr(object,"dim"))-is.poll
+             attr(w,"ways") <- names(dimnames(object))[1:w]
+             if(object@type=="ones") { w <- 0 }
+             return(w)
+           })
+
+setGeneric ("getYbarWeighted", function (object) { standardGeneric ("getYbarWeighted")})
+setMethod (f="getYbarWeighted",
+        signature=signature(object="NWayData"),
+        definition=function (object) {
+          ybar.w <- do.call("[",c(x=quote(object), 
+                                  as.list(rep(TRUE,getNumberWays(object))),
+                                  "ybar.w"))
+          return(ybar.w)
+        })
+
+setGeneric ("getN", function (object) { standardGeneric ("getN")})
+setMethod (f="getN",
+        signature=signature(object="NWayData"),
+        definition=function(object){
+  N <- do.call("[",c(x=quote(object), 
+                     as.list(rep(TRUE,getNumberWays(object))),
+                     "N"))
+  N[is.na(N)] <- 0
+  return(N)
+}  )
+
+setGeneric ("getDesignEffect", function (object) { standardGeneric ("getDesignEffect")})
+setMethod (f="getDesignEffect",
+        signature=signature(object="NWayData"),
+        definition=function (object) {
+          D <- getDesignEffectByCell(object)
+          N <- getN(object)
+          #subsY <- {length(subsN)*2+1}:length(array)
+          design.effect <- weighted.mean(D,N,na.rm=TRUE)
+          return(c("design.effect"=design.effect))
+})
+
+
+setGeneric ("getDesignEffectByCell", function (object) { standardGeneric ("getDesignEffectByCell")})
+setMethod (f="getDesignEffectByCell",
+        signature=signature(object="NWayData"),
+        definition=function (object) {
+          D <- do.call("[",c(x=quote(object), 
+                             as.list(rep(TRUE,getNumberWays(object))),
+                             "design.effect.cell"))
+          return(D)
+})
+
+
+## Returns the number of observations (unweighted observations) that was used to create the data set.
+## TODO: remove this method -- not useful. Perhaps a weighted number of observations would be more useful
+## setGeneric ("getDataLength", function (object) { standardGeneric ("getDataLength")})
+## setMethod (f="getDataLength",
+##         signature=signature(object="NWayData"),
+##         definition=function (object) {
+##             return (object@dataLength)
+##         })
+
+setGeneric ("getNEffective", function (object) { standardGeneric ("getNEffective")})
+setMethod (f="getNEffective",
+           signature=signature(object="NWayData"),
+           definition=function(object){
+             getN(object) / getDesignEffect(object)
+           })
+
+setGeneric ("getDesignEffect", function (object) { standardGeneric ("getDesignEffect")})
+setMethod (f="getDesignEffect",
+        signature=signature(object="NWayData"),
+        definition=function (object) {
+            return (weighted.mean (getDesignEffectByCell (object), getN(object), na.rm=TRUE))
+        })
+
+setGeneric ("getData", function (object) { standardGeneric ("getData")})
+setMethod (f="getData",
+        signature=signature(object="NWayData"),
+        definition=function (object) {
+            return (object@data)
+        })
+
+### makeNway is meant to be called on a sliced (subsetted) data.frame
+### made by the call to plyr:::daply (dataframe-to-array)
+### args: response - column name of binary response
+###       weights - column name of survey weight var
+###       pop - logical, for population data (just sums)
+### when used for population data, must supply 'weights'
+setGeneric ("makeNWay", function (cell,response,weights,pop) { standardGeneric ("makeNWay")})
+setMethod (f="makeNWay",
+           signature=signature(cell="data.frame"),
+           definition=function(cell, response="response", 
+             weights=c(1,"weight"), pop=FALSE) {
+             if(pop==TRUE){
+               if(length(weights)!=1) {
+                 stop(paste("When supplying a data.frame as ",sQuote("population")," you must also indicate the (character or integer) ",sQuote("pop.column"), ", which column of the data.frame to use.\n")) }
+               prop <- sum(cell[,weights])
+               return(prop)
+             }
+             N <- nrow(cell)
+             y <- cell[,response]
+             ## quietly allow easy noweight
+             if(weights==1) {
+               cell$weight <- rep(1,nrow(cell))
+               weight="weight"
+             }
+             w <- cell[,weight]
+             ## do weighted mean
+
+             ## do design effect with cases N=0,1 only if weights provided
+             if(weights!=1) {
+               design.effect.cell <- 1+ var(w/mean(w))
+               design.effect.cell <- ifelse(N>1,
+                                            design.effect.cell,
+                                            ifelse(N==0, 0 ,1)
+                                            )
+               ybar.w <- weighted.mean(y, w)
+             } else {
+               ybar.w <- mean(y)
+               design.effect.cell <- 1
+             }
+             ybar.w[is.nan(ybar.w)] <- 0
+             
+             ans <- c(N=N,
+                      design.effect.cell=design.effect.cell,
+                      ybar.w=ybar.w)
+                                        #print(str(ans))
+             return(ans)
+           })
+
+### turns a NWayData array back into a data.frame for lmer call.
+### args: v, a vector of the plyr:::adply -sliced NWayData array.
+setGeneric ("flattenNWay", function (v,design.effect) { standardGeneric ("flattenNWay")})
+setMethod (f="flattenNWay",
+           definition=function(v,design.effect){
+             if(sum(is.na(v))>0) { 
+               v <- c(N=0,
+                      design.effect.cell=0,
+                      ybar.w=.5) 
+             }
+             ## do n.eff
+             N.eff <- v["N"] / design.effect
+             
+             ybar.w <- v["ybar.w"]
+             ## do ybar.w with cases
+             response.yes <- ybar.w*N.eff
+             response.no <- (1-ybar.w)*N.eff
+             ans <- c(response.yes,response.no,v)
+             names(ans)[1:2] <- c("response.yes","response.no")
+             return(ans)
+           })
+
+setGeneric ("makeOnesNWay", function (object) { standardGeneric ("makeOnesNWay")})
+setMethod (f="makeOnesNWay",
+        signature=signature(object="NWayData"),
+           definition=function(object) {
+             pop.nway <-  array (1,
+                                 dim(getYbarWeighted(object)),
+                                 dimnames=dimnames(getYbarWeighted(object)))
+             pop.nway <- new("NWayData",pop.nway,type="ones",
+                             levels=object@levels)
+             return(pop.nway)
+           } )
+
+## Convenience 
+is.NWayData <- function(object) {
+  inherits(object,"NWayData")
+}
