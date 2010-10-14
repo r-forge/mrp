@@ -277,7 +277,7 @@ foo <- na.omit(naes08[,{names(naes08) %in% c("race","age","income","state","gays
 ## baz <- restoreNWayLevels(df=baz,nway=bar)
 
 cen <- na.omit(census[, {
-  names(census) %in% c("race","age","income","state","gays", "weighted2008")}])
+  names(census) %in% c("race","age","income","state", "weighted2004")}])
 
 ## cenNway <- daply(cen, .variables=attr(mrp.terms,"term.labels"),
 ##                  .fun=makeNway,pop=TRUE,weights="weighted2008")
@@ -340,7 +340,7 @@ spmap.states <- spmap.states[-4,]
 
 ## NEED TO DO: the 'maps' state map as an sp object!
 
-spplot.mrp <- function(formula, object, spmap=NULL, FID="state", exclude=NULL, ...) {
+spplot.mrp <- function(formula, object, spmap=NULL, FID="state", exclude=NULL, add.list=NULL, ...) {
   object.p <- melt(poststratify(object, all.vars(formula)))
   object.p <- MisterP:::restoreNWayLevels(object.p, object@poll)
   plot.terms <- terms(formula,keep.order=TRUE)
