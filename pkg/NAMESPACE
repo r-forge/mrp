@@ -4,7 +4,7 @@ exportMethods (getNumberWays, setPopulation,
                mr, poststratify, hasMultilevelModel,
                getResponse, setPopOnes, getThetaHat)
 export (mrp)
-importFrom("sp",panel.polygonsplot)
+importFrom("sp",panel.polygonsplot,spplot)
 importFrom("grid",grid.polygon, gpar)
 export(panel.polygonsplot)
 

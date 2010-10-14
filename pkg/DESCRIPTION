@@ -12,3 +12,5 @@ Depends: R (>= 2.11), methods, arm, lme4, maps, sp, lattice, plyr, reshape2,colo
 Description: Multilevel Regressions and Poststratification
 License: GPL (>= 2)
 Collate: 'load.first.R' 'classNWayData.R' 'classMrp.R' 'spplot.R'
+LazyLoad: yes
+LazyData: yes
