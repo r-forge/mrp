@@ -122,132 +122,166 @@
 
 \examples{
 \dontrun{
-library("foreign")
+# library("foreign")
 
-#read in megapoll and attach
-marriage.data <- read.dta("http://www.princeton.edu/~jkastell/MRP_primer/gay_marriage_megapoll.dta", convert.underscore = TRUE) 
+## #read in megapoll and attach
+# marriage.data <- read.dta("http://www.princeton.edu/~jkastell/MRP_primer/gay_marriage_megapoll.dta", convert.underscore = TRUE) 
 
-#read in state-level dataset
-Statelevel <-
-read.dta("http://www.princeton.edu/~jkastell/MRP_primer/state_level_update.dta",
-convert.underscore = TRUE)
+## #read in state-level dataset
+## Statelevel <-
+## read.dta("http://www.princeton.edu/~jkastell/MRP_primer/state_level_update.dta",
+## convert.underscore = TRUE)
 
-#read in Census data
-Census <- read.dta("http://www.princeton.edu/~jkastell/MRP_primer/poststratification%202000.dta",convert.underscore = TRUE)
-Census <- Census[order(Census$cstate),]
+## #read in Census data
+## Census <- read.dta("http://www.princeton.edu/~jkastell/MRP_primer/poststratification%202000.dta",convert.underscore = TRUE)
+## Census <- Census[order(Census$cstate),]
 
-#Create index variables
+## #Create index variables
 
-  #At level of megapoll
-marriage.data <- within(marriage.data, {
-  state <- factor(state,exclude=NA)
-race.female <- factor(((female *3) + race.wbh), exclude=NA)# from 1 for white males to 6 for hispanic females
-age.edu.cat <- factor( (4 * (age.cat -1) + edu.cat),exclude=NA)# from 1 for 18-29 with low edu to 16 for 65+ with high edu
-poll <- factor(poll,exclude=NA)
-  age.cat <- factor(age.cat,exclude=NA,labels=c("young","middleage","older","old"))
-  edu.cat <- factor(edu.cat,exclude=NA,labels=c("nohs","hs","college","toomuch"))
-})
-marriage.data <- subset(marriage.data,!is.na(state) & state!="" )
-marriage.data$state <- factor(marriage.data$state)
+##   #At level of megapoll
+##   marriage.data <- within(marriage.data, {
+##     state <- factor(state,exclude=NA)
+##     poll <- factor(poll,exclude=NA)
+##     age <- factor(age.cat,exclude=NA,labels=c("young","middleage",
+##                                        "older","old"))
+##     edu <- factor(edu.cat,exclude=NA,labels=c"< High School",
+##                   "High School",
+##                   "Some College",
+##                   "Graduated College"))
+##                         })
+## marriage.data <- subset(marriage.data,!is.na(state) & state!="" )
+## marriage.data$state <- factor(marriage.data$state)
 
-Statelevel <- within(Statelevel, {
-  state <- sstate
-  state.initnum <- sstate.initnum
-p.evang.full<- p.evang[state.initnum]# proportion of evangelicals in respondent's state
-p.mormon.full <- p.mormon[state.initnum]# proportion of mormon's in respondent's state
-p.relig.full <- p.evang.full + p.mormon.full# combined evangelical + mormom proportions
-p.kerry.full <- kerry.04[state.initnum]# kerry's % of 2-party vote in respondent's state in 2004
-})
-
-
-  #At census level (same coding as above for all variables)
-## crace.female <- (cfemale *3) + crace.WBH 
-## cage.edu.cat <- 4 * (cage.cat -1) + cedu.cat 
-## cp.evang.full<- p.evang[cstate.initnum]
-## cp.mormon.full <- p.mormon[cstate.initnum]
-## cp.relig.full <- cp.evang.full + cp.mormon.full
-## cp.kerry.full <- kerry.04[cstate.initnum]
-
-
-regions <- data.frame(state=levels(marriage.data$state),region=NA)
-  regions[regions$state %in% c("CT","ME","MA","NH","RI","VT","NJ","NY","PA"),"region"] <- "Northeast"
-
-regions[regions$state %in% c("IN","IL","MI","OH","WI","IA","KS","MO","MN","NE","ND","SD"),"region"] <- "Midwest"
-  regions[regions$state %in% c("DE","DC","FL","GA","MD","NC","SC","VA","WV","AL","KY","MS","TN","AR","LA","OK","TX"),"region"] <- "South"
-  regions[regions$state %in% c("AZ","CO","ID","NM","MT","UT","NV","WY","AK","CA","HI","OR","WA"),"region"] <- "West"
-regions$region <- factor(regions$region)
+## Statelevel <- within(Statelevel, {
+##   state <- sstate
+##   state.initnum <- sstate.initnum
+## p.evang.full<- p.evang[state.initnum]# proportion of evangelicals in respondent's state
+## p.mormon.full <- p.mormon[state.initnum]# proportion of mormon's in respondent's state
+## p.relig.full <- p.evang.full + p.mormon.full# combined evangelical + mormom proportions
+## p.kerry.full <- kerry.04[state.initnum]# kerry's % of 2-party vote in respondent's state in 2004
+## })
 
 library(MisterP,lib="~/R")
 
+load("../data/us_noaa_map.Rdata")
+load("../data/kastellec_ex.Rdata")
 
-mrp.simple <- mrp(yes.of.all ~ state +age.cat+race.female+poll,
+  marriage.data <- within(marriage.data, {
+    state <- factor(state,exclude=NA)
+    poll <- factor(poll,exclude=NA)
+    age <- factor(age.cat,exclude=NA,labels=c("young","middleage",
+                                       "older","old"))
+    edu <- factor(edu.cat,exclude=NA,labels=c("< High School",
+                  "High School",
+                  "Some College",
+                  "Graduated College"))
+                        })
+marriage.data <- subset(marriage.data,!is.na(state) & state!="" )
+marriage.data$state <- factor(marriage.data$state)
+
+
+
+##   #At census level (same coding as above for all variables)
+census <- na.omit(census[census$state %in% marriage.data$state,
+                         c("age","state","education",
+                           "weighted2000","weighted2004","weighted2008")])
+
+Census <- within(census,{
+   age <- factor(age,exclude=NA,labels=c("young","middleage",
+                                  "older","old"))
+   education[education=="postgraduate"] <- "college graduate"
+   edu <- factor(education,exclude=NA,labels=c("< High School",
+                                        "High School",
+                                        "Some College",
+                                        "Graduated College"))
+   state <- factor(state,exclude=NA)
+})
+
+regions <- data.frame(state=levels(marriage.data$state),region=NA)
+  regions[regions$state %in% c("CT","ME","MA",
+                               "NH","RI","VT",
+                               "NJ","NY","PA"),"region"] <- "Northeast"
+regions[regions$state %in% c("IN","IL","MI",
+                             "OH","WI","IA",
+                             "KS","MO","MN",
+                             "NE","ND","SD"),"region"] <- "Midwest"
+regions[regions$state %in% c("DE","DC","FL",
+                             "GA","MD","NC",
+                             "SC","VA","WV",
+                             "AL","KY","MS",
+                             "TN","AR","LA",
+                             "OK","TX"),"region"] <- "South"
+regions[regions$state %in% c("AZ","CO","ID",
+                             "NM","MT","UT",
+                             "NV","WY","AK",
+                             "CA","HI","OR","WA"),"region"] <- "West"
+regions$region <- factor(regions$region)
+
+
+
+
+mrp.simple <- mrp(yes.of.all ~ state +age+edu+poll,
     poll=marriage.data)
-
-library(maptools)
-library(rgdal)
-library(colorRamps)
-spmap.states <- readShapeSpatial("~/mrp/malecki/s_01au07",proj4string=CRS("+proj=longlat +datum=NAD27"))
-spmap.states <- spTransform(spmap.states, CRS("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96"))
-## One in this has no 2letter abbrev.
-spmap.states <- spmap.states[-4,]
-
-## NEED TO DO: the 'maps' state map as an sp object!
-
 
 quartzFonts(gotham=quartzFont(c(
               "Gotham-Book","Gotham-Bold",
               "Gotham-BookItalic","Gotham-BoldItalic")))
 
-spplot ( mrp.statelevel, state ~ poll+age.cat , spmap.states, "STATE", exclude=c("AK","DC","HI"))
-spplot ( mrp.simple, state ~ age.cat +poll, spmap.states, "STATE", exclude=c("AK","DC","HI"))
+spplot (mrp.simple, state ~ poll + age ,
+        spmap.states, "STATE", exclude=c("AK","DC","HI"),
+        add.settings=list(
+          add.text=list(cex=.7,fontface="italic",
+            fontfamily="gotham")))
 
- 
-mrp.statelevel <- mrp(yes.of.all~state+age.cat+edu.cat+poll,
+
+mrp.statelevel <- mrp(yes.of.all~state+age+edu,
                       poll=marriage.data,
+                      pop=Census,use="weighted2004",
                       add=list(Statelevel,regions,
-                        expression(z.age <- rescale(age.cat))),
-                      mr=.~.+z.age+p.relig.full+p.kerry.full+(1|region)+(1|poll)
+                        expression(z.age <- rescale(age))),
+                      mr=.~.+z.age+p.relig.full+p.kerry.full+(1|region)
                       )
 mrp.statelevel <- mr(mrp.statelevel, .~.+z.age+p.relig.full+p.kerry.full+(1|region)+(1|poll))
+spplot(mrp.statelevel, state~age+edu, spmap.states, "STATE", exclude=c("AK","DC","HI"),add.settings=list())
 
-#run individual-level opinion model
+## #run individual-level opinion model
 
-individual.model <- glmer(formula = yes.of.all ~ (1|race.female) + (1|age.cat) 
-  + (1|edu.cat) + (1|age.edu.cat) + (1|state) + (1|region) + (1|poll) + p.relig.full 
-        + p.kerry.full, family=binomial(link="logit"))
-display(individual.model)
+## individual.model <- glmer(formula = yes.of.all ~ (1|race.female) + (1|age.cat) 
+##   + (1|edu.cat) + (1|age.edu.cat) + (1|state) + (1|region) + (1|poll) + p.relig.full 
+##         + p.kerry.full, family=binomial(link="logit"))
+## display(individual.model)
 
-#examine random effects and standard errors for race-female
-ranef(individual.model)$race.female
-se.ranef(individual.model)$race.female
+## #examine random effects and standard errors for race-female
+## ranef(individual.model)$race.female
+## se.ranef(individual.model)$race.female
 
-#create vector of state ranefs and then fill in missing ones
-state.ranefs <- array(NA,c(51,1))
-dimnames(state.ranefs) <- list(c(sstate),"effect")
-for(i in sstate){
-    state.ranefs[i,1] <- ranef(individual.model)$state[i,1]
-}
-state.ranefs[,1][is.na(state.ranefs[,1])] <- 0
+## #create vector of state ranefs and then fill in missing ones
+## state.ranefs <- array(NA,c(51,1))
+## dimnames(state.ranefs) <- list(c(sstate),"effect")
+## for(i in sstate){
+##     state.ranefs[i,1] <- ranef(individual.model)$state[i,1]
+## }
+## state.ranefs[,1][is.na(state.ranefs[,1])] <- 0
 
 
-#create a prediction for each cell in Census data
-cellpred <- invlogit(fixef(individual.model)["(Intercept)"]
-            +ranef(individual.model)$race.female[crace.female,1]
-            +ranef(individual.model)$age.cat[cage.cat,1]
-            +ranef(individual.model)$edu.cat[cedu.cat,1]
-            +ranef(individual.model)$age.edu.cat[cage.edu.cat,1]
-            +ranef(individual.model)$age.edu.cat[cage.edu.cat,1]
-            +state.ranefs[cstate,1]
-            +ranef(individual.model)$region[cregion,1]   
-            +(fixef(individual.model)["p.relig.full"] *cp.relig.full)
-            +(fixef(individual.model)["p.kerry.full"] *cp.kerry.full)
-               )
+## #create a prediction for each cell in Census data
+## cellpred <- invlogit(fixef(individual.model)["(Intercept)"]
+##             +ranef(individual.model)$race.female[crace.female,1]
+##             +ranef(individual.model)$age.cat[cage.cat,1]
+##             +ranef(individual.model)$edu.cat[cedu.cat,1]
+##             +ranef(individual.model)$age.edu.cat[cage.edu.cat,1]
+##             +ranef(individual.model)$age.edu.cat[cage.edu.cat,1]
+##             +state.ranefs[cstate,1]
+##             +ranef(individual.model)$region[cregion,1]   
+##             +(fixef(individual.model)["p.relig.full"] *cp.relig.full)
+##             +(fixef(individual.model)["p.kerry.full"] *cp.kerry.full)
+##                )
 
-#weights the prediction by the freq of cell                                       
-cellpredweighted <- cellpred * cpercent.state
+## #weights the prediction by the freq of cell                                       
+## cellpredweighted <- cellpred * cpercent.state
 
-#calculates the percent within each state (weighted average of responses)
-statepred <- 100* as.vector(tapply(cellpredweighted,cstate,sum))
-statepred
+## #calculates the percent within each state (weighted average of responses)
+## statepred <- 100* as.vector(tapply(cellpredweighted,cstate,sum))
+## statepred
 }
 }
