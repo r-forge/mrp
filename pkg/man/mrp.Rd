@@ -13,7 +13,8 @@
 
 \usage{mrp (formula,
             poll, poll.weights=1,
-            pop=NULL, use=NULL,
+            population=NULL, use=NULL,
+            population.formula=formula,
             add=NULL, mr.formula=NULL,
             \dots)
 \S4method{mr}{mrp}(object, mr.formula, \dots)
@@ -46,11 +47,18 @@
       \sQuote{no}).}
     \item{poll.weights}{Supplied survey weights for respondents, used to
       compute the effective \eqn{N}, weighted \eqn{\bar{Y}}, and Design Effect.}
-    \item{pop}{A \code{data.frame} containing population (e.g., census)
+    \item{population}{A \code{data.frame} containing population (e.g., census)
       data with variable names and factor levels matching those in
       \code{poll} and specified in \code{formula}.}
     \item{use}{The column of the \code{pop} data to use for
       poststratification.}
+    \item{population.formula}{Any modifications to be made to the
+      formula above. In the example below, we poststratify by poll,
+      which has to be removed from the ways that we stratify the
+      population. If used, should be of the form
+      \code{.~.-var}. It is possible, but strongly discouraged, to use a matching
+      factor with a different name (e.g., \sQuote{edu} in \code{poll}
+      with \code{population.formula=.~education})}
     \item{add}{A \code{list} of additional variables to add to
       the prepared \code{data.frame} used in the multilevel
       regression step. The list may contain items of two types of
@@ -70,218 +78,148 @@
       formula specification (\code{(1|way1)+(1|way2)} etc.)}
     \item{\dots}{Additional arguments to be passed to the multilevel
       regression \code{\link[lme4]{glmer}} step.}
-}
-\section{Methods}{
-  \describe{
-    \item{mr}{\code{signature(object = "mrp")}: update the formula and
-      re-run the multilevel regression in the object.}
-    \item{poststratify}{\code{signature(object = "mrp")}: perform
-      poststratification using the fitted values of the multilevel model
-      slot and the population frequencies contained in the
-      population slot. When used with a
-      \code{poststratification.specification} (formula, character, or
-      logical; see above), gives values in each of the given cells of the
-      N-way array.}
-    \item{getThetaHat}{\code{signature(object = "mrp")}: model fitted
-      values in an N-way array corresponding to the dimension of the
-      NWayData contained in slot \code{poll}.}
-    \item{setPopulation}{\code{signature(object = "mrp")}: set
-      population frequency data used for poststratification. This method
-      checks that the dimension and names of the array correspond to those
-      of slot \code{poll}.}
-    \item{setPopOnes}{\code{signature(object = "mrp")}: To display model
-      results without adjusting to a population frequency table, all
-      dimensions can be set to 1.}
-    \item{getNumberWays}{\code{signature(object = "mrp")}: returns the
-      dimension of both \code{poll} and \code{population}. When a
-      \dQuote{real} population array is not set (all=1), value for pop
-      shows 0 here for.}
-    \item{getFormula}{\code{signature(object = "mrp")}: returns the
-      formula used to fit the multilevel regression.}
-    \item{setFormula}{\code{signature(object = "mrp")}: set the formula; but
-      you really should use the \code{mr} method instead.}
-    \item{getPopulation}{\code{signature(object = "mrp")}: returns the
-      \code{NWayData} population array.}
-    \item{getData}{\code{signature(object = "mrp")}: return the
-      \code{data.frame} used in the multilevel regression step.}
-    \item{getResponse}{\code{signature(object = "mrp")}: returns a
-      matrix containing the two-column \dQuote{yes/no} response used to
-      fit the multilevel regression.}
   }
-}
+  %%%%%%%% THIS IS DUPLICATED IN mrp-class : PICK ONE.
+  %%%%%%%%
+% \section{Methods}{
+%   \describe{
+%     \item{mr}{\code{signature(object = "mrp")}: update the formula and
+%       re-run the multilevel regression in the object.}
+%     \item{poststratify}{\code{signature(object = "mrp")}: perform
+%       poststratification using the fitted values of the multilevel model
+%       slot and the population frequencies contained in the
+%       population slot. When used with a
+%       \code{poststratification.specification} (formula, character, or
+%       logical; see above), gives values in each of the given cells of the
+%       N-way array.}
+%     \item{getThetaHat}{\code{signature(object = "mrp")}: model fitted
+%       values in an N-way array corresponding to the dimension of the
+%       NWayData contained in slot \code{poll}.}
+%     \item{getEstimates}{\code{signature(object = "mrp")}: an alias for \code{getThetaHat()}}
+%     \item{setPopulation}{\code{signature(object = "mrp")}: set
+%       population frequency data used for poststratification. This method
+%       checks that the dimension and names of the array correspond to those
+%       of slot \code{poll}.}
+%     \item{setPopOnes}{\code{signature(object = "mrp")}: To display model
+%       results without adjusting to a population frequency table, all
+%       dimensions can be set to 1.}
+%     \item{getNumberWays}{\code{signature(object = "mrp")}: returns the
+%       dimension of both \code{poll} and \code{population}. When a
+%       \dQuote{real} population array is not set (all=1), value for pop
+%       shows 0 here.}
+%     \item{getFormula}{\code{signature(object = "mrp")}: returns the
+%       formula used to fit the multilevel regression.}
+%     \item{setFormula}{\code{signature(object = "mrp")}: set the formula; but
+%       you really should use the \code{mr} method instead.}
+%     \item{getPopulation}{\code{signature(object = "mrp")}: returns the
+%       \code{NWayData} population array.}
+%     \item{getData}{\code{signature(object = "mrp")}: return the
+%       \code{data.frame} used in the multilevel regression step.}
+%     \item{getResponse}{\code{signature(object = "mrp")}: returns a
+%       matrix containing the two-column \dQuote{yes/no} response used to
+%       fit the multilevel regression.}
+%   }
+% }
 \seealso{\code{\link{mrp-class}} for other
-    methods on the objects produced by \code{mrp()}.}
+    methods on the objects produced by \code{mrp()};
+      \code{\link{plotmrp}} for how to plot poststratified results  onto maps.}
 
 
 \author{Andrew Gelman <gelman@stat.columbia.edu>,
+  Michael Malecki <malecki@wustl.edu>,
   Daniel Lee <bearlee@alum.mit.edu>,
-  Yu-Sung Su <ys463@columbia.edu>,
-  Michael Malecki <malecki@wustl.edu>
+  Yu-Sung Su <ys463@columbia.edu>
 }
 
 
 \examples{
-\dontrun{
-# library("foreign")
+  library(MRP)
+  ## Load example data and helper datasets.
+  data(samesexmarriage)
+  ## Helper datasets for other US applications of MRP:
+  data(spmap.states) # projected state map
+  data(mrp.census)   # census with common demo strata
+  data(mrp.regions)  # regions data.frame with DC separate
 
-## #read in megapoll and attach
-# marriage.data <- read.dta("http://www.princeton.edu/~jkastell/MRP_primer/gay_marriage_megapoll.dta", convert.underscore = TRUE) 
-
-## #read in state-level dataset
-## Statelevel <-
-## read.dta("http://www.princeton.edu/~jkastell/MRP_primer/state_level_update.dta",
-## convert.underscore = TRUE)
-
-## #read in Census data
-## Census <- read.dta("http://www.princeton.edu/~jkastell/MRP_primer/poststratification%202000.dta",convert.underscore = TRUE)
-## Census <- Census[order(Census$cstate),]
-
-## #Create index variables
-
-##   #At level of megapoll
-##   marriage.data <- within(marriage.data, {
-##     state <- factor(state,exclude=NA)
-##     poll <- factor(poll,exclude=NA)
-##     age <- factor(age.cat,exclude=NA,labels=c("young","middleage",
-##                                        "older","old"))
-##     edu <- factor(edu.cat,exclude=NA,labels=c"< High School",
-##                   "High School",
-##                   "Some College",
-##                   "Graduated College"))
-##                         })
-## marriage.data <- subset(marriage.data,!is.na(state) & state!="" )
-## marriage.data$state <- factor(marriage.data$state)
-
-## Statelevel <- within(Statelevel, {
-##   state <- sstate
-##   state.initnum <- sstate.initnum
-## p.evang.full<- p.evang[state.initnum]# proportion of evangelicals in respondent's state
-## p.mormon.full <- p.mormon[state.initnum]# proportion of mormon's in respondent's state
-## p.relig.full <- p.evang.full + p.mormon.full# combined evangelical + mormom proportions
-## p.kerry.full <- kerry.04[state.initnum]# kerry's % of 2-party vote in respondent's state in 2004
-## })
-
-library(MisterP,lib="~/R")
-
-load("../data/us_noaa_map.Rdata")
-load("../data/kastellec_ex.Rdata")
-
+  ## To ensure matching of strata between poll and population,
+  ## both should be factors with identical names and levels.
   marriage.data <- within(marriage.data, {
     state <- factor(state,exclude=NA)
     poll <- factor(poll,exclude=NA)
-    age <- factor(age.cat,exclude=NA,labels=c("young","middleage",
-                                       "older","old"))
+    age <- factor(age.cat,exclude=NA,
+                  labels=c("18-29","30-44","45-64","65+"))
     edu <- factor(edu.cat,exclude=NA,labels=c("< High School",
-                  "High School",
-                  "Some College",
-                  "Graduated College"))
-                        })
-marriage.data <- subset(marriage.data,!is.na(state) & state!="" )
-marriage.data$state <- factor(marriage.data$state)
+                                       "High School",
+                                       "Some College",
+                                       "Graduated College"))
+    ## Code interaction here, first fixing levels
+    female <- factor(female,levels=c(0,1),
+                     labels=c("Male","Female"))
+    race.wbh <- factor(race.wbh, levels=c(1,3,2),
+                   labels=c("White","Hispanic","Black"))
+    f.race <- interaction(female,race.wbh)
+    age.edu <- interaction(age,edu)
+  })
+  ## Remove empty "" state and drop it from levels.
+  marriage.data <- subset(marriage.data,!is.na(state) & state!="" )
+  marriage.data$state <- factor(marriage.data$state)
+  
+  ## Poll has four levels of education, so we need to combine
+  ## the top two levels in the census data. We'll also go ahead
+  ## and trim it down to just the variables used here.
+  mrp.census <- na.omit(mrp.census[mrp.census$state \%in\% marriage.data$state,])
 
+  mrp.census <- within(mrp.census,{
+    age <- factor(age,exclude=NA,labels=c("18-29","30-44","45-64","65+"))
+    education[education=="postgraduate"] <- "college graduate"
+    edu <- factor(education,exclude=NA,labels=c("< High School",
+                                         "High School",
+                                         "Some College",
+                                         "Graduated College"))
+    state <- factor(state,exclude=NA)
+    race[race=="Other"] <- NA
+    race <- factor(race,exclude=NA)
+    f.race <- interaction(sex,race)
+    age.edu <- interaction(age,edu)
+  })
 
+  ## Ready to run simple mrp with poll and population:
+  
+  mrp.simple <- mrp(yes.of.all ~ state+age+edu+poll,
+                    poll=marriage.data,
+                    pop=mrp.census,use="weighted2004",
+                    population.formula= .~.-poll
+                    )
 
-##   #At census level (same coding as above for all variables)
-census <- na.omit(census[census$state %in% marriage.data$state,
-                         c("age","state","education",
-                           "weighted2000","weighted2004","weighted2008")])
+  print(poststratify(mrp.simple, ~ age+poll), digits=2)
 
-Census <- within(census,{
-   age <- factor(age,exclude=NA,labels=c("young","middleage",
-                                  "older","old"))
-   education[education=="postgraduate"] <- "college graduate"
-   edu <- factor(education,exclude=NA,labels=c("< High School",
-                                        "High School",
-                                        "Some College",
-                                        "Graduated College"))
-   state <- factor(state,exclude=NA)
-})
+\dontrun{
+  ## Fit a fuller model, adding state-level predictors:
+  mrp.statelevel <- mrp(yes.of.all~ state+age+edu+f.race+poll,
+                        poll=marriage.data,
+                        ## leave population NULL; borrow from
+                        ## the simple one above.
+                        pop=mrp.census,use="weighted2004",
+                        add=list(Statelevel,
+                          mrp.regions,
+                          expression(z.age <- rescale(age))),
+                        mr=.~.+(1|region)
+                        )
+  
+  ## When no population data exist, the array of 1s is shows as having 0 ways
+  print(getNumberWays(mrp.statelevel))
+  mrp.statelevel@population <- mrp.simple@population
+  print(getNumberWays(mrp.statelevel))
 
-regions <- data.frame(state=levels(marriage.data$state),region=NA)
-  regions[regions$state %in% c("CT","ME","MA",
-                               "NH","RI","VT",
-                               "NJ","NY","PA"),"region"] <- "Northeast"
-regions[regions$state %in% c("IN","IL","MI",
-                             "OH","WI","IA",
-                             "KS","MO","MN",
-                             "NE","ND","SD"),"region"] <- "Midwest"
-regions[regions$state %in% c("DE","DC","FL",
-                             "GA","MD","NC",
-                             "SC","VA","WV",
-                             "AL","KY","MS",
-                             "TN","AR","LA",
-                             "OK","TX"),"region"] <- "South"
-regions[regions$state %in% c("AZ","CO","ID",
-                             "NM","MT","UT",
-                             "NV","WY","AK",
-                             "CA","HI","OR","WA"),"region"] <- "West"
-regions$region <- factor(regions$region)
+  ## Update the mr.formula on already-prepared mrp object and re-fit:
+  mrp.statelevel <- mr(mrp.statelevel, .~.+z.age+p.relig.full+p.kerry.full)
 
-
-
-
-mrp.simple <- mrp(yes.of.all ~ state +age+edu+poll,
-    poll=marriage.data)
-
-quartzFonts(gotham=quartzFont(c(
-              "Gotham-Book","Gotham-Bold",
-              "Gotham-BookItalic","Gotham-BoldItalic")))
-
-spplot (mrp.simple, state ~ poll + age ,
-        spmap.states, "STATE", exclude=c("AK","DC","HI"),
-        add.settings=list(
-          add.text=list(cex=.7,fontface="italic",
-            fontfamily="gotham")))
-
-
-mrp.statelevel <- mrp(yes.of.all~state+age+edu,
-                      poll=marriage.data,
-                      pop=Census,use="weighted2004",
-                      add=list(Statelevel,regions,
-                        expression(z.age <- rescale(age))),
-                      mr=.~.+z.age+p.relig.full+p.kerry.full+(1|region)
-                      )
-mrp.statelevel <- mr(mrp.statelevel, .~.+z.age+p.relig.full+p.kerry.full+(1|region)+(1|poll))
-spplot(mrp.statelevel, state~age+edu, spmap.states, "STATE", exclude=c("AK","DC","HI"),add.settings=list())
-
-## #run individual-level opinion model
-
-## individual.model <- glmer(formula = yes.of.all ~ (1|race.female) + (1|age.cat) 
-##   + (1|edu.cat) + (1|age.edu.cat) + (1|state) + (1|region) + (1|poll) + p.relig.full 
-##         + p.kerry.full, family=binomial(link="logit"))
-## display(individual.model)
-
-## #examine random effects and standard errors for race-female
-## ranef(individual.model)$race.female
-## se.ranef(individual.model)$race.female
-
-## #create vector of state ranefs and then fill in missing ones
-## state.ranefs <- array(NA,c(51,1))
-## dimnames(state.ranefs) <- list(c(sstate),"effect")
-## for(i in sstate){
-##     state.ranefs[i,1] <- ranef(individual.model)$state[i,1]
-## }
-## state.ranefs[,1][is.na(state.ranefs[,1])] <- 0
-
-
-## #create a prediction for each cell in Census data
-## cellpred <- invlogit(fixef(individual.model)["(Intercept)"]
-##             +ranef(individual.model)$race.female[crace.female,1]
-##             +ranef(individual.model)$age.cat[cage.cat,1]
-##             +ranef(individual.model)$edu.cat[cedu.cat,1]
-##             +ranef(individual.model)$age.edu.cat[cage.edu.cat,1]
-##             +ranef(individual.model)$age.edu.cat[cage.edu.cat,1]
-##             +state.ranefs[cstate,1]
-##             +ranef(individual.model)$region[cregion,1]   
-##             +(fixef(individual.model)["p.relig.full"] *cp.relig.full)
-##             +(fixef(individual.model)["p.kerry.full"] *cp.kerry.full)
-##                )
-
-## #weights the prediction by the freq of cell                                       
-## cellpredweighted <- cellpred * cpercent.state
-
-## #calculates the percent within each state (weighted average of responses)
-## statepred <- 100* as.vector(tapply(cellpredweighted,cstate,sum))
-## statepred
+  spplot(mrp.statelevel, state~age+f.race, spmap.states, "STATE",
+         exclude=c("AK","DC","HI"),
+         add.settings=list(
+           add.text=list(cex=.7,fontface="italic")),
+         colorkey=list(
+           space="bottom",height=.5,width=.5)
+         )
 }
 }

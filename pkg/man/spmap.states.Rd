@@ -19,14 +19,17 @@ poststratified survey results.}
 \details{
   A \link[sp]{SpatialPolygonsDataFrame}; the \sQuote{data} slot is
   described above. The polygons have been projected using an Albers
-  Equal-Area Conic projection with parameters equal to those \url{http://egsc.usgs.gov/isb/pubs/MapProjections/projections.html}{suggested
-  by USGS} for the contiguous US: (A PROJ4 specification of \code{+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +ellps=WGS84}).
+  Equal-Area Conic projection with parameters equal to those suggested
+  by USGS for the contiguous US: (A PROJ4 specification of \code{+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +ellps=WGS84}).
 }
 \source{
 \url{http://www.weather.gov/geodata/catalog/national/html/us_state.htm}
 }
 \references{
-\url{http://nationalatlas.gov/atlasftp.html}}
+  \url{http://nationalatlas.gov/atlasftp.html}; for projection see
+  \url{http://egsc.usgs.gov/isb/pubs/MapProjections/projections.html}
+  and to apply other projections, see \link[rgdal]{spTransform}.
+  and the Spatial CRAN task view (\url{http://cran.r-project.org/web/views/Spatial.html}) }
 \examples{
 data(spmap.states)
 }

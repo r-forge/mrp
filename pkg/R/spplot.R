@@ -32,8 +32,13 @@ setMethod("spplot", signature("mrp"),
             dimlabels <- lapply(obj@poll@levels[attr(plot.terms,"term.labels")],
                                 function(x) { return(x$levels) })
             if(length(dimlabels)==1) {
-              dimlabels[[2]] <- 1
+              dimlabels[[2]] <- ""
+              dimlabels <- rev(dimlabels)
             }
+            ## Quietly swap the order.
+            ## will need to be better if we allow
+            ## multipage plots.
+            
             theplot <- spplot(spmap,
                               startcol:endcol,
                               layout=c(length(dimlabels[[2]]), length(dimlabels[[1]])),
@@ -98,7 +103,6 @@ function (x, y, z, subscripts, at = pretty(z), shrink, labels = NULL,
 	zcol <- rep(NA, length(z))
 	for (i in seq(along = col.regions)) zcol[!is.na(x) & !is.na(y) & 
       			!is.na(z) & z >= at[i] & z < at[i + 1]] <- i
-        zcol[is.na(z)] <- emptycolor
 	label.style <- match.arg(label.style)
 	x <- as.numeric(x[subscripts])
 	y <- as.numeric(y[subscripts])
@@ -131,7 +135,9 @@ function (x, y, z, subscripts, at = pretty(z), shrink, labels = NULL,
 							fill = bg$col
 						alpha = bg$alpha
 					} else {
-                                          if(is.na(zcol[i])) { fill = trellis.par.get()$reference.line$col }
+                                          if(is.na(zcol[i])) {
+                                            fill = trellis.par.get()$reference.line$col
+                                          }
 						fill = col.regions[zcol[i]]
 						alpha = alpha.regions
 					}

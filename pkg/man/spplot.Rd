@@ -1,12 +1,16 @@
 \name{plotmrp}
 \docType{methods}
 \alias{spplot,mrp-method}
+\alias{panel.polygonsplot}
 \alias{plotmrp}
 
 \title{Plot poststratified estimates onto sp map objects}
 \description{
-Poststratify and plot a fitted \code{\link{mrp-class}} object onto a \link[sp]{SpatialPolygonsDataFrame}.
-}
+Poststratify and plot a fitted \code{\link{mrp-class}} object onto a
+\link[sp]{SpatialPolygonsDataFrame}. Note that package \emph{mrp} masks
+the \emph{sp} function \code{\link[sp]{panel.polygonsplot}} for a single
+change: to plot \code{NA} values in a color other than \sQuote{bg}.}
+
 \usage{
 \S4method{spplot}{mrp}( obj, formula, spmap=NULL, FID="state",
 exclude=NULL, add.settings,\dots)
@@ -27,10 +31,7 @@ exclude=NULL, add.settings,\dots)
 }
   \item{exclude}{A vector of feature IDs to exclude from the
     plot. \emph{Note:} any rows not present in the \code{mrp} data
-    itself will automatically be excluded. Cells with \code{NA} are
-    filled in the color given by \sQuote{reference.line$col}, which
-    in our theme defaults to a 68\%
-    opaque black, or \code{"#00000044"}.}
+    itself will automatically be excluded.}
   \item{add.settings}{A list of lattice graphical parameters, suitable
     for \code{trellis.par.set()}. These will override the MRP defaults,
     which bear mention for two reasons: 1) top and left strip titles are
@@ -40,6 +41,19 @@ exclude=NULL, add.settings,\dots)
 opaque black, or \code{"#00000044"}.}
   \item{\dots}{further arguments to be passed to
     \code{\link[sp]{spplot}}}
-  }
+}
+  \examples{
+## plot the example from mrp()
+example(mrp)
+## Dimension of plot are by order of terms -- x,y so
+  ## this will plot age along x and poll along y.
+  spplot(mrp.simple, state ~ age+edu,
+         spmap.states, "STATE", exclude=c("AK","DC","HI"),
+         add.settings=list(
+           add.text=list(cex=.7,fontface="italic")),
+         colorkey=list(
+           space="bottom",height=.5,width=.5)
+         )
+}
 
   \keyword{methods}
