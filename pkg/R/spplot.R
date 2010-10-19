@@ -1,6 +1,5 @@
 setMethod("spplot", signature("mrp"),
-          definition=function(obj, formula, spmap=NULL, FID="STATE", exclude=NULL, stroke=NULL, add.settings=list(),
-            subset=TRUE, at, cuts=15, pretty=FALSE, center=0.5, between=list(x=.25,y=.25), ...) {
+          definition=function(obj, formula, spmap=spmap.states, FID="STATE", exclude=NULL, stroke=NULL, subset=TRUE, at, cuts=15, pretty=FALSE, center=0.5, between=list(x=.25,y=.25), add.settings=list(), ...) {
             obj.p <- melt(poststratify(obj, all.vars(formula)))
             obj.p <- restoreNWayLevels(obj.p, obj@poll)
             plot.terms <- terms(formula,keep.order=TRUE)
@@ -44,7 +43,9 @@ setMethod("spplot", signature("mrp"),
 
             ## Process the stroke list
             if(!is.null(stroke)) {
-              stroke <- doStrokeList(stroke, spmap@data, obj@data)
+              stroke <- doStrokeList(stroke, spmap@data, obj@data,
+                                     ## lc fid is column name in data
+                                     fid=as.character(plot.terms[[2]]))
             } else {
               stroke <- rep(NA, nrow(spmap))
             }
@@ -64,7 +65,7 @@ setMethod("spplot", signature("mrp"),
               dimlabels=list(c(""),c(""))
             }
 
-            ## set up 'at', centered at 50%
+            ## set up 'at', centered at center
             centered.range <- lattice:::extend.limits(center + c(-1,1)*{max(abs(range(as.matrix(spmap@data[,startcol:endcol])-center,finite=TRUE)))})
             if(diff(centered.range)>1){ centered.range <- c(0,1) }
             if (missing(at))
@@ -75,9 +76,9 @@ setMethod("spplot", signature("mrp"),
             theplot <- spplot(spmap,
                               startcol:endcol,
                               layout=c(length(dimlabels[[2]]), length(dimlabels[[1]])),
-                              panel=panel.polygonsplot,
+                              #panel=panel.polygonsplot,
                               stroke=stroke,
-                              at=at,
+                              at=at,panel=panel.polygonsplot,
                               strip=strip.custom(
                                 factor.levels=rep(dimlabels[[2]],
                                   length(dimlabels[[1]]))),
@@ -91,13 +92,11 @@ setMethod("spplot", signature("mrp"),
                                 add.settings)# col length
                               ,subset=TRUE,...
                               )
-
-            
             
             return(theplot)
           } )
 
-"doStrokeList" <- function(stroke, plotdf, datadf) {
+"doStrokeList" <- function(stroke, plotdf, datadf, fid) {
   if (!is.list(stroke)) { stroke <- list(stroke) }
   stroke <- lapply(stroke, function(scol, type=class(scol)[1]) {
     switch(type,
@@ -115,17 +114,13 @@ setMethod("spplot", signature("mrp"),
              ans <- rownames(plotdf) %in% scol
              return(ans)
            }
-###### TO DO: eval expressions in the mrp@data and left-join
-###### the result onto the featurelist.
-###### Simplest case is just a column name.
-           ##
-           ## ,"expression" = {
-           ##   fid <- as.character(plot.terms[[2]])
-           ##   ans <- within(obj@data, { stroke <- eval.parent(scol,2) })
-           ##   s <- join( data.frame(fid=rownames(spmap@data)),ans,
-           ##             by=fid)
-           
-           ## }
+           ,"expression" = {
+             stroke <- eval(scol,datadf)
+             ans <- data.frame(fid=datadf[,fid], stroke)
+             ans <- join(data.frame(fid=rownames(plotdf)), ans,
+                         by="fid")
+             return(as.logical(ans$stroke))
+           }
            )
   })
   
@@ -142,9 +137,10 @@ setMethod("spplot", signature("mrp"),
   list(
        strip.background = list(col = "transparent"),
        reference.line = list(col="#00000044"),
+       superpose.line=list(col=c("#00000066", trellis.par.get()$superpose.line$col)),
        ##par.main.text=list(fontfamily="gotham"),
        add.line=list(col="#00000022",lwd=0), # state borders
-       ##add.text=list(cex=.7,fontface="italic",
+       add.text=list(cex=.7,fontface="italic"),
        ##  fontfamily="gotham"),
        axis.line=list(lwd=0),
        ## Here we are going to do some
@@ -155,7 +151,7 @@ setMethod("spplot", signature("mrp"),
        layout.widths=list(strip.left=
          c(1, rep(0,collength-1))),
        strip.border=list(col="transparent"),
-       regions=list(col=blue2green2red(100))
+       regions=list(col=timPalette)
        )}
 
 
@@ -236,4 +232,54 @@ setMethod("spplot", signature("mrp"),
 	#if (!is(grid.polygons, "SpatialLines"))
 	#	sp.panel.layout(sp.layout, panel.number())
 	sp:::sp.panel.layout(sp.layout, panel.number())
+}
+
+
+timPalette <- 
+function(n = 64)
+{
+    # A function implemented by Diethelm Wuertz
+    # taken from package fBasics. This is the default palette for MRP plots
+  
+    # Description:
+    #   Creates a cyan, yellow, to orange palette
+    
+    # Notes:
+    #   'Tim.colors' in 'fields' package goes from blue to red, and passes
+    #   through the colors cyan, yellow, and orange. Also known as Jet
+    #   color-map in Matlab. You can also easily design your own color map
+    #   using 'rgb' function from 'gdDevices'.
+    #   From:  <Jaroslaw.W.Tuszynski@saic.com>
+
+    # FUNCTION:
+    
+    orig = c(
+        "#00008F", "#00009F", "#0000AF", "#0000BF", "#0000CF",
+        "#0000DF", "#0000EF", "#0000FF", "#0010FF", "#0020FF",
+        "#0030FF", "#0040FF", "#0050FF", "#0060FF", "#0070FF",
+        "#0080FF", "#008FFF", "#009FFF", "#00AFFF", "#00BFFF",
+        "#00CFFF", "#00DFFF", "#00EFFF", "#00FFFF", "#10FFEF",
+        "#20FFDF", "#30FFCF", "#40FFBF", "#50FFAF", "#60FF9F",
+        "#70FF8F", "#80FF80", "#8FFF70", "#9FFF60", "#AFFF50",
+        "#BFFF40", "#CFFF30", "#DFFF20", "#EFFF10", "#FFFF00",
+        "#FFEF00", "#FFDF00", "#FFCF00", "#FFBF00", "#FFAF00",
+        "#FF9F00", "#FF8F00", "#FF8000", "#FF7000", "#FF6000",
+        "#FF5000", "#FF4000", "#FF3000", "#FF2000", "#FF1000",
+        "#FF0000", "#EF0000", "#DF0000", "#CF0000", "#BF0000",
+        "#AF0000", "#9F0000", "#8F0000", "#800000")
+    if (n == 64) return(orig)
+    rgb.tim = t(col2rgb(orig))
+    temp = matrix(NA, ncol = 3, nrow = n)
+    x = seq(0, 1, , 64)
+    xg = seq(0, 1, , n)
+    for (k in 1:3) { 
+        hold = spline(x, rgb.tim[, k], n = n)$y
+        hold[hold < 0] = 0
+        hold[hold > 255] = 255
+        temp[, k] = round(hold)
+    }
+    ans = rgb(temp[, 1], temp[, 2], temp[, 3], maxColorValue = 255)
+    
+    # Return Value:
+    ans
 }

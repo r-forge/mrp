@@ -8,12 +8,17 @@
 \description{
 Poststratify and plot a fitted \code{\link{mrp-class}} object onto a
 \link[sp]{SpatialPolygonsDataFrame}. Note that package \emph{mrp} masks
-the \emph{sp} function \code{\link[sp]{panel.polygonsplot}} for a single
-change: to plot \code{NA} values in a color other than \sQuote{bg}.}
+the \emph{sp} function \code{\link[sp]{panel.polygonsplot}}: in
+particular it plots \code{NA} values in a color, and enables a custom stroke
+on selected polygons in the map.}
 
 \usage{
-\S4method{spplot}{mrp}( obj, formula, spmap=NULL, FID="state",
-exclude=NULL, stroke=list(), at, cuts=15, pretty=FALSE, add.settings, \dots)
+\S4method{spplot}{mrp}(obj, formula,
+                       spmap=spmap.states, FID="state",
+                       exclude=NULL, stroke=NULL, subset=TRUE,
+                       at, cuts=15, pretty=FALSE,
+                       center=0.5, between=list(x=0.25, y=0.25),
+                       add.settings, \dots)
 }
 \arguments{
   \item{obj}{A \code{\link{mrp-class}} object.}
@@ -26,7 +31,8 @@ exclude=NULL, stroke=list(), at, cuts=15, pretty=FALSE, add.settings, \dots)
   \item{spmap}{A map of class 
     \code{\link[sp]{SpatialPolygonsDataFrame}}, such as is produced by
     \code{\link[maptools]{readShapeSpatial}} for reading ESRI \dQuote{shapefiles.}
-  This package includes a US map in \link{spmap.states}.}
+  This package includes a US map called \link{spmap.states}, which is
+  the default here.}
   \item{FID}{The name of the column in the \code{spmap} to use as unique
     \dQuote{feature IDs}, whose values to the left-hand-side of
     \code{formula}. In the included \link{spmap.states} map, the
@@ -35,14 +41,19 @@ exclude=NULL, stroke=list(), at, cuts=15, pretty=FALSE, add.settings, \dots)
   \item{exclude}{A vector of feature IDs to exclude from the
     plot. \emph{Note:} any rows not present in the \code{mrp} data
     itself will automatically be excluded.}
-  \item{stroke}{A subscript (character, logical, or integer) vector or a
-    list of such vectors, of feature IDs (logical or integer with respect to
+  \item{stroke}{A list of feature IDs (\bold{character, logical, or integer} with respect to
     the order of \code{spmap}) to plot with a distinct
-    stroke. The type, width, and color of the line are taken from the
+    stroke; or an \bold{expression} to evaluate in the
+    \code{mrp@data}. Expressions allow data pertaining to geographic
+    units, joined via the \code{add} argument to \code{\link{mrp}} to be
+    used in plotting.
+    
+    The type, width, and color of the stroke(s) are taken from the
     \emph{superpose.line} list, which can be customized as described
     below. In the event that a feature ID appears multiple times in the
     list, the last value is used; e.g., if it is in both the first and second
-    vectors of a list, its stroke will be \code{superpose.line$lty[2]}.}
+    vectors of the \sQuote{stroke} list, its \sQuote{type} will be
+    \code{superpose.line$lty[2]}.}
   \item{add.settings}{A list of lattice graphical parameters, suitable
     for \code{trellis.par.set()}. These will override the MRP defaults,
     which bear mention for two reasons: 1) top and left strip titles are
@@ -52,7 +63,8 @@ exclude=NULL, stroke=list(), at, cuts=15, pretty=FALSE, add.settings, \dots)
     opaque black, or \code{"#00000044"}.}
   \item{subset}{Expression that evalues to a logical or integer indexing
     vector, evaluated in the \code{\link[reshape2]{melt}}ed
-    poststratified results.}
+    poststratified results. N.B. because of partial argument matching, to place a subheading blow the plot
+    using the argument \sQuote{sub} you have to include \code{subset=TRUE}.}
   \item{at}{See \link[lattice]{levelplot}. If a vector of values is
     provided to \code{at}, it overrides \code{cuts}, \code{pretty}, and
     \code{center}.}
@@ -74,27 +86,50 @@ exclude=NULL, stroke=list(), at, cuts=15, pretty=FALSE, add.settings, \dots)
 An object of class \code{"trellis"}. See \code{\link[lattice]{xyplot}}
 for details. }
   \seealso{
+    \code{\link[sp]{spplot}} for the parent function of the
+    \code{spplot,mrp-method}; \code{spplot} in turn extends
+    \code{\link[lattice]{levelplot}}.
+
+    Several packages produce gradients of colors which can be supplied
+  to \code{spplot} as \code{regions=list(col=\dots)} in the \sQuote{add.settings} list. Among them are
+  \link[RColorBrewer]{RColorBrewer}, \code{\link{colorRamps}}, and
+  \code{colorspace}, along with the basic grDevices palettes such as
+  \code{\link[grDevices]{heat.colors}} and the function
+  \code{\link[grDevices]{colorRampPalette}}.
+
+  A wrapper for all these
+  nice palettes (including spline interpolation for the Brewer palettes)
+  is in package \emph{fBasics}; it is used in the example below
   }
   \examples{
 ## plot the example from mrp()
-#library(MRP);example(mrp)
+example(mrp)
 library(MRP);load("~/Desktop/fitted.Rdata")
-    ## Dimension of plot are by order of terms -- y,x so
+## Dimension of plot are by order of terms -- y,x so
 ## this will plot age along x and poll along y.
-spplot(mrp.simple, state~ age+poll,
-subset=age=="18-29",
-spmap.states, "STATE", exclude=c("AK","DC","HI"),
-cuts=9, 
-add.settings=list(
-  regions=list(col=RColorBrewer:::brewer.pal(10,"BrBG")),
-  superpose.line=list(col="#00000044",lwd=c(.8,.5)),
-  add.text=list(cex=.7,fontface="italic")),
-stroke=list(c("IA","NH","VT","CT","MA","ME")),
-colorkey=list(
-  space="bottom",height=.5,width=.5)
-)
+spplot(mrp.simple, state~ age,
+       spmap.states, "STATE", exclude=c("AK","DC","HI"),
+       
+       stroke=c("IA","NH","VT","CT","MA","ME"),
+       colorkey=list(
+         space="bottom",height=.5,width=.5)
+       )
 
 \dontrun{
+spplot(mrp.statelevel, state~f.race+age,
+       spmap.states, "STATE", exclude=c("AK","DC","HI"),
+       stroke=expression(hasmarriage2010==TRUE),
+       subset=(age=="18-29"),
+       sub=paste("National average:",
+         format(poststratify(mrp.statelevel),digits=2)),
+       add.settings=list(
+         regions=list(col=fBasics:::divPalette(36,"BrBG"))
+         ),
+       colorkey=list(
+         space="bottom",height=.5,width=.5,
+         labels=list(at=c(.1,.5,.9),labels=c("10%","50%","90%"), cex=.7)
+         )
+       )
 
 
 }

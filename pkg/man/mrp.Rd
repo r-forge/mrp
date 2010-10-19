@@ -156,7 +156,7 @@
     female <- factor(female,levels=c(0,1),
                      labels=c("Male","Female"))
     race.wbh <- factor(race.wbh, levels=c(1,3,2),
-                   labels=c("White","Hispanic","Black"))
+                   labels=c("White","Black","Hispanic"))
     f.race <- interaction(female,race.wbh)
     age.edu <- interaction(age,edu)
   })
@@ -180,8 +180,9 @@
     race[race=="Other"] <- NA
     race <- factor(race,exclude=NA)
     f.race <- interaction(sex,race)
-    age.edu <- interaction(age,edu)
   })
+    mrp.census <- na.omit(mrp.census[mrp.census$state \%in\% marriage.data$state,c("state","age","f.race","edu","age.edu")])
+
 
   ## Ready to run simple mrp with poll and population:
   
@@ -195,31 +196,25 @@
 
 \dontrun{
   ## Fit a fuller model, adding state-level predictors:
-  mrp.statelevel <- mrp(yes.of.all~ state+age+edu+f.race+poll,
+  ## This model is also used in the not-run example
+  ## for plotting maps.
+  
+  mrp.statelevel <- mrp(yes.of.all~
+                        state+f.race+age+edu+poll,
+
                         poll=marriage.data,
-                        ## leave population NULL; borrow from
-                        ## the simple one above.
-                        pop=mrp.census,use="weighted2004",
+                        population=mrp.census,use="weighted2008",
+                        population.formula=.~.-poll,
                         add=list(Statelevel,
                           mrp.regions,
-                          expression(z.age <- rescale(age))),
-                        mr=.~.+(1|region)
+                          expression(age.edu <- interaction(age,edu)),
+                          expression(z.age <- rescale(age)))
                         )
   
-  ## When no population data exist, the array of 1s is shows as having 0 ways
-  print(getNumberWays(mrp.statelevel))
-  mrp.statelevel@population <- mrp.simple@population
-  print(getNumberWays(mrp.statelevel))
-
   ## Update the mr.formula on already-prepared mrp object and re-fit:
-  mrp.statelevel <- mr(mrp.statelevel, .~.+z.age+p.relig.full+p.kerry.full)
+  mrp.statelevel <- mr(mrp.statelevel, .~.+(1|region)+ (1|age.edu)+
+                       z.age+p.relig.full+p.kerry.full)
 
-  spplot(mrp.statelevel, state~age+f.race, spmap.states, "STATE",
-         exclude=c("AK","DC","HI"),
-         add.settings=list(
-           add.text=list(cex=.7,fontface="italic")),
-         colorkey=list(
-           space="bottom",height=.5,width=.5)
-         )
+  ## Fine plot control is shown with this example in plotmrp documentation!
 }
 }

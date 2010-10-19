@@ -30,7 +30,7 @@ mrp <- function(formula,
                 population.formula=formula,
                 add=NULL, mr.formula=NULL,
                 ...) {
-   pop <- population
+  pop <- population
   mrp.formula <- as.formula(formula)
   mrp.terms <- terms(mrp.formula)  
   mrp.varnames <- attr(mrp.terms,"term.labels")
@@ -100,8 +100,9 @@ mrp <- function(formula,
                         .fun=makeNWay,pop=TRUE,weights=use,
                         .progress="text"
                         )
-      pop.nway <- array(rep(pop.nway, length(poll.nway)),
-                        dim(getNEffective(poll.nway)), dimnames(getNEffective(poll.nway)))
+      pop.nway <- array(rep(pop.nway,
+                             length.out=length(poll.nway)),
+                         dim(getNEffective(poll.nway)), dimnames(getNEffective(poll.nway)))
       
       pop.nway <- new("NWayData",pop.nway,type="pop",
                       levels=saveNWayLevels(pop))

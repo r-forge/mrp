@@ -123,7 +123,7 @@ setMethod (f="makeNWay",
              weights=c(1,"weight"), pop=FALSE) {
              if(pop==TRUE){
                if(length(weights)!=1) {
-                 stop(paste("When supplying a data.frame as ",sQuote("population")," you must also indicate the (character or integer) ",sQuote("pop.column"), ", which column of the data.frame to use.\n")) }
+                 stop(paste("When supplying a data.frame as ",sQuote("population")," you must also indicate ",sQuote("use"), ", which column of the data.frame to use.\n")) }
                prop <- sum(cell[,weights])
                return(prop)
              }
