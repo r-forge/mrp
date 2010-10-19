@@ -158,7 +158,6 @@
     race.wbh <- factor(race.wbh, levels=c(1,3,2),
                    labels=c("White","Black","Hispanic"))
     f.race <- interaction(female,race.wbh)
-    age.edu <- interaction(age,edu)
   })
   ## Remove empty "" state and drop it from levels.
   marriage.data <- subset(marriage.data,!is.na(state) & state!="" )
@@ -168,7 +167,6 @@
   ## the top two levels in the census data. We'll also go ahead
   ## and trim it down to just the variables used here.
   mrp.census <- na.omit(mrp.census[mrp.census$state \%in\% marriage.data$state,])
-
   mrp.census <- within(mrp.census,{
     age <- factor(age,exclude=NA,labels=c("18-29","30-44","45-64","65+"))
     education[education=="postgraduate"] <- "college graduate"
@@ -181,8 +179,7 @@
     race <- factor(race,exclude=NA)
     f.race <- interaction(sex,race)
   })
-    mrp.census <- na.omit(mrp.census[mrp.census$state \%in\% marriage.data$state,c("state","age","f.race","edu","age.edu")])
-
+    
 
   ## Ready to run simple mrp with poll and population:
   
