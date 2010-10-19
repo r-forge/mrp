@@ -1,6 +1,6 @@
 setMethod("spplot", signature("mrp"),
-          definition=function(obj, formula, spmap=NULL, FID="state", exclude=NULL, stroke=NULL, add.settings=list(),
-            subset=TRUE, at, cuts=15, pretty=FALSE, center=0.5, ...) {
+          definition=function(obj, formula, spmap=NULL, FID="STATE", exclude=NULL, stroke=NULL, add.settings=list(),
+            subset=TRUE, at, cuts=15, pretty=FALSE, center=0.5, between=list(x=.25,y=.25), ...) {
             obj.p <- melt(poststratify(obj, all.vars(formula)))
             obj.p <- restoreNWayLevels(obj.p, obj@poll)
             plot.terms <- terms(formula,keep.order=TRUE)
@@ -66,6 +66,7 @@ setMethod("spplot", signature("mrp"),
 
             ## set up 'at', centered at 50%
             centered.range <- lattice:::extend.limits(center + c(-1,1)*{max(abs(range(as.matrix(spmap@data[,startcol:endcol])-center,finite=TRUE)))})
+            if(diff(centered.range)>1){ centered.range <- c(0,1) }
             if (missing(at))
               at <-
                 if (pretty) pretty(centered.range, cuts)
@@ -83,7 +84,7 @@ setMethod("spplot", signature("mrp"),
                               strip.left=strip.custom(horizontal=FALSE,
                                 factor.levels=rep(dimlabels[[1]],
                                   each=length(dimlabels[[2]]))),
-                              between=list(x=.25,y=.25),
+                              between=between,
                               par.settings=lattice:::updateList(mrp.theme(
                                   length(dimlabels[[1]]), # row length
                                   length(dimlabels[[2]])),

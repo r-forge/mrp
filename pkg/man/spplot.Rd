@@ -19,21 +19,25 @@ exclude=NULL, stroke=list(), at, cuts=15, pretty=FALSE, add.settings, \dots)
   \item{obj}{A \code{\link{mrp-class}} object.}
   \item{formula}{The desired poststratification, where the left-hand
     side indicates the name of the variable in the \code{mrp} data that
-    identifies the polygons to plot (e.g., \sQuote{state}).}
+    identifies the polygons to plot. In the special case where the
+    desired poststratification is \emph{only} by
+    geographic unit, place it on both sides of the equation (e.g.,
+    \code{state ~ state}.}
   \item{spmap}{A map of class 
     \code{\link[sp]{SpatialPolygonsDataFrame}}, such as is produced by
     \code{\link[maptools]{readShapeSpatial}} for reading ESRI \dQuote{shapefiles.}
   This package includes a US map in \link{spmap.states}.}
   \item{FID}{The name of the column in the \code{spmap} to use as unique
-    \dQuote{feature IDs}, corresponding to the left-hand-side of
-    \code{formula}. In the included \link{spmap.states} object, the
-    column with two-letter state abbreviations is called \sQuote{STATE}.
-}
+    \dQuote{feature IDs}, whose values to the left-hand-side of
+    \code{formula}. In the included \link{spmap.states} map, the
+    column with two-letter state abbreviations is called
+    \sQuote{STATE}, which is the default here.}
   \item{exclude}{A vector of feature IDs to exclude from the
     plot. \emph{Note:} any rows not present in the \code{mrp} data
     itself will automatically be excluded.}
   \item{stroke}{A subscript (character, logical, or integer) vector or a
-    list of such vectors, of feature IDs to plot with a distinct
+    list of such vectors, of feature IDs (logical or integer with respect to
+    the order of \code{spmap}) to plot with a distinct
     stroke. The type, width, and color of the line are taken from the
     \emph{superpose.line} list, which can be customized as described
     below. In the event that a feature ID appears multiple times in the
@@ -46,18 +50,31 @@ exclude=NULL, stroke=list(), at, cuts=15, pretty=FALSE, add.settings, \dots)
     \code{NA}-valued parts of any panel will be filled in the color given
     by \sQuote{reference.line$col}, which in our theme defaults to a 68\%
     opaque black, or \code{"#00000044"}.}
-  \item{at}{}
-  \item{cuts}{}
-  \item{pretty}{}
-  \item{center}{logical. Plot results as difference from poststratified
-    overall average?}
+  \item{subset}{Expression that evalues to a logical or integer indexing
+    vector, evaluated in the \code{\link[reshape2]{melt}}ed
+    poststratified results.}
+  \item{at}{See \link[lattice]{levelplot}. If a vector of values is
+    provided to \code{at}, it overrides \code{cuts}, \code{pretty}, and
+    \code{center}.}
+  \item{cuts}{See \link[lattice]{levelplot}. If using a
+    \code{\link[RColorBrewer]{RColorBrewer}} palette, should be one less
+  than the number of colors in the call to \code{\link[RColorBrewer]{brewer.pal}}.}
+  \item{pretty}{See \link[lattice]{levelplot}}
+  \item{center}{Value at which to center the calculation of
+    limits. Default=0.5}
+  \item{between}{Documented for \code{\link{xyplot}}. A named list
+    giving space between panels (in character heights). Default is 0.25
+    for both \eqn{x} and \eqn{y}.}
 
   \item{\dots}{further arguments to be passed to
-    \code{\link[sp]{spplot}}}
+    \code{\link[sp]{spplot}} which in turn passes them to
+    \code{\link[lattice]{levelplot}}.}
 }
-\details{
-  
-}
+\value{
+An object of class \code{"trellis"}. See \code{\link[lattice]{xyplot}}
+for details. }
+  \seealso{
+  }
   \examples{
 ## plot the example from mrp()
 #library(MRP);example(mrp)
