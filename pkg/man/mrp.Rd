@@ -186,9 +186,9 @@
   ## Ready to run simple mrp with poll and population:
   
   mrp.simple <- mrp(yes.of.all ~ state+age+edu+poll,
-                    poll=marriage.data,
-                    pop=mrp.census,use="weighted2004",
-                    population.formula= .~.-poll
+                    poll=marriage.data
+                    #,pop=mrp.census,use="weighted2004",
+                    #population.formula= .~.-poll
                     )
 
   print(poststratify(mrp.simple, ~ age+poll), digits=2)
