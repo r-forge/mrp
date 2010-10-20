@@ -179,6 +179,7 @@
     race <- factor(race,exclude=NA)
     f.race <- interaction(sex,race)
   })
+  mrp.census <- na.omit(mrp.census)
     
 
   ## Ready to run simple mrp with poll and population:

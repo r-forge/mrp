@@ -109,8 +109,7 @@ library(MRP);load("~/Desktop/fitted.Rdata")
 ## this will plot age along x and poll along y.
 spplot(mrp.simple, state~ age,
        spmap.states, "STATE", exclude=c("AK","DC","HI"),
-       
-       stroke=c("IA","NH","VT","CT","MA","ME"),
+       stroke=list(c("IA","NH","VT","CT","MA","ME")),
        colorkey=list(
          space="bottom",height=.5,width=.5)
        )
