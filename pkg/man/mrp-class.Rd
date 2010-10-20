@@ -14,10 +14,12 @@
 \alias{getFormula}
 \alias{getResponse}
 \alias{getThetaHat}
+\alias{getEstimates}
 \alias{hasMultilevelModel}
 \alias{setFormula}
 \alias{setPopOnes}
 \alias{setPopulation}
+
 
 \title{Multilevel regression and poststratification}
 \description{
@@ -72,6 +74,7 @@
     \item{getThetaHat}{\code{signature(object = "mrp")}: model fitted
       values in an N-way array corresponding to the dimension of the
       NWayData contained in slot \code{poll}.}
+    \item{getEstimates}{alias for \code{getThetaHat}}
     \item{setPopulation}{\code{signature(object = "mrp")}: set
       population frequency data used for poststratification. This method
       checks that the dimension and names of the array correspond to those
