@@ -45,7 +45,7 @@ setMethod("spplot", signature("mrp"),
             if(!is.null(stroke)) {
               stroke <- doStrokeList(stroke, spmap@data, obj@data,
                                      ## lc fid is column name in data
-                                     fid=as.character(plot.terms[[2]]))
+                                     fid=names(plotdf)[1])
             } else {
               stroke <- rep(NA, nrow(spmap))
             }
@@ -76,9 +76,9 @@ setMethod("spplot", signature("mrp"),
             theplot <- spplot(spmap,
                               startcol:endcol,
                               layout=c(length(dimlabels[[2]]), length(dimlabels[[1]])),
-                              #panel=panel.polygonsplot,
+                              panel=panel.polygonsplot,
                               stroke=stroke,
-                              at=at,panel=panel.polygonsplot,
+                              at=at,
                               strip=strip.custom(
                                 factor.levels=rep(dimlabels[[2]],
                                   length(dimlabels[[1]]))),
@@ -151,7 +151,7 @@ setMethod("spplot", signature("mrp"),
        layout.widths=list(strip.left=
          c(1, rep(0,collength-1))),
        strip.border=list(col="transparent"),
-       regions=list(col=timPalette)
+       regions=list(col=timPalette())
        )}
 
 

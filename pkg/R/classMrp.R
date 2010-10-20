@@ -96,6 +96,7 @@ mrp <- function(formula,
                           "; pop has",length(levels(pop[,x]))),call.=FALSE)
           }
         })}
+      browser()
       pop.nway <- daply(pop, .variables=unlist(population.varnames$inpop),
                         .fun=makeNWay,pop=TRUE,weights=use,
                         .progress="text"
