@@ -1,4 +1,4 @@
-\documentclass[12pt]{article} %%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[11pt]{article} %%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%
 %%% Blank Sweave Document
@@ -94,7 +94,7 @@
 %%% To change WITHIN the document (you want a section single spaced)
 %%% just drop in, where needed, \singlespacing
 %%% and then \doublespacing again when finished.
-\usepackage[doublespacing]{setspace} 
+\usepackage[onehalfspacing]{setspace} 
 
 %\usepackage{egameps} % See Martin Osborne's documentation!
 %\usepackage{sgame} % See Osborne
@@ -200,14 +200,14 @@ options(width=100)
 \section{Running Example}
 \label{sec:running-example}
 
-The running example is the same combined poll data and model in Kastellec's \href{http://www.princeton.edu/~jkastell/mrp_primer.html}{MRP Primer}, dealing with support for same-sex marriage in 2004--2005. A simple model using only a few group-level intercepts, is run and subject to \textsc{R CMD check}; in the “not run” section of the examples, the complete model with census poststratification, individual- and state-level predictors, and categorical interactions is shown.
+The running example is the same combined poll data and model in Kastellec's \href{http://www.princeton.edu/~jkastell/mrp_primer.html}{MRP Primer}, dealing with support for same-sex marriage in 2004--2005. A simple model using only a few group-level intercepts, is run and subject to \texttt{R CMD check}; in the “not run” section of the examples, the complete model with census poststratification, individual- and state-level predictors, and categorical interactions is shown.
 
 \subsection{Data}
 \label{sec:data}
 
-The data for the example are the combined survey results in the “marriage.data” data.frame, and state-level predictors in “Statelevel” data.frame. Both of these are loaded by the command \textsc{data(samesexmarriage)}. The package includes several other pieces of data that are useful to US practitioners of MRP:
+The data for the example are the combined survey results in the “marriage.data” data.frame, and state-level predictors in “Statelevel” data.frame. Both of these are loaded by the command\\ \texttt{data(samesexmarriage)}. The package includes several other pieces of data that are useful to US practitioners of MRP:
 \begin{description}
-\item[mrp.census] Census data with main data columns “weighted2000”, “weighted2004”, and “weighted2008”. See documentation for \textsc{mrp.census} for details on the demographic features in the file.
+\item[mrp.census] Census data with main data columns “weighted2000”, “weighted2004”, and “weighted2008”. See documentation for \texttt{mrp.census} for details on the demographic features in the file.
 \item[mrp.regions] A data.frame with state two-letter abbreviations and five census region codes, with DC as its own region.
 \item[spmap.states] A projected map object with state names, FIPS codes, and two-letter state abbreviations.
 \end{description}
@@ -241,7 +241,7 @@ marriage.data <- within(marriage.data, {
     female <- factor(female,levels=c(0,1),
                      labels=c("Male","Female"))
     race.wbh <- factor(race.wbh)
-    labels(race.wbh) <- c("White","Black","Hispanic"))
+    levels(race.wbh) <- c("White","Black","Hispanic")
     f.race <- interaction(female,race.wbh)
   })
   ## Remove empty "" state and drop it from levels.
@@ -272,10 +272,10 @@ In this case, the poll data we have uses four instead of five categories for edu
 \subsection{Calling \texttt{mrp()} for the first time}
 \label{sec:calling-mrp-first}
 
-In the most basic setup MRP will fit an intercept to each of the groups provided in the formula. In the simple example, these categories are \textbf{state}, \textbf{age}, and \textbf{education}; all of these exist in the census data as well. The outcome variable \texttt{yes.of.all} is already coded as 0/1; within \textsc{mrp()} it is transformed into the two-column form used for estimation.
+In the most basic setup MRP will fit an intercept to each of the groups provided in the formula. In the simple example, these categories are \textbf{state}, \textbf{age}, and \textbf{education}; all of these exist in the census data as well. The outcome variable \texttt{yes.of.all} is already coded as 0/1; within \texttt{mrp()} it is transformed into the two-column form used for estimation.
 
-<<simple-model,echo=TRUE>>=
-mrp.simple <- mrp(yes.of.all ~ state+age+edu)
+<<simple-model,echo=TRUE,results=hide>>=
+mrp.simple <- mrp(yes.of.all ~ state+age+edu, poll=marriage.data)
 @ 
 
 
