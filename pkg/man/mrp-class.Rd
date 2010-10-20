@@ -35,10 +35,12 @@
       created by summarizing the NWayData array in poll, and optionally
       joining additional columns of other predictors. \bold{Note:} the row
       order of the data object, which will be the row order of the fitted
-      values, matters because it corresponds to the NWayData arrays used
-      in poststratification. If you \code{\link{merge}} columns, ensure
-      that \code{sort=FALSE} or that the rows are reordered by the special
-      column \code{finalrow}. This is done automatically when data.frames are
+      values, \bold{must be preserved} because it corresponds to the NWayData arrays used
+      in poststratification. To add new columns onto the data.frame in
+  the \code{mrp@data} slot, take care to preserve this
+  ordering. Base \code{merge()} will almost invariably permute it in
+  unpredictable ways: \bold{use \code{\link[plyr]{join}}} from plyr instead.  
+      This is done automatically when data.frames are
       joined by the \code{add} argument to \code{\link{mrp}}.}
     \item{\code{formula}:}{ The formula used in the multilevel
       regression. The left-hand side is always \sQuote{response}.}

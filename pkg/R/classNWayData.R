@@ -1,7 +1,4 @@
-
 setClass("NWayData",representation(type="character",levels="list"),contains="array")
-
-
 ## save the levels on the original data for when it is plyd back
 ## in poststratification
 ## match on names of ways

@@ -37,6 +37,6 @@ US Census Public Use Microdata Sample (PUMS) for Poststratification
 \references{
 }
 \examples{
-data(census)
+data(mrp.census)
 }
 \keyword{datasets}

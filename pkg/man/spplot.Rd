@@ -104,7 +104,7 @@ for details. }
   \examples{
 ## plot the example from mrp()
 example(mrp)
-library(MRP);load("~/Desktop/fitted.Rdata")
+#library(MRP);load("~/Desktop/fitted.Rdata")
 ## Dimension of plot are by order of terms -- y,x so
 ## this will plot age along x and poll along y.
 spplot(mrp.simple, state~ age,

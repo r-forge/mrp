@@ -125,7 +125,7 @@ mrp <- function(formula,
                                           mrp.varnames,")"),
                                     collapse="+"))
                         )
-  if (!is.null(mr.formula)){ 
+  if (!missing(mr.formula)){ 
     mr.f <- update.formula(mr.f, mr.formula)
   }
   mrp <- new("mrp",
@@ -235,12 +235,18 @@ setMethod(f="getThetaHat",signature(object="mrp"),
             return(theta.hat)
           })
 
-setGeneric ("mr", function (object,formula,...) { standardGeneric ("mr")})
+setGeneric ("getEstimates", function (object) { standardGeneric ("getEstimates")})
+setMethod(f="getEstimates",signature(object="mrp"),
+          definition=function(object) {
+            return(getThetaHat(object))
+          })
+
+setGeneric ("mr", function (object,mr.formula,...) { standardGeneric ("mr")})
                                         #setGeneric ("multilevelRegression", function (object) { standardGeneric ("multilevelRegression")})
 setMethod (f="mr",
 signature=signature(object="mrp"),
-definition=function(object,mr.formula=NULL,...) {
-  if(is.null(mr.formula)) {
+definition=function(object,mr.formula,...) {
+  if(missing(mr.formula)) {
     fm <- object@formula
   } else {
     fm <- update.formula(object@formula, mr.formula)
