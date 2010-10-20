@@ -115,10 +115,10 @@ spplot(mrp.simple, state~ age,
        )
 
 \dontrun{
-spplot(mrp.statelevel, state~f.race+age,
+spplot(mrp.statelevel, state~age+edu,
+       subset=age%in%levels(age)[1:2],
        spmap.states, "STATE", exclude=c("AK","DC","HI"),
        stroke=expression(hasmarriage2010==TRUE),
-       subset=(age=="18-29"),
        sub=paste("National average:",
          format(poststratify(mrp.statelevel),digits=2)),
        add.settings=list(
