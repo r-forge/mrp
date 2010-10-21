@@ -190,7 +190,7 @@
                     #population.formula= .~.-poll
                     )
 
-  print(poststratify(mrp.simple, ~ age+poll), digits=2)
+  print(100*poststratify(mrp.simple, ~ edu+age), digits=2)
 
 \dontrun{
   ## Fit a fuller model, adding state-level predictors:

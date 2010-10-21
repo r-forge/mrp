@@ -275,8 +275,34 @@ In this case, the poll data we have uses four instead of five categories for edu
 In the most basic setup MRP will fit an intercept to each of the groups provided in the formula. In the simple example, these categories are \textbf{state}, \textbf{age}, and \textbf{education}; all of these exist in the census data as well. The outcome variable \texttt{yes.of.all} is already coded as 0/1; within \texttt{mrp()} it is transformed into the two-column form used for estimation.
 
 <<simple-model,echo=TRUE,results=hide>>=
-mrp.simple <- mrp(yes.of.all ~ state+age+edu, poll=marriage.data)
+mrp.simple <- mrp(yes.of.all ~ state+age+edu, 
+                  poll=marriage.data,
+                  population=mrp.census,
+                  use="weighted2004")
 @ 
 
+The \texttt{mrp} function then executes the following steps:
+\begin{enumerate}
+\item Stratify the poll data according to the formula. This creates an $N$-way array of data where the dimensions are given by the categories of the stratification variables. On this array, it computes the $\bar{Y}$, and the effective $N$ taking into account any survey weights provided, and the “design effect” in that cell of the array.
+\item Collapse the $N$-way survey array into a rectangular matrix, using $\bar{Y}$, effective $N$, and the design effects to form for each combination of strata (`cell' of the $N$-way data) a sum of yes and no responses.
+\item Perform any transformations on the prepared data; the `add' argument is discussed in detail below.
+\item Stratify the population data, creating an $N$-way array of matching dimension to that of the survey.
+\item Estimate a multilevel model. By default this is a call to \texttt{glmer} with \texttt{family= quasibinomial( link="logit")}. By default, as in the call above, the formula for this model fits just an intercept for each stratum in the specification. 
+\end{enumerate}
+
+Poststratification is straightforward: multiply the fitted values from the multilevel model by the population frequencies, and collapse across any remaining dimensions. Below, we collapse across states to show the poststratified estimates of support for same-sex marriage by education and age.
+<<simple-model-table,results=tex>>=
+ xtable(100*poststratify(mrp.simple, ~ edu+age), digits=0,
+        caption="Support for same-sex marriage (in percent) by level of education and age cohort. Simple model poststratified results.")
+@ 
+
+\subsection{Basic Map Plotting}
+\label{sec:basic-map-plotting}
+
+The package makes it easy to 
 
 \end{document}
+
+Need from Yair the corrected poststratification array. 
+
+Need to figure out how to correct for voter suveys / exity poll to precinct-turnout at the level of the poll. 

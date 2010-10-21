@@ -8,8 +8,6 @@ setMethod("spplot", signature("mrp"),
               names(obj.p)[1] <- all.vars(plot.terms)
             }
             obj.p <- restoreNWayLevels(obj.p, obj@poll)
-            
-            
             subset <- eval(substitute(subset), obj.p)
             obj.p <- obj.p[subset,]
             if(length(all.vars(plot.terms))>1) {
