@@ -325,8 +325,7 @@ print(spplot(mrp.simple, state~state))
 
 In this section we demonstrate the use of the high-level arguments to \texttt{mrp()} for fitting more complex models with more data including intercepts strata not present in the population, additional group-level predictors, and transformations in the data.
 
-Kastellec writes the full model as follows:
-
+The full model includes intercepts for poll (the data combine several polls), for region (states are grouped into regions), 
 
 
 \end{document}
