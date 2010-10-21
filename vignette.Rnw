@@ -200,7 +200,7 @@ options(width=100)
 \section{Running Example}
 \label{sec:running-example}
 
-The running example is the same combined poll data and model in Kastellec's \href{http://www.princeton.edu/~jkastell/mrp_primer.html}{MRP Primer}, dealing with support for same-sex marriage in 2004--2005. A simple model using only a few group-level intercepts, is run and subject to \texttt{R CMD check}; in the “not run” section of the examples, the complete model with census poststratification, individual- and state-level predictors, and categorical interactions is shown.
+The running example is the same combined poll data and model in Kastellec's \href{http://www.princeton.edu/~jkastell/mrp_primer.html}{MRP Primer}, dealing with support for same-sex marriage in 2004--2005. A simple model using only a few group-level intercepts, is run and subject to \texttt{R CMD check}; in the “not run” section of the examples, code for the complete model with census poststratification, individual- and state-level predictors, and categorical interactions is shown. This vignette walks through both of those examples.
 
 \subsection{Data}
 \label{sec:data}
@@ -290,8 +290,12 @@ The \texttt{mrp} function then executes the following steps:
 \item Estimate a multilevel model. By default this is a call to \texttt{glmer} with \texttt{family= quasibinomial( link="logit")}. By default, as in the call above, the formula for this model fits just an intercept for each stratum in the specification. 
 \end{enumerate}
 
-Poststratification is straightforward: multiply the fitted values from the multilevel model by the population frequencies, and collapse across any remaining dimensions. Below, we collapse across states to show the poststratified estimates of support for same-sex marriage by education and age.
-<<simple-model-table,results=tex>>=
+Poststratification is straightforward: multiply the fitted values from the multilevel model by the population frequencies, and collapse across any remaining dimensions. Below, we collapse across states to show the poststratified estimates of support for same-sex marriage by education and age using the formula interface of the `poststratify' method.
+
+<<simple-model-table-code,eval=FALSE>>=
+xtable(100*poststratify(mrp.simple, ~ edu+age), digits=0)
+@ 
+<<simple-model-table,results=tex,echo=FALSE>>=
  xtable(100*poststratify(mrp.simple, ~ edu+age), digits=0,
         caption="Support for same-sex marriage (in percent) by level of education and age cohort. Simple model poststratified results.")
 @ 
@@ -299,7 +303,19 @@ Poststratification is straightforward: multiply the fitted values from the multi
 \subsection{Basic Map Plotting}
 \label{sec:basic-map-plotting}
 
-The package makes it easy to 
+The package makes it easy to plot results onto maps.\footnote{Maps very quickly blow up file sizes, and bitmap renditions may be acceptable for many documents, at least for drafts. For this reason we have submitted a patch to R to add a `png' option for Sweave.} For a wide variety of conditioning plots the \emph{MRP} \texttt{spplot} method preserves the same formula interface and to build complex maps. The method for \texttt{mrp} objects extends the \texttt{spplot} method, which uses Lattice as the “high level” graphics language.
+In future versions of \emph{MRP} we hope to make \href{http://spatialanalysis.co.uk/2010/09/27/maps-with-ggplot2/}{ggplot2 maps} with poststratified data similarly easy.
+
+A map of results poststratified by state with no further conditioning (that is, collapsed across the other strata) using the included map object and \texttt{spplot} defaults is trivial to produce:
+\begin{figure}
+  \centering
+  \caption{Support for same-sex marraige from simple MRP model.}
+  \label{fig:firstmap}
+<<firstmap,fig=TRUE,pdf=TRUE,png=FALSE,width=8,height=4>>=
+print(spplot(mrp.simple, state~state))
+@   
+\end{figure}
+
 
 \end{document}
 
