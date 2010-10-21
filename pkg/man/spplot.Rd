@@ -104,18 +104,19 @@ for details. }
   \examples{
 ## plot the example from mrp()
 example(mrp)
-#library(MRP);load("~/Desktop/fitted.Rdata")
+#library(MRP);load("~/mrp/malecki/fitted.Rdata")
 ## Dimension of plot are by order of terms -- y,x so
 ## this will plot age along x and poll along y.
-spplot(mrp.simple, state~ age,
+spplot(mrp.simple, state~ state, center=poststratify(mrp.simple),
        spmap.states, "STATE", exclude=c("AK","DC","HI"),
-       stroke=list(c("IA","NH","VT","CT","MA","ME")),
+       stroke=list(c("IA","NH","VT","CT","MA","ME"), "CA"),
+       add.settings=list(superpose.line=list(lwd=c(1,2),col=c("black","#FF00FF"))),
        colorkey=list(
          space="bottom",height=.5,width=.5)
        )
 
 \dontrun{
-spplot(mrp.statelevel, state~age+edu,
+spplot(mrp.statelevel, state ~ age+edu,
        subset=age%in%levels(age)[1:2],
        spmap.states, "STATE", exclude=c("AK","DC","HI"),
        stroke=expression(hasmarriage2010==TRUE),

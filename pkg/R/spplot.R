@@ -1,28 +1,29 @@
 setMethod("spplot", signature("mrp"),
           definition=function(obj, formula, spmap=spmap.states, FID="STATE", exclude=NULL, stroke=NULL, subset=TRUE, at, cuts=15, pretty=FALSE, center=0.5, between=list(x=.25,y=.25), add.settings=list(), ...) {
-            obj.p <- melt(poststratify(obj, all.vars(formula)))
-            obj.p <- restoreNWayLevels(obj.p, obj@poll)
             plot.terms <- terms(formula,keep.order=TRUE)
+            obj.p <- melt(poststratify(obj, all.vars(formula)))
 
-              
-            subset <- eval(substitute(subset), obj.p, environment(formula))
-            obj.p <- obj.p[subset,]
-            obj.p <- data.frame(lapply(obj.p, function(x) if (is.factor(x)){ factor(x)} else {x}))
-            
             if(length(all.vars(plot.terms))==1){
-              plotdf <- data.frame(rownames(obj.p), datacol=obj.p)
-              names(plotdf)[1] <- all.vars(plot.terms)
-            } else {
-              plotdf <- dcast(obj.p, formula)
+              obj.p <- data.frame(fid=rownames(obj.p), value=obj.p[,1])
+              names(obj.p)[1] <- all.vars(plot.terms)
             }
+            obj.p <- restoreNWayLevels(obj.p, obj@poll)
+            
+            
+            subset <- eval(substitute(subset), obj.p)
+            obj.p <- obj.p[subset,]
+            if(length(all.vars(plot.terms))>1) {
+              plotdf <- dcast(obj.p, formula)
+            } else { plotdf <- obj.p }
             
             names(plotdf) <- make.names(names(plotdf))
-            if (center==0) {
-              
-            }
-            plotdf[,1] <- as.character(levels(plotdf[,1])[plotdf[,1]])
-            spmap@data[,FID] <- as.character(levels(spmap@data[,FID])[spmap@data[,FID]])
             
+            if(is.factor(plotdf[,1])) {
+              plotdf[,1] <- as.character(levels(plotdf[,1])[plotdf[,1]])
+            }
+            if(is.factor(spmap@data[,FID])) {
+              spmap@data[,FID] <- as.character(levels(spmap@data[,FID])[spmap@data[,FID]])
+            }
             
             ## remove excludes list from fitted model, and then pare the sp obj to match.
             if(!is.null(exclude)) {
