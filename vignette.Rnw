@@ -145,7 +145,7 @@
 \setromanfont [BoldFont={* Bold}, ItalicFont={* Italic}]{Minion Pro}
 %\setromanfont [Mapping=tex-text,Ligatures={Common},BoldFont={ElectraLH-Bold},ItalicFont={ElectraLH-CursiveOsF},BoldItalicFont={ElectraLH-BoldCursiveOsF},SmallCapsFont={ElectraLH-RegularSC}]{ElectraLH-RegularOsF}
 \setsansfont[Mapping=tex-text,BoldFont={Delicious-Bold},ItalicFont={Delicious-Italic},SmallCapsFont={Delicious-SmallCaps}] {Delicious-Roman}
-\setmonofont[Scale=0.8]{Monaco} 
+%\setmonofont[Scale=0.8]{Monaco} 
 %\usepackage[final,expansion=true,protrusion=true,spacing=true,kerning=true]{microtype}
 
 
@@ -269,6 +269,10 @@ In this case, the poll data we have uses four instead of five categories for edu
   mrp.census <- na.omit(mrp.census)
 @ 
 
+\section{Simple Model}
+\label{sec:simple-model}
+
+
 \subsection{Calling \texttt{mrp()} for the first time}
 \label{sec:calling-mrp-first}
 
@@ -306,7 +310,7 @@ xtable(100*poststratify(mrp.simple, ~ edu+age), digits=0)
 The package makes it easy to plot results onto maps.\footnote{Maps very quickly blow up file sizes, and bitmap renditions may be acceptable for many documents, at least for drafts. For this reason we have submitted a patch to R to add a `png' option for Sweave.} For a wide variety of conditioning plots the \emph{MRP} \texttt{spplot} method preserves the same formula interface and to build complex maps. The method for \texttt{mrp} objects extends the \texttt{spplot} method, which uses Lattice as the “high level” graphics language.
 In future versions of \emph{MRP} we hope to make \href{http://spatialanalysis.co.uk/2010/09/27/maps-with-ggplot2/}{ggplot2 maps} with poststratified data similarly easy.
 
-A map of results poststratified by state with no further conditioning (that is, collapsed across the other strata) using the included map object and \texttt{spplot} defaults is trivial to produce:
+A map of results poststratified by state with no further conditioning (collapsed across the other strata) using the included map object and \texttt{spplot} defaults is fantastically easy to produce.
 \begin{figure}
   \centering
   \caption{Support for same-sex marraige from simple MRP model.}
@@ -316,9 +320,13 @@ print(spplot(mrp.simple, state~state))
 @   
 \end{figure}
 
+\section{The Full Model}
+\label{sec:full-model}
+
+In this section we demonstrate the use of the high-level arguments to \texttt{mrp()} for fitting more complex models with more data including intercepts strata not present in the population, group-level predictors, and 
 
 \end{document}
 
 Need from Yair the corrected poststratification array. 
 
-Need to figure out how to correct for voter suveys / exity poll to precinct-turnout at the level of the poll. 
+Need to figure out how to correct for voter surveys / exity poll to precinct-turnout at the level of the poll. 

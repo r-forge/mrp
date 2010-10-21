@@ -295,7 +295,21 @@ setMethod (f="poststratify",
                ans[is.nan(ans)] <- NA
                return(ans)
              }
-           })
+           }
+           ##### INTERCEPT SHIFT BY STATE FOR KNOWN TURNOUT
+           ##    from Yair. See paper, p 12.
+           ##    this will go in .fun arg of aaply()
+           ################################################
+           ##
+           ## logit <- function (a) log(a/(1-a))
+           ## find.delta <- function(delta, a, w, x0)
+           ## abs(x0-sum(invlogit(logit(a) + delta)*w))
+           ## correct.weighted <- function(a, w, x0) {
+           ##   delta <- optimize(find.delta, interval=c(-5,5), a, w, x0)$minimum
+           ##   corrected <- invlogit(logit(a) + delta)
+           ##   return(list(delta=delta, corrected=corrected))
+           ## }
+           )
 
 
 setGeneric ("hasMultilevelModel", function (object) { standardGeneric ("hasMultilevelModel")})
