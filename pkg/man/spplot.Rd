@@ -16,7 +16,7 @@ on selected polygons in the map.}
 \S4method{spplot}{mrp}(obj, formula,
                        spmap=spmap.states, FID="state",
                        exclude=NULL, stroke=NULL, subset=TRUE,
-                       at, cuts=15, pretty=FALSE,
+                       at, cuts=63, pretty=FALSE,
                        center=0.5, between=list(x=0.25, y=0.25),
                        add.settings, \dots)
 }
@@ -115,14 +115,15 @@ spplot(mrp.simple, state~ age,
        )
 
 \dontrun{
-spplot(mrp.statelevel, state ~ age+edu,
-       subset=age%in%levels(age)[1:2],
+spplot(mrp.statelevel, state ~ age+edu, cuts=50,
+       subset=TRUE,
        spmap.states, "STATE", exclude=c("AK","DC","HI"),
-       stroke=expression(hasmarriage2010==TRUE),
+       stroke=list(expression(hasmarriage2010==TRUE),
+         "CA"),
        sub=paste("National average:",
          format(poststratify(mrp.statelevel),digits=2)),
        add.settings=list(
-         regions=list(col=fBasics:::divPalette(36,"BrBG"))
+         regions=list(col=fBasics:::divPalette(51,"BrBG"))
          ),
        colorkey=list(
          space="bottom",height=.5,width=.5,

@@ -1,5 +1,5 @@
 setMethod("spplot", signature("mrp"),
-          definition=function(obj, formula, spmap=spmap.states, FID="STATE", exclude=NULL, stroke=NULL, subset=TRUE, at, cuts=15, pretty=FALSE, center=0.5, between=list(x=.25,y=.25), add.settings=list(), ...) {
+          definition=function(obj, formula, spmap=spmap.states, FID="STATE", exclude=NULL, stroke=NULL, subset=TRUE, at, cuts=63, pretty=FALSE, center=0.5, between=list(x=.25,y=.25), add.settings=list(), ...) {
             plot.terms <- terms(formula,keep.order=TRUE)
             obj.p <- melt(poststratify(obj, all.vars(formula)))
 
