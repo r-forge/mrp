@@ -15,6 +15,7 @@
 \alias{getResponse}
 \alias{getThetaHat}
 \alias{getEstimates}
+\alias{getEstimates,mrp-method}
 \alias{hasMultilevelModel}
 \alias{setFormula}
 \alias{setPopOnes}

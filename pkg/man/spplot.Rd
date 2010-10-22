@@ -92,7 +92,7 @@ for details. }
 
     Several packages produce gradients of colors which can be supplied
   to \code{spplot} as \code{regions=list(col=\dots)} in the \sQuote{add.settings} list. Among them are
-  \link[RColorBrewer]{RColorBrewer}, \code{\link{colorRamps}}, and
+  \link[RColorBrewer]{RColorBrewer}, \code{\link[colorRamps]{colorRamps}}, and
   \code{colorspace}, along with the basic grDevices palettes such as
   \code{\link[grDevices]{heat.colors}} and the function
   \code{\link[grDevices]{colorRampPalette}}.

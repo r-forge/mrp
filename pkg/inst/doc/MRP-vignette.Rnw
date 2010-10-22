@@ -1,0 +1,10 @@
+%\VignetteIndexEntry{MRP Primer Reloaded}
+
+%% This is a placeholder file. Please see
+%% MRP-vignette.Rnw.real
+
+%% It will not pass R CMD check because it requires
+%% a modified Sweave with a png output device.
+%% (also, xelatex and the installation of some fonts)
+
+%% A patch has been submitted to the R Core Team.
