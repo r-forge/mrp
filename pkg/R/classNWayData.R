@@ -156,7 +156,8 @@ setMethod (f="makeNWay",
            })
 
 ### turns a NWayData array back into a data.frame for lmer call.
-### args: v, a vector of the plyr:::adply -sliced NWayData array.
+### args: v, a vector of the plyr:::adply -sliced NWayData array;
+###       design.effect, the averaged design effect
 setGeneric ("flattenNWay", function (v,design.effect) { standardGeneric ("flattenNWay")})
 setMethod (f="flattenNWay",
            definition=function(v,design.effect){
