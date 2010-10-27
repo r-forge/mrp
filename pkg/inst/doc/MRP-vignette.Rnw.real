@@ -193,6 +193,7 @@ the#1\endcsname\quad}}
 <<mainsetup,echo=false,results=hide>>=
 library(xtable)
 library(MRP)
+
 library(apsrtable)
 options(width=100,prompt="R> ",continue="   ")
 load("/Users/malecki/mrp/malecki/fitted.Rdata")
