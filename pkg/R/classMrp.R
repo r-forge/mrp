@@ -40,6 +40,7 @@ mrp <- function(formula,
   population.varnames <- reorder.popterms(mrp.varnames,population.varnames)
   
   allvars <- all.vars(mrp.formula)
+  if(poll.weights!=1){ allvars <- c(allvars,poll.weights) }
   poll <- na.omit(poll[,allvars])
   ## Set up and store poll NWayData
   cat("\nMaking NWay poll data:\n")

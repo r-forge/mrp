@@ -185,7 +185,7 @@
   ## Ready to run simple mrp with poll and population:
   
   mrp.simple <- mrp(yes.of.all ~ state+age+edu+poll,
-                    poll=marriage.data
+                    poll=marriage.data,poll.weights="weight"
                     #,pop=mrp.census,use="weighted2004",
                     #population.formula= .~.-poll
                     )

@@ -193,7 +193,6 @@ the#1\endcsname\quad}}
 <<mainsetup,echo=false,results=hide>>=
 library(xtable)
 library(MRP)
-
 library(apsrtable)
 options(width=100,prompt="R> ",continue="   ")
 load("/Users/malecki/mrp/malecki/fitted.Rdata")
@@ -320,7 +319,7 @@ A map of results poststratified by state with no further conditioning (collapsed
   \centering
   \caption{Support for same-sex marraige from simple MRP model.}
   \label{fig:firstmap}
-<<firstmap,fig=TRUE,pdf=FALSE,png=TRUE,eps=FALSE,width=8,height=4,resolution=144>>=
+<<firstmap,fig=TRUE,pdf=TRUE,png=FALSE,eps=FALSE,width=8,height=4,resolution=144>>=
 print(spplot(mrp.simple, state~state))
 @   
 \end{figure}
@@ -474,7 +473,7 @@ print(spplot(mrp.statelevel, state ~ edu+age,
   \caption{The final map shows support for same-sex marriage by age cohort and level of education, centered around the national poststratified average of 34\%.}
   \label{fig:finalmap}
 \setkeys{Gin}{width=\linewidth}
-<<finalmap,fig=TRUE,pdf=FALSE,png=TRUE,eps=FALSE,width=6.5,height=6.5,echo=FALSE,resolution=144>>=
+<<finalmap,fig=TRUE,pdf=TRUE,png=FALSE,eps=FALSE,width=6.5,height=6.5,echo=FALSE,resolution=144>>=
 <<finalmapcode>>
 @   
 \end{figure}

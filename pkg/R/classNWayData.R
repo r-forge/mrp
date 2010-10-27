@@ -131,7 +131,7 @@ setMethod (f="makeNWay",
                cell$weight <- rep(1,nrow(cell))
                weight="weight"
              }
-             w <- cell[,weight]
+             w <- cell[,weights]
              ## do weighted mean
 
              ## do design effect with cases N=0,1 only if weights provided
