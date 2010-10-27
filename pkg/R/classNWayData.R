@@ -137,10 +137,6 @@ setMethod (f="makeNWay",
              ## do design effect with cases N=0,1 only if weights provided
              if(weights!=1) {
                design.effect.cell <- 1+ var(w/mean(w))
-               design.effect.cell <- ifelse(N>1,
-                                            design.effect.cell,
-                                            ifelse(N==0, 0 ,1)
-                                            )
                ybar.w <- weighted.mean(y, w)
              } else {
                ybar.w <- mean(y)
@@ -161,18 +157,20 @@ setMethod (f="makeNWay",
 setGeneric ("flattenNWay", function (v,design.effect) { standardGeneric ("flattenNWay")})
 setMethod (f="flattenNWay",
            definition=function(v,design.effect){
-             if(sum(is.na(v))>0) { 
-               v <- c(N=0,
-                      design.effect.cell=0,
-                      ybar.w=.5) 
+             if(is.na(v["N"])) { 
+               v["N"] <- 0
+               v["design.effect.cell"] <- NA
+               v["ybar.w"] <- .5
+               response.yes <- response.no <- 0
+             } else {
+               ## do n.eff
+               N.eff <- v["N"] / design.effect
+               
+               ybar.w <- v["ybar.w"]
+               ## do ybar.w with cases
+               response.yes <- ybar.w*N.eff
+               response.no <- (1-ybar.w)*N.eff
              }
-             ## do n.eff
-             N.eff <- v["N"] / design.effect
-             
-             ybar.w <- v["ybar.w"]
-             ## do ybar.w with cases
-             response.yes <- ybar.w*N.eff
-             response.no <- (1-ybar.w)*N.eff
              ans <- c(response.yes,response.no,v)
              names(ans)[1:2] <- c("response.yes","response.no")
              return(ans)
