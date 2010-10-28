@@ -47,6 +47,7 @@ mrp <- function(formula,
   if (sum(mrp.varnames %in% names(poll)) != length(mrp.varnames) ) {
        stop(paste("\nVariable ",sQuote(mrp.varnames[!(mrp.varnames %in% names(poll))])," not found in poll data."))
      }
+  ##### When multiple polls, renormalize mean1 *in each poll*
   poll.nway <- daply(poll, .variables=mrp.varnames, pop=FALSE,
              .fun=makeNWay, .progress="text",
              response=as.character(mrp.formula[[2]]), weights=poll.weights)
@@ -259,6 +260,21 @@ definition=function(object,mr.formula,...) {
                                   family=quasibinomial(link="logit"),...)
   return (object)
 })
+
+
+##### NEW SHIFT FUNCTION for state vote total.
+##### only one margin now.
+
+## shift(mrp,
+## turnoutData (vector or char name of data col), 
+## ~shiftvar)
+
+## p1 = collapse across population by shiftvar
+## delta = apply (p1, shiftfun, turnoutdata)
+##  do this optimization and get a bunch of
+##  shiftresults
+## p2 = sweep delta+population array
+## return a full-dimension shifted array
 
 
 setGeneric ("poststratify", function (object, formula=NULL) { standardGeneric ("poststratify")})
