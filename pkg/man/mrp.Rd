@@ -226,7 +226,6 @@
   Neff <- test.mrp@data$N
   eNeff <- expectedN()
   getDesignEffect(test.mrp@poll)
-
   checkEqualsNumeric(eNeff,Neff)
 }
 }
