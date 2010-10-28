@@ -214,5 +214,19 @@
                        z.age+p.relig.full+p.kerry.full)
 
   ## Fine plot control is shown with this example in plotmrp documentation!
+
+### test fixing:
+
+  library(MRP)
+  library(RUnit)
+  source("/Users/malecki/mrp/pkg/tests-disabled/unitTests/runit.Mrp.weightsRegressionTest.R")
+  test.Y()
+  test.mrp <- mrp(yes.of.all ~ state+age+edu,
+                  poll=testData(), poll.weights="weight")
+  Neff <- test.mrp@data$N
+  eNeff <- expectedN()
+  getDesignEffect(test.mrp@poll)
+
+  checkEqualsNumeric(eNeff,Neff)
 }
 }
