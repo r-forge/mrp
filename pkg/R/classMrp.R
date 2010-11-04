@@ -106,7 +106,7 @@ mrp <- function(formula,
                              length.out=length(poll.nway)),
                          dim(getNEffective(poll.nway)), dimnames(getNEffective(poll.nway)))
       
-      pop.nway <- new("NWayData",pop.nway,type="pop",
+      pop.nway <- new("NWayData",pop.nway,type="population",
                       levels=saveNWayLevels(pop))
     }
     ## if (is.NWayData(pop)) {
@@ -198,11 +198,11 @@ setMethod (f="setPopulation",
             return (object)
         })
 
-setGeneric ("setPopOnes", function (object) { standardGeneric ("setPopOnes")})
-setMethod (f="setPopOnes",
+setGeneric ("setPopulationOnes", function (object) { standardGeneric ("setPopulationOnes")})
+setMethod (f="setPopulationOnes",
         signature=signature(object="mrp"),
            definition=function(object) {
-             if(object@population@type=="pop") {
+             if(object@population@type=="population") {
                warning("Population appears to contain real data. Replacing with ones!")
              }
              object@population <- makeOnesNWay(object@poll)
@@ -294,7 +294,6 @@ setMethod (f="poststratify",
                spec <- attr(terms(spec),"term.labels")
              }
              stopifnot (object@population != numeric(0)) 
-             stopifnot (hasMultilevelModel(object))
              
              poststratified <- getThetaHat(object) * object@population
 
@@ -327,15 +326,6 @@ setMethod (f="poststratify",
            ##   return(list(delta=delta, corrected=corrected))
            ## }
            )
-
-
-setGeneric ("hasMultilevelModel", function (object) { standardGeneric ("hasMultilevelModel")})
-setMethod (f="hasMultilevelModel",
-        signature=signature(object="mrp"),
-        definition=function (object) {
-            return (length (fitted(object@multilevelModel)) != 0)
-        })
-
 
 
 ## newMrp <- function (response, vars, population, weight=rep(1, length(response))) {

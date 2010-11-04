@@ -5,7 +5,7 @@
 States and Regions for MRP
 }
 \description{
-A data.frame containing the 50 states plus the District of Columbia, and 
+A data.frame containing the regions for the 50 states plus the District of Columbia, indexed by state abbreviation.
 }
 \usage{data(mrp.regions)}
 \format{

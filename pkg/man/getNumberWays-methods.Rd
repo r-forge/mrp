@@ -5,10 +5,10 @@
 \alias{getNumberWays,NWayData-method}
 \alias{getNumberWays}
 
-\title{ Methods for Function getNumberWays in Package `MisterP'}
+\title{ Get Number of Ways for MRP analysis }
 \description{
   A cross-classified dataset for multilevel regression and
-  poststratification is an \eqn{N}-dimensional array, where each dimension
+  poststratification is an \eqn{N}-dimensional array. Each dimension in the array
   is one of the \dQuote{ways} by which it can later be poststratified. For
   various reasons it may be useful to query a \code{\link{mrp-class}}
   object or an \code{\link{NWayData-class}} object for these dimensions

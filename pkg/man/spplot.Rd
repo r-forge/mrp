@@ -14,7 +14,7 @@ on selected polygons in the map.}
 
 \usage{
 \S4method{spplot}{mrp}(obj, formula,
-                       spmap=spmap.states, FID="state",
+                       spmap=spmap.states, FID="STATE",
                        exclude=NULL, stroke=NULL, subset=TRUE,
                        at, cuts=63, pretty=FALSE,
                        center=0.5, between=list(x=0.25, y=0.25),
@@ -27,7 +27,7 @@ on selected polygons in the map.}
     identifies the polygons to plot. In the special case where the
     desired poststratification is \emph{only} by
     geographic unit, place it on both sides of the equation (e.g.,
-    \code{state ~ state}.}
+    \code{state ~ state}).}
   \item{spmap}{A map of class 
     \code{\link[sp]{SpatialPolygonsDataFrame}}, such as is produced by
     \code{\link[maptools]{readShapeSpatial}} for reading ESRI \dQuote{shapefiles.}
@@ -41,7 +41,7 @@ on selected polygons in the map.}
   \item{exclude}{A vector of feature IDs to exclude from the
     plot. \emph{Note:} any rows not present in the \code{mrp} data
     itself will automatically be excluded.}
-  \item{stroke}{A list of feature IDs (\bold{character, logical, or integer} with respect to
+  \item{stroke}{A list of feature IDs (\bold{character}, \bold{logical}, or \bold{integer} with respect to
     the order of \code{spmap}) to plot with a distinct
     stroke; or an \bold{expression} to evaluate in the
     \code{mrp@data}. Expressions allow data pertaining to geographic
@@ -104,11 +104,11 @@ for details. }
   \examples{
 ## plot the example from mrp()
 example(mrp)
-#library(MRP);load("~/Desktop/fitted.Rdata")
 ## Dimension of plot are by order of terms -- y,x so
 ## this will plot age along x and poll along y.
-spplot(mrp.simple, state~ age,
-       spmap.states, "STATE", exclude=c("AK","DC","HI"),
+spplot(mrp.simple, formula=state~ age,
+       spmap=spmap.states, FID="STATE", 
+	   exclude=c("AK","DC","HI"),
        stroke=list(c("IA","NH","VT","CT","MA","ME"), "CA"),
        colorkey=list(
          space="bottom",height=.5,width=.5)

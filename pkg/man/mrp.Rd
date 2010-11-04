@@ -32,7 +32,7 @@
       estimated for each named stratum. See \code{mr.formula}
       below to easily fit more complex models.
 
-      In \code{poststratify}, the formula is null on the left-hand
+      In \code{poststratify}, the formula is \code{NULL} on the left-hand
       side and right-hand-side variable names are dimensions of
       the population data by which to poststratify. See the
       example below. For \code{poststratify} method, may be a formula with variable names
@@ -50,7 +50,7 @@
     \item{population}{A \code{data.frame} containing population (e.g., census)
       data with variable names and factor levels matching those in
       \code{poll} and specified in \code{formula}.}
-    \item{use}{The column of the \code{pop} data to use for
+    \item{use}{The column of the \code{population} data to use for
       poststratification.}
     \item{population.formula}{Any modifications to be made to the
       formula above. In the example below, we poststratify by poll,
@@ -62,10 +62,10 @@
     \item{add}{A \code{list} of additional variables to add to
       the prepared \code{data.frame} used in the multilevel
       regression step. The list may contain items of two types of
-      objects: an \bold{expression} to be evaluated \sQuote{within} the
-      prepared data, such as a transformation of another variable; or a
-      \bold{data.frame} to be left-joined onto the data via
-      \code{merge}. An example of the latter would be a data.frame with
+      objects: a \bold{data.frame} to be left-joined onto the data via
+      \code{merge}; or an \bold{expression} to be evaluated \sQuote{within} 
+	  the prepared data, such as a transformation of another variable. 
+	  An example of the latter would be a data.frame with
       a column containing the \sQuote{region} for every \sQuote{state}
       in the data.}
     \item{mr.formula}{A formula specification for the multilevel model
@@ -137,14 +137,14 @@
   ## Load example data and helper datasets.
   data(samesexmarriage)
   ## Helper datasets for other US applications of MRP:
-  data(spmap.states) # projected state map
+  data(spmap.states) # projected US state map
   data(mrp.census)   # census with common demo strata
   data(mrp.regions)  # regions data.frame with DC separate
 
   ## To ensure matching of strata between poll and population,
   ## both should be factors with identical names and levels.
   marriage.data <- within(marriage.data, {
-    state <- factor(state,exclude=NA)
+    state <- factor(state,exclude=c(NA, ""))
     poll <- factor(poll,exclude=NA)
     age <- factor(age.cat,exclude=NA,
                   labels=c("18-29","30-44","45-64","65+"))
@@ -159,9 +159,6 @@
                    labels=c("White","Black","Hispanic"))
     f.race <- interaction(female,race.wbh)
   })
-  ## Remove empty "" state and drop it from levels.
-  marriage.data <- subset(marriage.data,!is.na(state) & state!="" )
-  marriage.data$state <- factor(marriage.data$state)
   
   ## Poll has four levels of education, so we need to combine
   ## the top two levels in the census data. We'll also go ahead
@@ -214,18 +211,5 @@
                        z.age+p.relig.full+p.kerry.full)
 
   ## Fine plot control is shown with this example in plotmrp documentation!
-
-### test fixing:
-
-  library(MRP)
-  library(RUnit)
-  source("/Users/malecki/mrp/pkg/tests-disabled/unitTests/runit.Mrp.weightsRegressionTest.R")
-  test.Y()
-  test.mrp <- mrp(yes.of.all ~ state+age+edu,
-                  poll=testData(), poll.weights="weight")
-  Neff <- test.mrp@data$N
-  eNeff <- expectedN()
-  getDesignEffect(test.mrp@poll)
-  checkEqualsNumeric(eNeff,Neff)
 }
 }

@@ -7,18 +7,16 @@
 \alias{getThetaHat,mrp-method}
 \alias{getPopulation,mrp-method}
 \alias{setPopulation,mrp-method}
-\alias{setPopOnes,mrp-method}
+\alias{setPopulationOnes,mrp-method}
 \alias{getFormula,mrp-method}
 \alias{setFormula,mrp-method}
-\alias{hasMultilevelModel,mrp-method}
 \alias{getFormula}
 \alias{getResponse}
 \alias{getThetaHat}
 \alias{getEstimates}
 \alias{getEstimates,mrp-method}
-\alias{hasMultilevelModel}
 \alias{setFormula}
-\alias{setPopOnes}
+\alias{setPopulationOnes}
 \alias{setPopulation}
 
 
@@ -72,15 +70,15 @@
       \code{poststratification.specification} (formula, character, or
       logical; see above), gives values in each of the given cells of the
       N-way array.}
-    \item{getThetaHat}{\code{signature(object = "mrp")}: model fitted
-      values in an N-way array corresponding to the dimension of the
+    \item{getThetaHat}{\code{signature(object = "mrp")}: estimates from the multilevel model 
+	  in an N-way array corresponding to the dimension of the
       NWayData contained in slot \code{poll}.}
     \item{getEstimates}{alias for \code{getThetaHat}}
     \item{setPopulation}{\code{signature(object = "mrp")}: set
       population frequency data used for poststratification. This method
       checks that the dimension and names of the array correspond to those
       of slot \code{poll}.}
-    \item{setPopOnes}{\code{signature(object = "mrp")}: To display model
+    \item{setPopulationOnes}{\code{signature(object = "mrp")}: To display model
       results without adjusting to a population frequency table, all
       dimensions can be set to 1.}
     \item{getNumberWays}{\code{signature(object = "mrp")}: returns the
@@ -98,19 +96,9 @@
     \item{getResponse}{\code{signature(object = "mrp")}: returns a
       matrix containing the two-column \dQuote{yes/no} response used to
       fit the multilevel regression.}
-    \item{hasMultilevelModel}{\code{signature(object = "mrp")}: tests
-      for presence of a fitted multilevel model in the object.}
   }
 }
 \seealso{\code{\link{mrp}}, which produces \code{mrp} objects.}
-
-
-\author{Andrew Gelman <gelman@stat.columbia.edu>,
-  Daniel Lee <bearlee@alum.mit.edu>,
-  Yu-Sung Su <ys463@columbia.edu>,
-  Michael Malecki <malecki@wustl.edu>
-}
-
 
 \examples{
 }

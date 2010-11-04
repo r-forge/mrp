@@ -1,8 +1,8 @@
 exportClasses (mrp)
 exportMethods (getNumberWays, setPopulation,
                setFormula, getFormula,
-               mr, poststratify, hasMultilevelModel,
-               getResponse, setPopOnes, getThetaHat,
+               mr, poststratify,
+               getResponse, setPopulationOnes, getThetaHat,
                getEstimates)
 export (mrp)
 importFrom("sp",panel.polygonsplot,spplot)
