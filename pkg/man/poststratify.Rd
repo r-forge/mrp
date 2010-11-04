@@ -16,9 +16,9 @@
     \item{formula}{
 	  A formula representation of the desired poststratification. 
 	  The formula is \code{NULL} on the left-hand side and 
-	  right-hand-side variable names corresponding to the 
+	  right-hand side variable names corresponding to the 
 	  \dQuote{ways} in the population data by which to poststratify. 
-	  The right-hand-side can also be a character vector of 
+	  The right-hand side can also be a character vector of 
 	  such names or a logical vector of length \dQuote{ways}.
 	  
 	  See example in \code{\link{mrp}}.}

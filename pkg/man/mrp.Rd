@@ -1,9 +1,5 @@
 \name{mrp}
 \alias{mrp}
-\alias{mr,mrp-method}
-\alias{poststratify,mrp-method}
-\alias{mr}
-\alias{poststratify}
 
 \title{Multilevel regression and poststratification}
 \description{
@@ -11,17 +7,15 @@
   used for poststratifying by an arbitrary number of strata or \dQuote{ways}.
 }
 
-\usage{mrp (formula,
-            poll, poll.weights=1,
-            population=NULL, use=NULL,
-            population.formula=formula,
-            add=NULL, mr.formula=NULL,
-            \dots)
-\S4method{mr}{mrp}(object, mr.formula, \dots)
-\S4method{poststratify}{mrp}(object,formula)
+\usage{
+mrp (formula,
+     poll, poll.weights=1,
+     population=NULL, use=NULL,
+     population.formula=formula,
+     add=NULL, mr.formula=NULL,
+     \dots)
 }
 \arguments{
-    \item{object}{A \code{mrp} object.}
     \item{formula}{A formula representation of the binary outcome variable
       and the desired eventual
       poststratification; i.e., the \dQuote{ways} by which to
@@ -30,24 +24,17 @@
       and \code{population}. By default, this formula will also be
       used to construct the multilevel model, with an intercept
       estimated for each named stratum. See \code{mr.formula}
-      below to easily fit more complex models.
-
-      In \code{poststratify}, the formula is \code{NULL} on the left-hand
-      side and right-hand-side variable names are dimensions of
-      the population data by which to poststratify. See the
-      example below. For \code{poststratify} method, may be a formula with variable names
-      corresponding to the \dQuote{ways} by which the data are stratified
-      (e.g., \code{~age+sex}), or a character vector of such names, or a
-      logical vector of the same length. By default, all \dQuote{ways} are
-      collapsed to a single poststratified predicted value.}
+      below to easily fit more complex models.}
     \item{poll}{A \code{data.frame} representing a survey, containing (at
       least) the named variables in \code{formula}. The LHS response
       is expected to be dichotomous, and will be coerced to
       binary-logical (if factor, 1 for \sQuote{yes}, 0 for
       \sQuote{no}).}
-    \item{poll.weights}{Supplied survey weights for respondents, used to
-      compute the effective \eqn{N}, weighted \eqn{\bar{Y}}, and Design Effect.}
-    \item{population}{A \code{data.frame} containing population (e.g., census)
+    \item{poll.weights}{Name of variable of the survey weights for 
+	  respondents in the poll. This is used to compute the effective 
+	  \eqn{N}, weighted \eqn{\bar{Y}}, and Design Effect. Default is 
+	  to make all weights equal.}
+    \item{population}{A \code{data.frame} containing population (e.g. census)
       data with variable names and factor levels matching those in
       \code{poll} and specified in \code{formula}.}
     \item{use}{The column of the \code{population} data to use for
@@ -56,9 +43,12 @@
       formula above. In the example below, we poststratify by poll,
       which has to be removed from the ways that we stratify the
       population. If used, should be of the form
-      \code{.~.-var}. It is possible, but strongly discouraged, to use a matching
-      factor with a different name (e.g., \sQuote{edu} in \code{poll}
-      with \code{population.formula=.~education})}
+      \code{.~.-var}. 
+	  % DL: Should remove?
+	  % It is possible, but strongly discouraged, to use a matching
+      % factor with a different name (e.g., \sQuote{edu} in \code{poll}
+      % with \code{population.formula=.~education})
+	  }
     \item{add}{A \code{list} of additional variables to add to
       the prepared \code{data.frame} used in the multilevel
       regression step. The list may contain items of two types of
@@ -79,59 +69,9 @@
     \item{\dots}{Additional arguments to be passed to the multilevel
       regression \code{\link[lme4]{glmer}} step.}
   }
-  %%%%%%%% THIS IS DUPLICATED IN mrp-class : PICK ONE.
-  %%%%%%%%
-% \section{Methods}{
-%   \describe{
-%     \item{mr}{\code{signature(object = "mrp")}: update the formula and
-%       re-run the multilevel regression in the object.}
-%     \item{poststratify}{\code{signature(object = "mrp")}: perform
-%       poststratification using the fitted values of the multilevel model
-%       slot and the population frequencies contained in the
-%       population slot. When used with a
-%       \code{poststratification.specification} (formula, character, or
-%       logical; see above), gives values in each of the given cells of the
-%       N-way array.}
-%     \item{getThetaHat}{\code{signature(object = "mrp")}: model fitted
-%       values in an N-way array corresponding to the dimension of the
-%       NWayData contained in slot \code{poll}.}
-%     \item{getEstimates}{\code{signature(object = "mrp")}: an alias for \code{getThetaHat()}}
-%     \item{setPopulation}{\code{signature(object = "mrp")}: set
-%       population frequency data used for poststratification. This method
-%       checks that the dimension and names of the array correspond to those
-%       of slot \code{poll}.}
-%     \item{setPopOnes}{\code{signature(object = "mrp")}: To display model
-%       results without adjusting to a population frequency table, all
-%       dimensions can be set to 1.}
-%     \item{getNumberWays}{\code{signature(object = "mrp")}: returns the
-%       dimension of both \code{poll} and \code{population}. When a
-%       \dQuote{real} population array is not set (all=1), value for pop
-%       shows 0 here.}
-%     \item{getFormula}{\code{signature(object = "mrp")}: returns the
-%       formula used to fit the multilevel regression.}
-%     \item{setFormula}{\code{signature(object = "mrp")}: set the formula; but
-%       you really should use the \code{mr} method instead.}
-%     \item{getPopulation}{\code{signature(object = "mrp")}: returns the
-%       \code{NWayData} population array.}
-%     \item{getData}{\code{signature(object = "mrp")}: return the
-%       \code{data.frame} used in the multilevel regression step.}
-%     \item{getResponse}{\code{signature(object = "mrp")}: returns a
-%       matrix containing the two-column \dQuote{yes/no} response used to
-%       fit the multilevel regression.}
-%   }
-% }
 \seealso{\code{\link{mrp-class}} for other
     methods on the objects produced by \code{mrp()};
       \code{\link{plotmrp}} for how to plot poststratified results  onto maps.}
-
-
-\author{Andrew Gelman <gelman@stat.columbia.edu>,
-  Michael Malecki <malecki@wustl.edu>,
-  Daniel Lee <bearlee@alum.mit.edu>,
-  Yu-Sung Su <ys463@columbia.edu>
-}
-
-
 \examples{
   library(MRP)
   ## Load example data and helper datasets.
@@ -194,9 +134,7 @@
   ## This model is also used in the not-run example
   ## for plotting maps.
   
-  mrp.statelevel <- mrp(yes.of.all~
-                        state+f.race+age+edu+poll,
-
+  mrp.statelevel <- mrp(formula=yes.of.all~state+f.race+age+edu+poll,
                         poll=marriage.data,
                         population=mrp.census,use="weighted2008",
                         population.formula=.~.-poll,
@@ -205,7 +143,11 @@
                           expression(age.edu <- interaction(age,edu)),
                           expression(z.age <- rescale(age)))
                         )
-  
+  ## Note: the formula is expanded from the condensed version in "formula" to
+  ##  an expanded version.
+  getFormula (mrp.statelevel)
+
+						
   ## Update the mr.formula on already-prepared mrp object and re-fit:
   mrp.statelevel <- mr(mrp.statelevel, .~.+(1|region)+ (1|age.edu)+
                        z.age+p.relig.full+p.kerry.full)
