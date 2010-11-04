@@ -1,73 +1,19 @@
-\name{mrp}
-\alias{mrp}
-\alias{mr,mrp-method}
-\alias{poststratify,mrp-method}
+\name{mr}
 \alias{mr}
-\alias{poststratify}
+\alias{mr,mrp-method}
 
-\title{Multilevel regression and poststratification}
+\title{Run Multilevel Regression step of MRP Analysis}
 \description{
-  Set up survey and population data, and a multilevel regression model
-  used for poststratifying by an arbitrary number of strata or \dQuote{ways}.
+  Run a (binomial) multilevel regression in survey data for later
+  poststratification.
 }
 
-\usage{mrp (formula,
-            poll, poll.weights=1,
-            population=NULL, use=NULL,
-            population.formula=formula,
-            add=NULL, mr.formula=NULL,
-            \dots)
+\usage{
 \S4method{mr}{mrp}(object, mr.formula, \dots)
-\S4method{poststratify}{mrp}(object,formula)
 }
 \arguments{
     \item{object}{A \code{mrp} object.}
-    \item{formula}{A formula representation of the binary outcome variable
-      and the desired eventual
-      poststratification; i.e., the \dQuote{ways} by which to
-      break down the poll and population data, given as factor
-      variables with matching names and levels in both \code{poll}
-      and \code{population}. By default, this formula will also be
-      used to construct the multilevel model, with an intercept
-      estimated for each named stratum. See \code{mr.formula}
-      below to easily fit more complex models.
-
-      In \code{poststratify}, the formula is \code{NULL} on the left-hand
-      side and right-hand-side variable names are dimensions of
-      the population data by which to poststratify. See the
-      example below. For \code{poststratify} method, may be a formula with variable names
-      corresponding to the \dQuote{ways} by which the data are stratified
-      (e.g., \code{~age+sex}), or a character vector of such names, or a
-      logical vector of the same length. By default, all \dQuote{ways} are
-      collapsed to a single poststratified predicted value.}
-    \item{poll}{A \code{data.frame} representing a survey, containing (at
-      least) the named variables in \code{formula}. The LHS response
-      is expected to be dichotomous, and will be coerced to
-      binary-logical (if factor, 1 for \sQuote{yes}, 0 for
-      \sQuote{no}).}
-    \item{poll.weights}{Supplied survey weights for respondents, used to
-      compute the effective \eqn{N}, weighted \eqn{\bar{Y}}, and Design Effect.}
-    \item{population}{A \code{data.frame} containing population (e.g., census)
-      data with variable names and factor levels matching those in
-      \code{poll} and specified in \code{formula}.}
-    \item{use}{The column of the \code{population} data to use for
-      poststratification.}
-    \item{population.formula}{Any modifications to be made to the
-      formula above. In the example below, we poststratify by poll,
-      which has to be removed from the ways that we stratify the
-      population. If used, should be of the form
-      \code{.~.-var}. It is possible, but strongly discouraged, to use a matching
-      factor with a different name (e.g., \sQuote{edu} in \code{poll}
-      with \code{population.formula=.~education})}
-    \item{add}{A \code{list} of additional variables to add to
-      the prepared \code{data.frame} used in the multilevel
-      regression step. The list may contain items of two types of
-      objects: a \bold{data.frame} to be left-joined onto the data via
-      \code{merge}; or an \bold{expression} to be evaluated \sQuote{within} 
-	  the prepared data, such as a transformation of another variable. 
-	  An example of the latter would be a data.frame with
-      a column containing the \sQuote{region} for every \sQuote{state}
-      in the data.}
+  
     \item{mr.formula}{A formula specification for the multilevel model
       to run in the prepared data. The left-hand side should always be
     \sQuote{response}. For convenience, the formula is handled by
@@ -77,7 +23,7 @@
       just an intercept term for each of the variables in the main
       formula specification (\code{(1|way1)+(1|way2)} etc.)}
     \item{\dots}{Additional arguments to be passed to the multilevel
-      regression \code{\link[lme4]{glmer}} step.}
+      regression step, which uses \code{\link[lme4]{glmer}} by default. }
   }
   %%%%%%%% THIS IS DUPLICATED IN mrp-class : PICK ONE.
   %%%%%%%%
