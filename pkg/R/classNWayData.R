@@ -129,18 +129,17 @@ setMethod (f="makeNWay",
              ## quietly allow easy noweight
              if(weights==1) {
                cell$weight <- rep(1,nrow(cell))
-               weight="weight"
+               weights <- "weight"
              }
              w <- cell[,weights]
              ## do weighted mean
-
              ## do design effect with cases N=0,1 only if weights provided
-             if(weights!=1) {
-               design.effect.cell <- 1+ var(w/mean(w))
-               ybar.w <- weighted.mean(y, w)
-             } else {
+             if( all(w==1) | N==1 ) {
                ybar.w <- mean(y)
                design.effect.cell <- 1
+             } else {
+               design.effect.cell <- 1+ var(w/mean(w))
+               ybar.w <- weighted.mean(y, w)
              }
              ybar.w[is.nan(ybar.w)] <- 0
              
