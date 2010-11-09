@@ -10,19 +10,23 @@
 ##    - verify that we can graph every thing properly.
 ##
 createFakeData <- function (n=100) {
-    #library (maps)
     response <- factor (rep (c("Yes", "No"), length.out=n))
     response <- relevel (response, "Yes")
     var1 <- factor (rep (state.abb, length.out=n))
     var2 <- factor (rep (1:3, length.out=n))
     var3 <- factor (rep (1:5, length.out=n))
+    #var2 <- factor (rep (letters[1:3], length.out=n))
+    #var3 <- factor (rep (letters[1:5], length.out=n))
     weight <- rep (1, length.out=n)
     
     return (data.frame (response=response, var1=var1, var2=var2, var3=var3, weight=weight))
 }
 
 createFakePopulation <- function () {
-    population <- array (data=1, dim=c(length(state.abb), 3, 5))
+    population <- expand.grid (state.abb, factor (1:3), factor(1:5))
+    population <- cbind (population, rep(1, nrow(population))) 
+    names (population) <- c("var1", "var2", "var3", "population")
+    
     return (population)
 }
 
@@ -30,11 +34,17 @@ createFakePopulation <- function () {
 test.creation <- function () {
     fakeData <- createFakeData()
     fakePopulation <- createFakePopulation()
-    mrp <- newMrp (fakeData$response, fakeData[,2:4], fakePopulation)
+
+    fakeData$response <- as.numeric (as.character (factor (fakeData$response, labels=c(1,0))))
     
-    checkEquals (3, mrp@data@numberWays)
-    checkEqualsNumeric (numeric(0), mrp@theta.hat)
-    checkEquals (fakePopulation, mrp@population)
+    obj <- mrp (formula = response ~ var1 + var2 + var3,
+                poll=fakeData,
+                poll.weights="weight",
+                population=fakePopulation,
+                use="population")
+    
+    checkEqualsNumeric (3, getNumberWays(obj)["poll"])
+    checkTrue (all (getPopulation (obj)@.Data == 1))
 }
 
 test.multilevelRegression <- function () {

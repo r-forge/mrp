@@ -1,5 +1,5 @@
 exportClasses (mrp)
-exportMethods (getNumberWays, setPopulation,
+exportMethods (getNumberWays, setPopulation, getPopulation,
                setFormula, getFormula,
                mr, poststratify,
                getResponse, setPopulationOnes, getThetaHat,
