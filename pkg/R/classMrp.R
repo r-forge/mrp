@@ -39,6 +39,20 @@ mrp <- function(formula,
   population.varnames <- attr(terms(population.formula),"term.labels")
   population.varnames <- reorder.popterms(mrp.varnames,population.varnames)
   
+  {
+    response <- poll[, as.character (formula[[2]])]
+    if (!is.numeric (response)) {
+      stop (paste ("'", as.character (formula[[2]]), "' must be numeric values of 0 / 1", sep=""))
+    }
+    if (length (unique(na.exclude(response))) != 2) {
+        stop (paste ("'", as.character (formula[[2]]), "' must have two values", sep=""))
+    }
+    if (all (c(0, 1) == sort(unique(na.exclude(response))))) {
+      stop (paste ("'", as.character (formula[[2]]), "' have values of 0 and 1", sep=""))
+    }
+  }
+  
+  
   allvars <- all.vars(mrp.formula)
   if(poll.weights!=1){ allvars <- c(allvars,poll.weights) }
   poll <- na.omit(poll[,allvars])

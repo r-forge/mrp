@@ -10,8 +10,7 @@
 ##    - verify that we can graph every thing properly.
 ##
 createFakeData <- function (n=100) {
-    response <- factor (rep (c("Yes", "No"), length.out=n))
-    response <- relevel (response, "Yes")
+    response <- rep (c(1, 0), length.out=n)
     var1 <- factor (rep (state.abb, length.out=n))
     var2 <- factor (rep (1:3, length.out=n))
     var3 <- factor (rep (1:5, length.out=n))
@@ -35,8 +34,6 @@ test.creation <- function () {
     fakeData <- createFakeData()
     fakePopulation <- createFakePopulation()
 
-    fakeData$response <- as.numeric (as.character (factor (fakeData$response, labels=c(1,0))))
-    
     obj <- mrp (formula = response ~ var1 + var2 + var3,
                 poll=fakeData,
                 poll.weights="weight",
@@ -46,11 +43,19 @@ test.creation <- function () {
     checkEqualsNumeric (3, getNumberWays(obj)["poll"])
     checkTrue (all (getPopulation (obj)@.Data == 1))
 }
-
+    
 test.multilevelRegression <- function () {
     fakeData <- createFakeData()
-    mrp <- newMrp (fakeData$response, fakeData[,2:4], createFakePopulation(), weight=fakeData$weight)
-    mrp <- mr (mrp)
+    fakePopulation <- createFakePopulation()
+    
+    fakeData$response <- as.numeric (as.character (factor (fakeData$response, labels=c(1,0))))
+    
+    obj <- mrp (formula = response ~ var1 + var2 + var3,
+            poll=fakeData,
+            poll.weights="weight",
+            population=fakePopulation,
+            use="population")
+    
     
     ## TODO: add some asserts here.
 }
