@@ -47,8 +47,8 @@ mrp <- function(formula,
     if (length (unique(na.exclude(response))) != 2) {
         stop (paste ("'", as.character (formula[[2]]), "' must have two values", sep=""))
     }
-    if (all (c(0, 1) == sort(unique(na.exclude(response))))) {
-      stop (paste ("'", as.character (formula[[2]]), "' have values of 0 and 1", sep=""))
+    if (all (c(0, 1) != sort(unique(na.exclude(response))))) {
+      stop (paste ("'", as.character (formula[[2]]), "' has values of ",sort(unique(na.exclude(response))), sep=""))
     }
   }
   
