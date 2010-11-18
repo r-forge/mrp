@@ -14,8 +14,6 @@ createFakeData <- function (n=100) {
     var1 <- factor (rep (state.abb, length.out=n))
     var2 <- factor (rep (1:3, length.out=n))
     var3 <- factor (rep (1:5, length.out=n))
-    #var2 <- factor (rep (letters[1:3], length.out=n))
-    #var3 <- factor (rep (letters[1:5], length.out=n))
     weight <- rep (1, length.out=n)
     
     return (data.frame (response=response, var1=var1, var2=var2, var3=var3, weight=weight))
@@ -43,12 +41,21 @@ test.creation <- function () {
     checkEqualsNumeric (3, getNumberWays(obj)["poll"])
     checkTrue (all (getPopulation (obj)@.Data == 1))
 }
+
+# Current version of the code does not allow for non 0/1 responses.
+test.creation.failure <- function () {
+    fakeData <- createFakeData()
+    # This is what we are testing: non 0/1 response
+    fakeData$response <- factor (fakeData$response, labels=c("no", "yes"))
     
+    checkException (mrp (formula = response ~ var1 + var2 + var3,
+            poll=fakeData))
+}
+
+
 test.multilevelRegression <- function () {
     fakeData <- createFakeData()
     fakePopulation <- createFakePopulation()
-    
-    fakeData$response <- as.numeric (as.character (factor (fakeData$response, labels=c(1,0))))
     
     obj <- mrp (formula = response ~ var1 + var2 + var3,
             poll=fakeData,
@@ -56,66 +63,8 @@ test.multilevelRegression <- function () {
             population=fakePopulation,
             use="population")
     
+    checkEqualsNumeric (0.5, poststratify (obj), tolerance=1e-5)
+    checkEqualsNumeric (rep (0.5, nlevels (fakeData$var2)*nlevels(fakeData$var3)), poststratify (obj, ~var2+var3), tolerance=1e-5)
     
-    ## TODO: add some asserts here.
+    checkEqualsNumeric (fitted (obj@multilevelModel), poststratify (obj, ~var1+var2+var3), tolerance=1e-5)
 }
-
-
-test.poststratify <- function () {
-    fakeData <- createFakeData()
-    mrp <- newMrp (fakeData$response, fakeData[,2:4], weight=fakeData$weight)
-    mrp <- mr (mrp)
-    
-    population <- array (1, dim=dim (mrp@theta.hat), dimnames=dimnames (mrp@theta.hat))
-    mrp <- setPopulation (mrp, population)
-    
-    reference.dim <- dim (mrp@theta.hat)
-    
-    estimate <- p (mrp) # should return a single number indicating the whole estimate
-    checkEquals (1, length(estimate))
-    checkTrue (estimate > 0 & estimate < 1)
-    
-    estimate2 <- p (mrp, c(FALSE, FALSE, FALSE)) # should return the same number
-    checkEquals (estimate, estimate2)
-    
-    estimate3 <- p (mrp, c(TRUE, FALSE, FALSE)) # should return a vector with an estimate for each state
-    checkEquals (reference.dim[1], length (estimate3))
-    checkEquals (estimate, mean (estimate3))
-    
-    estimate4 <- p (mrp, c(TRUE, TRUE, FALSE)) # should return a vector with an estimate for each state
-    checkEquals (reference.dim[1:2], dim (estimate4))
-    checkEquals (estimate, mean (estimate4))
-    
-    estimate5 <- p (mrp, c(TRUE, TRUE, TRUE)) # should return a vector with an estimate for each state
-    checkEquals (reference.dim, dim (estimate5))
-    checkEquals (estimate, mean(estimate5))
-    
-    
-    population <- array (1/length (mrp@theta.hat), dim=dim (mrp@theta.hat), dimnames=dimnames (mrp@theta.hat))
-    mrp <- setPopulation (mrp, population)
-    new.estimate <- p (mrp) # should return a single number indicating the whole estimate
-    checkEquals (estimate, new.estimate)
-    
-    new.estimate2 <- p (mrp, c(FALSE, FALSE, FALSE)) # should return the same number
-    checkEquals (estimate2, new.estimate2)
-    
-    new.estimate3 <- p (mrp, c(TRUE, FALSE, FALSE)) # should return a vector with an estimate for each state
-    checkEquals (estimate3, new.estimate3)
-    
-    new.estimate4 <- p (mrp, c(TRUE, TRUE, FALSE)) # should return a vector with an estimate for each state
-    checkEquals (estimate4, new.estimate4)
-    
-    new.estimate5 <- p (mrp, c(TRUE, TRUE, TRUE)) # should return a vector with an estimate for each state
-    checkEquals (estimate5, new.estimate5)
-}
-
-## mrp.ex1 <- new(Class="mrp")
-## mrp.ex1
-## 
-
-## Alternative:
-## 2) run multilevel regression with different model
-## test.multilevelRegressionWithCustomModel <- function () {
-##     ## checkEquals (0, 1)
-## }
-
