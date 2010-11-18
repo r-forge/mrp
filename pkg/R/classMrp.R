@@ -37,7 +37,7 @@ mrp <- function(formula,
   population.varnames <- attr(terms(population.formula),"term.labels")
   population.varnames <- reorder.popterms(mrp.varnames,population.varnames)
   
-  
+  # TODO find a more elegant solution for requiring 0/1 values for the response.
   {
     response <- poll[, as.character (formula[[2]])]
     if (!is.numeric (response)) {
