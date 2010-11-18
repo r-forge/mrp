@@ -6,6 +6,7 @@
 \alias{getResponse,mrp-method}
 \alias{getThetaHat,mrp-method}
 \alias{getPopulation,mrp-method}
+\alias{getPopulation}
 \alias{setPopulation,mrp-method}
 \alias{setPopulationOnes,mrp-method}
 \alias{getFormula,mrp-method}

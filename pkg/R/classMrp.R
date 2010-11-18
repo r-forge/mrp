@@ -5,8 +5,6 @@ setClass(Class="mrp",
            formula = "formula",
            multilevelModel = "mer",
            population = "NWayData"),
-         prototype=prototype (
-           formula=as.formula("cbind(response.yes, response.no) ~ 1 + (1 | var1) + (1 | var2) + (1 | var3) + (1 | var1:var2) + (1 | var1:var3) + (1 | var2:var3)")),
          validity=function (object) {
             if (is.null (object@data)) {
               stop ("[mrp: validation] flattened data is missing")
@@ -38,6 +36,7 @@ mrp <- function(formula,
   population.terms <- terms(population.formula)
   population.varnames <- attr(terms(population.formula),"term.labels")
   population.varnames <- reorder.popterms(mrp.varnames,population.varnames)
+  
   
   {
     response <- poll[, as.character (formula[[2]])]
