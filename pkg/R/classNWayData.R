@@ -124,6 +124,7 @@ setMethod (f="makeNWay",
                prop <- sum(cell[,weights])
                return(prop)
              }
+
              N <- nrow(cell)
              y <- cell[,response]
              ## quietly allow easy noweight
@@ -133,13 +134,14 @@ setMethod (f="makeNWay",
              }
              w <- cell[,weights]
              ## do weighted mean
-             ## do design effect with cases N=0,1 only if weights provided
-             if( all(w==1) | N==1 ) {
-               ybar.w <- mean(y)
-               design.effect.cell <- 1
+			 ybar.w <- weighted.mean(y, w)
+			 
+             if( N > 1 & all(w==1) ) {
+				# This is just for speed. Can use the other loop without 
+				# an if statement and it will produce the same result.
+				design.effect.cell <- 1
              } else {
                design.effect.cell <- 1+ var(w/mean(w))
-               ybar.w <- weighted.mean(y, w)
              }
              ybar.w[is.nan(ybar.w)] <- 0
              
