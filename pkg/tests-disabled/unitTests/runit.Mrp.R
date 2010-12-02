@@ -31,7 +31,6 @@ createFakePopulation <- function () {
 test.creation <- function () {
     fakeData <- createFakeData()
     fakePopulation <- createFakePopulation()
-browser()
     obj <- mrp (formula = response ~ var1 + var2 + var3,
                 poll=fakeData,
                 poll.weights="weight",
