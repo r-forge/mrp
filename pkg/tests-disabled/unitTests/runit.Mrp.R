@@ -9,8 +9,8 @@
 ##    - check that average values match up
 ##    - verify that we can graph every thing properly.
 ##
-createFakeData <- function (n=100) {
-    response <- rep (c(1, 0), length.out=n)
+createFakeData <- function (n=500) {
+    response <- rep(c(1,0), n)
     var1 <- factor (rep (state.abb, length.out=n))
     var2 <- factor (rep (1:3, length.out=n))
     var3 <- factor (rep (1:5, length.out=n))
@@ -31,7 +31,7 @@ createFakePopulation <- function () {
 test.creation <- function () {
     fakeData <- createFakeData()
     fakePopulation <- createFakePopulation()
-
+browser()
     obj <- mrp (formula = response ~ var1 + var2 + var3,
                 poll=fakeData,
                 poll.weights="weight",
