@@ -193,3 +193,22 @@ setMethod (f="makeOnesNWay",
 is.NWayData <- function(object) {
   inherits(object,"NWayData")
 }
+
+NWayData <- function (df, variables, response, weights, type="poll") {
+  nway <- daply(df, .variables=variables, pop=FALSE,
+      .fun=makeNWay, .progress="text",
+      response=response, weights)
+  nway <- new("NWayData", nway, type=type,
+      levels=saveNWayLevels(df))
+  
+  return (nway)
+}
+
+NWayData2df <- function (nway) {
+  data <- adply(nway, .margins=1:getNumberWays(nway), 
+      flattenNWay,
+      design.effect=getDesignEffect(nway))
+  data <- restoreNWayLevels(df=data,nway=nway)
+  
+  return (data)
+}

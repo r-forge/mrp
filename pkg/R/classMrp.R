@@ -61,21 +61,28 @@ mrp <- function(formula,
   #### ------------------       ##################
   
   
+  
+  
   ## Set up and store poll NWayData
   cat("\nMaking NWay poll data:\n")
   if (sum(mrp.varnames %in% names(poll)) != length(mrp.varnames) ) {
     stop(paste("\nVariable ",sQuote(mrp.varnames[!(mrp.varnames %in% names(poll))])," not found in poll data."))
   }
+  
+  ## TODO: Want this
+   
+  data <- NWayData2df (NWayData (df=poll, variables=mrp.varnames, response=as.character(mrp.formula[[2]]), weights=poll.weights, type="poll"))
   ##### When multiple polls, renormalize mean1 *in each poll*
-  poll.nway <- daply(poll, .variables=mrp.varnames, pop=FALSE,
-      .fun=makeNWay, .progress="text",
-      response=as.character(mrp.formula[[2]]), weights=poll.weights)
-  poll.nway <- new("NWayData",poll.nway,type="poll",
-      levels=saveNWayLevels(poll))
-  data <- adply(poll.nway, .margins=1:getNumberWays(poll.nway), 
-      flattenNWay,
-      design.effect=getDesignEffect(poll.nway))
-  data <- restoreNWayLevels(df=data,nway=poll.nway)
+  #poll.nway <- daply(poll, .variables=mrp.varnames, pop=FALSE,
+  #    .fun=makeNWay, .progress="text",
+  #    response=as.character(mrp.formula[[2]]), weights=poll.weights)
+  #poll.nway <- new("NWayData",poll.nway,type="poll",
+  #    levels=saveNWayLevels(poll))
+  #data <- adply(poll.nway, .margins=1:getNumberWays(poll.nway), 
+  #    flattenNWay,
+  #    design.effect=getDesignEffect(poll.nway))
+  #data <- restoreNWayLevels(df=data,nway=poll.nway)
+  
   ## Do merges and eval expressions on the data
   data.expressions <- add[sapply(add, is.expression)]
   data.merges <- add[sapply(add, is.data.frame)]
@@ -111,13 +118,15 @@ mrp <- function(formula,
       if(!(identical(sapply(poll[,population.varnames$inpop], levels), 
                 sapply(pop[,population.varnames$inpop], levels)) )) {
         sapply(population.varnames$inpop, function(x) {
-                        if(length(levels(poll[,x])) != length(levels(pop[,x]))){
-                            warning("Non-conformable population array. Poststratification will not work unless factor levels are identical. You can still get raw estimates.",call.=FALSE)
-                            warning(paste("For",sQuote(x),
+              if(length(levels(poll[,x])) != length(levels(pop[,x]))){
+                warning("Non-conformable population array. Poststratification will not work unless factor levels are identical. You can still get raw estimates.",call.=FALSE)
+                warning(paste("For",sQuote(x),
                         "poll has", length(levels(poll[,x])),
                         "; pop has",length(levels(pop[,x]))),call.=FALSE)
-                        }
-                    })}
+              }
+            })}
+      
+      
       pop.nway <- daply(pop, .variables=unlist(population.varnames$inpop),
           .fun=makeNWay,pop=TRUE,weights=use,
           .progress="text"
@@ -209,7 +218,7 @@ setMethod (f="getPopulation",
 		signature=signature(object="mrp"),
 		definition=function(object) {
 			stopifnot (class (object) == "mrp")
-		      
+		  
 			return (object@population)
 		})
 
@@ -275,17 +284,17 @@ setGeneric ("mr", function (object,mr.formula,...) { standardGeneric ("mr")})
 setMethod (f="mr",
     signature=signature(object="mrp"),
     definition=function(object,mr.formula,...) {
-        if(missing(mr.formula)) {
-            fm <- object@formula
-        } else {
-            fm <- update.formula(object@formula, mr.formula)
-            object@formula <- fm
-        }
-        response <- as.matrix(getResponse(object))
-        object@multilevelModel <- glmer(fm,
+      if(missing(mr.formula)) {
+        fm <- object@formula
+      } else {
+        fm <- update.formula(object@formula, mr.formula)
+        object@formula <- fm
+      }
+      response <- as.matrix(getResponse(object))
+      object@multilevelModel <- glmer(fm,
           data=object@data,
           family=quasibinomial(link="logit"),...)
-        return (object)
+      return (object)
     })
 
 
