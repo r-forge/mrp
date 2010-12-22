@@ -59,57 +59,19 @@ mrp <- function(formula,
   
   
   #### ------------------       ##################
-  
-  
-  
-  
   ## Set up and store poll NWayData
   cat("\nMaking NWay poll data:\n")
   if (sum(mrp.varnames %in% names(poll)) != length(mrp.varnames) ) {
     stop(paste("\nVariable ",sQuote(mrp.varnames[!(mrp.varnames %in% names(poll))])," not found in poll data."))
   }
   
-  ## TODO: Want this
-   
-  data <- NWayData2df (NWayData (df=poll, variables=mrp.varnames, response=as.character(mrp.formula[[2]]), weights=poll.weights, type="poll"))
-  ##### When multiple polls, renormalize mean1 *in each poll*
-  #poll.nway <- daply(poll, .variables=mrp.varnames, pop=FALSE,
-  #    .fun=makeNWay, .progress="text",
-  #    response=as.character(mrp.formula[[2]]), weights=poll.weights)
-  #poll.nway <- new("NWayData",poll.nway,type="poll",
-  #    levels=saveNWayLevels(poll))
-  #data <- adply(poll.nway, .margins=1:getNumberWays(poll.nway), 
-  #    flattenNWay,
-  #    design.effect=getDesignEffect(poll.nway))
-  #data <- restoreNWayLevels(df=data,nway=poll.nway)
-  
-  ## Do merges and eval expressions on the data
-  data.expressions <- add[sapply(add, is.expression)]
-  data.merges <- add[sapply(add, is.data.frame)]
-  data$finalrow <- 1:nrow(data)
-  if(length(data.expressions)>0){
-    data <- within(data,sapply(data.expressions, eval.parent, n=2))
-  }
-  ## Attempt merges. 
-  if(length(data.merges)>0){
-    for(d in 1:length(data.merges)){
-      data <- join(data,data.merges[[d]],type="left")
-    }
-  }
-  ## ## These are an obnoxious hack but we *really* don't want it
-  ## ## to get confused about the order of the data.
-  ### UPDATE: should be fixed by using plyr::join instead of base::merge
-  ## data <- data[order(data$finalrow),]
-  ## rownames(data) <- data$finalrow
-  
-  
-  #### ------------------       ##################
-  
-  if (!is.null(pop)) { ## set up and store population NWayData
-    if(is.data.frame(pop)) {
+  poll.nway <- NWayData (df=poll, variables=mrp.varnames, response=as.character(mrp.formula[[2]]), weights=poll.weights, type="poll")
+  if (is.null(pop)) {
+    pop.nway <- makeOnesNWay(poll.nway)
+  } else {
+    if(class(pop)!= "NWayData" && is.data.frame(pop)) { 
       ## construct the population array based on population formula
       ## next, repeat it across any extra dimensions in poll
-      
       na.omit(pop[, {names(pop) %in% c(population.varnames$inpop, use)}])
       cat("\nMaking NWay population data:\n")    
       if (sum(population.varnames$inpop %in% names(pop)) != length(population.varnames$inpop) ) {
@@ -126,19 +88,30 @@ mrp <- function(formula,
               }
             })}
       
-      
-      pop.nway <- daply(pop, .variables=unlist(population.varnames$inpop),
-          .fun=makeNWay,pop=TRUE,weights=use,
-          .progress="text"
-      )
-      pop.nway <- array(rep(pop.nway,
-              length.out=length(poll.nway)),
-          dim(getNEffective(poll.nway)), dimnames(getNEffective(poll.nway)))
-      
-      pop.nway <- new("NWayData",pop.nway,type="population",
-          levels=saveNWayLevels(pop))
+      pop.nway <- NWayData (df=pop, variables=unlist(population.varnames$inpop), weights=use, type="population", reference.poll=poll.nway)    
+    } else {
+      stop ("population not recognized")
     }
-    ## if (is.NWayData(pop)) {
+  }
+  
+  ## Do merges and eval expressions on the data  
+  data <- NWayData2df (poll.nway)
+  data.expressions <- add[sapply(add, is.expression)]
+  data.merges <- add[sapply(add, is.data.frame)]
+  data$finalrow <- 1:nrow(data)
+  if(length(data.expressions)>0){
+    data <- within(data,sapply(data.expressions, eval.parent, n=2))
+  }
+  ## Attempt merges. 
+  if(length(data.merges)>0){
+    for(d in 1:length(data.merges)){
+      data <- join(data,data.merges[[d]],type="left")
+    }
+  }
+  #### ------------------       ##################
+  
+  if (!is.null(pop)) { ## set up and store population NWayData
+      ## if (is.NWayData(pop)) {
     ##   if(!identical(getNumberWays(pop), getNumberWays(poll))){
     ##     warning(paste("Population (",
     ##                   paste(attr(getNumberWays(pop),"ways"),collapse=" + "),
@@ -148,7 +121,7 @@ mrp <- function(formula,
     ##   pop.nway <- pop
     ## }
   } else { ## No population supplied
-    pop.nway <- makeOnesNWay(poll.nway)
+    
   }
   
   #### ------------------       ##################
