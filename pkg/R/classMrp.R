@@ -108,26 +108,6 @@ mrp <- function(formula,
       data <- join(data,data.merges[[d]],type="left")
     }
   }
-  #### ------------------       ##################
-  
-  if (!is.null(pop)) { ## set up and store population NWayData
-      ## if (is.NWayData(pop)) {
-    ##   if(!identical(getNumberWays(pop), getNumberWays(poll))){
-    ##     warning(paste("Population (",
-    ##                   paste(attr(getNumberWays(pop),"ways"),collapse=" + "),
-    ##                   ")\nis different from poll (",
-    ##                   paste(attr(getNumberWays(poll),"ways"),collapse=" + "),")",sep=""))
-    ##   }
-    ##   pop.nway <- pop
-    ## }
-  } else { ## No population supplied
-    
-  }
-  
-  #### ------------------       ##################
-  
-  
-  
   
   
   ## build the default formula unless one has been supplied
