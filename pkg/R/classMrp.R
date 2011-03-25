@@ -54,16 +54,17 @@ mrp <- function(formula,
   
   allvars <- all.vars(mrp.formula)
   if(poll.weights!=1){ allvars <- c(allvars,poll.weights) }
-  poll <- na.omit(poll[,allvars])
-  
-  
-  
+
+  ## for complete, imputed datasets don't drop any columns.
+  ## Useful especially when continuous imputed rather than rescaled
+  ## below as an 'add'.
+  if(any(is.na(poll))) {
+    poll <- na.omit(poll[,allvars])
+  }
+   
   #### ------------------       ##################
   
-  
-  
-  
-  ## Set up and store poll NWayData
+    ## Set up and store poll NWayData
   cat("\nMaking NWay poll data:\n")
   if (sum(mrp.varnames %in% names(poll)) != length(mrp.varnames) ) {
     stop(paste("\nVariable ",sQuote(mrp.varnames[!(mrp.varnames %in% names(poll))])," not found in poll data."))
@@ -99,13 +100,7 @@ mrp <- function(formula,
       data <- join(data,data.merges[[d]],type="left")
     }
   }
-  ## ## These are an obnoxious hack but we *really* don't want it
-  ## ## to get confused about the order of the data.
-  ### UPDATE: should be fixed by using plyr::join instead of base::merge
-  ## data <- data[order(data$finalrow),]
-  ## rownames(data) <- data$finalrow
-  
-  
+    
   #### ------------------       ##################
   
   if (!is.null(pop)) { ## set up and store population NWayData

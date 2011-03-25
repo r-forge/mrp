@@ -221,3 +221,24 @@ NWayData2df <- function (nway) {
   
   return (data)
 }
+
+## Transform for fitting in Stan, etc.
+
+"write.stan" <- function(data, x, y, fileprefix="./stan") {
+  data <- sapply(data, function(col) {
+    if(is.factor(col) & length(levels(col)) == 2) {
+      col <- as.integer(col) - 1
+    }
+    if(is.factor(col) & length(levels(col)) > 2) {
+      col <- as.integer(col)
+    }
+    return(col)
+  })  
+  y <- data[,y]
+  x <- data[,x]
+  write.table(x, file=paste(fileprefix,"x.dat",sep=""),
+              row.names=FALSE, col.names=FALSE)
+  write.table(as.integer(y)-1,file=paste(fileprefix,"y.dat",sep=""),
+              row.names=FALSE, col.names=FALSE)
+}
+    
