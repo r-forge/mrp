@@ -166,6 +166,28 @@ load("~/mrp/malecki/naes08.Rdata")
 
 load("~/Desktop/censusMRP/census.Rdata")
 naes.vars <- c(316,356,353,232,210,211)
+## econ: tax rates a problem, favor cutting taxes or strengthening social security, federal gov should reduce top tax rate, flat tax, spend more on social security, invest social security in stock market, poverty a problem, reduce income differences, spend more on aid to mothers with young children, expend effort to eliminate business regulations;
+## give school vouchers, restrict abortion, ban abortion, favor death penalty, favor gun licenses, restrict gun purchases, underpunished criminals a problem, immigration a problem, gays in military, stop job discrimination against gays, stop job discrimination against blacks, women, allow school prayer. 
+
+vargrep1 <- c("tax", "social", "invest", "pover", "income" ,"equal" , "welfare", "trade", "regul")
+vargrep2 <- c("vouch", "abor", "death","pun", "gun" ,"crim", "citiz","imm", "gay" ,"same", "discr", "pray", "env","oil")
+
+lapply(vargrep1, function(w) {
+  v <- grep(w, names(naes08))
+  vtext <- names(naes08)[v]
+  names(vtext) <- v
+  return(vtext)
+})
+lapply(vargrep2, function(w) {
+  v <- grep(w, names(naes08))
+  vtext <- names(naes08)[v]
+  names(vtext) <- v
+  return(vtext)
+})
+
+naes.vars1 <- c(162, )
+naes.vars2 <- c(232, 316, 282, 353, 311)
+
 naes.ways <- c(1010,1011,1012,1021,1019,1020,1026:1032,1009,1010,1039,1040)
 names(naes08) <- make.names(attributes(naes08)$var.labels)
 names(naes08)[naes.ways]
