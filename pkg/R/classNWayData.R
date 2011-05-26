@@ -224,8 +224,8 @@ NWayData2df <- function (nway) {
 
 ## Transform for fitting in Stan, etc.
 
-"write.stan" <- function(data, x, y, fileprefix="./stan") {
-  data <- sapply(data, function(col) {
+"write.stan" <- function(data, x, y, fileprefix="stan") {
+  data <- as.data.frame(sapply(data, function(col) {
     if(is.factor(col) & length(levels(col)) == 2) {
       col <- as.integer(col) - 1
     }
@@ -233,12 +233,17 @@ NWayData2df <- function (nway) {
       col <- as.integer(col)
     }
     return(col)
-  })  
+  }))
   y <- data[,y]
   x <- data[,x]
+  x$intercept <- 1
   write.table(x, file=paste(fileprefix,"x.dat",sep=""),
               row.names=FALSE, col.names=FALSE)
-  write.table(as.integer(y)-1,file=paste(fileprefix,"y.dat",sep=""),
+  write.table(y,file=paste(fileprefix,"y.dat",sep=""),
               row.names=FALSE, col.names=FALSE)
+  data <- cbind(y,x)
+  invisible(data)
 }
     
+
+## head(write.stan(CCES.complete,x=72:79, y="ban.gaymarr"))

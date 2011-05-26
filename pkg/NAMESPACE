@@ -14,7 +14,7 @@ exportMethods (getNumberWays,
                getYbarWeighted, getN,
                getNEffective,
                getDesignEffect)
-S3Method(is.NWayData)
+#S3Method(is, NWayData)
 
 #exportClasses (MrpVisualizer)
 #exportMethods (visualize, placeMisc,
