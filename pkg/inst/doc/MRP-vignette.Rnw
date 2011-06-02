@@ -209,7 +209,7 @@ The running example is the same combined poll data and model in Kastellec's \hre
 \subsection{Data}
 \label{sec:data}
 
-The data for the example are the combined survey results in the “marriage.data” data.frame, and state-level predictors in “Statelevel” data.frame. Both of these are loaded by the command\\ \texttt{data(samesexmarriage)}. The package includes several other pieces of data that are useful to US practitioners of MRP:
+The data for the example are the combined survey results in the “marriage.data” data.frame, and state-level predictors in “Statelevel” data.frame. Both of these are loaded by the command\\ \texttt{data(samesexmarriage)}. The package includes several other pieces of data that are useful to US users of MRP:
 \begin{description}
 \item[mrp.census] Census data with main data columns `weighted2000', `weighted2004', and `weighted2008'. See documentation for \texttt{mrp.census} for details on the demographic features in the file.
 \item[mrp.regions] A data.frame with state two-letter abbreviations and five census region codes, with DC as its own region.
@@ -311,7 +311,7 @@ xtable(100*poststratify(mrp.simple, ~ edu+age), digits=0)
 \subsection{Basic Map Plotting}
 \label{sec:basic-map-plotting}
 
-The package makes it easy to plot results onto maps.\footnote{Maps very quickly blow up file sizes, and bitmap renditions may be acceptable for many documents, at least for drafts. For this reason we have submitted a patch to R to add a `png' option for Sweave.} For a wide variety of conditioning plots the \emph{MRP} \texttt{spplot} method preserves the same formula interface and to build complex maps. The method for \texttt{mrp} objects extends the \texttt{spplot} method, which uses Lattice as the “high level” graphics language.
+The package makes it easy to plot results onto maps.\footnote{Maps very quickly blow up file sizes, and bitmap renditions may be acceptable for many documents, at least for drafts. We suggest PNG.} For a wide variety of conditioning plots the \emph{MRP} \texttt{spplot} method preserves the same formula interface and to build complex maps. The method for \texttt{mrp} objects extends the \texttt{spplot} method, which uses Lattice as the “high level” graphics language.
 In future versions of \emph{MRP} we hope to make \href{http://spatialanalysis.co.uk/2010/09/27/maps-with-ggplot2/}{\emph{ggplot2} maps} with poststratified data similarly easy.
 
 A map of results poststratified by state with no further conditioning (collapsed across the other strata) using the included map object and \texttt{spplot} defaults is fantastically easy to produce.
@@ -334,10 +334,12 @@ The full model includes intercepts for poll (the data combine several polls), fo
 \subsection{Modifying Population Strata}
 \label{sec:modify-popul-strata}
 
-We would like to separate the estimation data by poll, but obviously the population data are the same across polls. To remove a stratification dimension, subtract it from the initial formula by adding this argument:
+We would like to separate the estimation data by poll, but in general the population data will be the same across polls. To remove a stratification dimension, subtract it from the initial formula by adding this argument:
 <<eval=FALSE>>=
 population.formula= . ~ . - poll
 @ 
+
+In the case where population arrays may differ across polls, such as polls over time with contemporaneous census values, the current method would require duplicating the census data across all polls for which it is the same and creating a factor of name and levels corresponding to those of \texttt{poll}.
 
 \subsection{Joining Predictors and Transforming Data}
 \label{sec:join-pred-transf}
@@ -392,7 +394,7 @@ mrp.statelevel <- mrp(yes.of.all~
 
 The \texttt{spplot,mrp-method} uses all parts of the fitted \texttt{mrp} object to produce beautiful plots with meaningful labels with the familiar fomula interface, intelligent subsetting, easy customization, and the addition of other information to the plot by selectively modifying the stroke on a list of features. 
 
-The \texttt{spplot} method takes an \texttt{mrp} object and a stratification specification, and merges it onto a map from the SpatialPolygonsDataFrame class, provided by the \emph{sp} package. Using \emph{maptools}, users can read in their own ESRI shapefiles. Shapefiles are somewhat of a standard for GIS applications. As mentioned in the data section above, we have included a map read into R from a publicly available shapefile. According to Wickham, \emph{sp} maps can be used with \emph{ggplot2} via \texttt{fortify} methods; we plan to make poststratified results more accessible to \emph{ggplot2} methods in the future. 
+The \texttt{spplot} method takes an \texttt{mrp} object and a stratification specification, and merges it onto a map from the SpatialPolygonsDataFrame class, provided by the \emph{sp} package. Using \emph{maptools}, users can read in their own ESRI “shapefiles” (actually a collection of files, in either a folder or a zip archive. Shapefiles are somewhat of a standard for GIS applications. As mentioned in the data section above, we have included a map read into R from a publicly available shapefile. According to Wickham, \emph{sp} maps can be used with \emph{ggplot2} via \texttt{fortify} methods; we plan to make poststratified results more accessible to \emph{ggplot2} methods in the future. 
 
 \subsection{Conditioning Panels}
 \label{sec:conditioning-panels}
