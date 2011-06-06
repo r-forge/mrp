@@ -88,11 +88,25 @@ mrp <- function(formula,
   #data <- restoreNWayLevels(df=data,nway=poll.nway)
   
   ## Do merges and eval expressions on the data
-  data.expressions <- add[sapply(add, is.expression)]
+  data.expressions <- as.expression(add[sapply(add, is.expression)])
   data.merges <- add[sapply(add, is.data.frame)]
   data$finalrow <- 1:nrow(data)
+
+  ## sort the expressions and build higher-order interactions
+  ## unless the user has done this already
+  ##
+  ## if(length(mrp.varnames) >= 2) {
+  ##   interaction.expressions <- list()
+  ##   sapply(2:length(mrp.varnames), function(o) {
+  ##     int.vars <- as.list(combn(mrp.varnames, o))
+  ##     sapply(int.vars, function(i) {
+  ##       attr(i)
+  ##     interaction.expressions[o]
+  ##   } )
+  ## }
+  ##
   if(length(data.expressions)>0){
-    data <- within(data,sapply(data.expressions, eval.parent, n=2))
+    data <- within(data, sapply(data.expressions, eval.parent, n=2))
   }
   ## Attempt merges. 
   if(length(data.merges)>0){
