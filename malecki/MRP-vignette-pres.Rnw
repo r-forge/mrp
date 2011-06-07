@@ -13,13 +13,13 @@
 \usepackage[no-math]{fontspec}
 \usepackage{xltxtra}
 \defaultfontfeatures{Mapping=tex-text}
-\setsansfont[BoldFont=Myriad Pro Semibold]{Myriad Pro}
-\setbeamerfont{frametitle}{family={\fontsize{14}{12}\fontspec{Gotham-Medium}} }
+%\setsansfont[BoldFont=Myriad Pro Semibold]{Myriad Pro}
+%\setbeamerfont{frametitle}{family={\fontsize{14}{12}\fontspec{Gotham-Medium}} }
 \setbeamercolor{frametitle}{fg=MidnightBlue}
 
-\setbeamerfont{title}{family=\fontspec{Gotham-Bold}}
-\setbeamerfont{minionreg}{family*={MinionPro-OsF}}
-\setbeamerfont{abstract}{family*={MinionPro-OsF}}
+%\setbeamerfont{title}{family=\fontspec{Gotham-Bold}}
+%\setbeamerfont{minionreg}{family*={MinionPro-OsF}}
+%\setbeamerfont{abstract}{family*={MinionPro-OsF}}
 \setbeamercolor{caption}{fg=MidnightBlue}
 \setbeamertemplate{caption}{\insertcaption}
 \setmonofont[Scale=0.8]{Menlo}
@@ -89,8 +89,7 @@ load("/Users/malecki/mrp/malecki/fitted.Rdata")
 \end{frame}
 \begin{frame}
   \frametitle{Other Data}
-
-\begin{description}
+\begin{description}[containsverbatim]
 \item[mrp.census] Census data with main data columns `weighted2000',
   `weighted2004', and `weighted2008'. See documentation for
   \texttt{mrp.census} for details on the demographic features in the
@@ -100,18 +99,16 @@ load("/Users/malecki/mrp/malecki/fitted.Rdata")
 \item[spmap.states] A projected map object with state names,
   \textsc{fips} codes, and two-letter state abbreviations.
 \end{description}
-\end{frame}
-
-\begin{frame}
-  \frametitle{loading data}
-  
+\begin{minipage}{1.0\linewidth}  
 <<load-data,echo=TRUE>>=
 data(samesexmarriage)
 data(mrp.census)
 data(mrp.regions)
 data(spmap.states)
 @ 
+\end{minipage}
 \end{frame}
+
 
 \section{Fitting a basic model}
 \label{sec:fitting-basic-model}
@@ -227,7 +224,7 @@ A map of results poststratified by state with no further conditioning (collapsed
   \centering
   \caption{Support for same-sex marraige from simple MRP model.}
   \label{fig:firstmap}
-<<firstmap,fig=TRUE,pdf=FALSE,png=TRUE,eps=FALSE,width=8,height=4,resolution=144>>=
+<<firstmap,eval=FALSE,fig=TRUE,pdf=FALSE,png=TRUE,eps=FALSE,width=8,height=4,resolution=144>>=
 print(spplot(mrp.simple, state~state))
 @   
 \end{figure}
@@ -383,7 +380,7 @@ print(spplot(mrp.statelevel, state ~ edu+age,
   \caption{The final map shows support for same-sex marriage by age cohort and level of education, centered around the national poststratified average of 34\%.}
   \label{fig:finalmap}
 \setkeys{Gin}{width=\linewidth}
-<<finalmap,fig=TRUE,pdf=FALSE,png=TRUE,eps=FALSE,width=6.5,height=6.5,echo=FALSE,resolution=144>>=
+<<finalmap,eval=FALSE,fig=TRUE,pdf=FALSE,png=TRUE,eps=FALSE,width=6.5,height=6.5,echo=FALSE,resolution=144>>=
 <<finalmapcode>>
 @   
 \end{figure}
