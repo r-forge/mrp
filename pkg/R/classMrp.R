@@ -186,7 +186,10 @@ mrp <- function(formula,
   )
   cat("\nRunning Multilevel Regression step.\n")
   response <- as.matrix(getResponse(mrp))
-  mrp <- mr(mrp, ...)
+  try(mrp <- mr(mrp,
+            ## blmer options here, possibly moved to blmer defaults
+            
+            ,...))
   return(mrp)
   
 }

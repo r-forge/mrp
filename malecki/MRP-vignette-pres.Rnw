@@ -1,171 +1,36 @@
-\documentclass[11pt]{article} %%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[11pt,xetex,xcolor=pdftex,dvipsnames,table,t]{beamer}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-%%%
-%%% Blank Sweave Document
-%%%   This uses xelatex and MinionPro. Most users will need
-%%%   to comment out stuff in the 'fonts' section below.
-%%%   It should compile in regular pdflatex, if you comment
-%%%   out xltxtra and fontspec.
-%%% also, you probably need to comment out \usepackage{Sweave}
-%%%   to allow R to insert its own ugly default one.
-%%% 
-%%% mjm / 2009-11-23 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% OVERLAY for uncovers
+% \begin{itemize}[<+->]
+% \begin{itemize}[<+-| alert@+>]
 
-
-%%% options to change font. If you want to play with MinionPro,
-%%% come bug me sometime. --mike
-%%% LOTS OF COOL FONT INFO AT http://www.tug.dk/FontCatalogue/
-%%% NO NEED EVER TO USE COMPUTER MODERN, AN ABOMINATION
-%%% see also http://nitens.org/taraborelli/latex and
-%%% http://scripts.sil.org/XeTeX
-%\usepackage{times}
-%\usepackage{cmbright}
-%\renewcommand\sfdefault{phv}% use helvetica for sans serif
-%\renewcommand\familydefault{\sfdefault}% use sans serif by default
-\usepackage[dvipsnames,usenames]{xcolor}
-%\usepackage[opticals,medfamily,minionint,footnotefigures]{MinionPro}
+\usetheme[compress]{Singapore}
+\usecolortheme[named=OliveGreen]{structure}
+\usefonttheme{professionalfonts}
+%\usepackage[slides,textosf,mathlf,amsbb,minionint,footnotefigures]{MinionPro}
+\usepackage{ucs}
+\usepackage{arev}
 \usepackage[no-math]{fontspec}
 \usepackage{xltxtra}
-%\VignetteIndexEntry{MRP Primer Reloaded}
+\defaultfontfeatures{Mapping=tex-text}
+\setsansfont[BoldFont=Myriad Pro Semibold]{Myriad Pro}
+\setbeamerfont{frametitle}{family={\fontsize{14}{12}\fontspec{Gotham-Medium}} }
+\setbeamercolor{frametitle}{fg=MidnightBlue}
 
+\setbeamerfont{title}{family=\fontspec{Gotham-Bold}}
+\setbeamerfont{minionreg}{family*={MinionPro-OsF}}
+\setbeamerfont{abstract}{family*={MinionPro-OsF}}
+\setbeamercolor{caption}{fg=MidnightBlue}
+\setbeamertemplate{caption}{\insertcaption}
+\setmonofont[Scale=0.8]{Menlo}
 
-%%%Set up bold Minion Pro math
-% \usepackage{bm}
-% \DeclareMathAlphabet\mathbf {T1} {MinionPro-OsF}{b}{n}
-% \SetMathAlphabet\mathit  {bold}{T1} {MinionPro-OsF}{b}{it}
-% \SetSymbolFont{operators}{bold}{T1} {MinionPro-OsF}{b}{n}
-% \SetSymbolFont{letters}  {bold}{OML}{MinionPro-TOsF} {b}{it}
-% \DeclareMathVersion{boldtabular}
-% \SetSymbolFont{operators}{boldtabular}{T1} {MinionPro-OsF}{b}{n}
-% \SetSymbolFont{letters}  {boldtabular}{OML}{MinionPro-TOsF}  {b}{it}
-% \SetMathAlphabet\mathit  {boldtabular}{T1} {MinionPro-OsF}{b}{it}
-% \DeclareMathAlphabet\mathebf {T1} {MinionPro-OsF}{eb}{n}
+\usepackage{dcolumn}
+\usepackage[english]{babel}
+\usepackage{pgf,pgfnodes,pgfautomata,pgfheaps}
+%\usepackage{amsmath,amssymb}
+%\usepackage[latin1]{inputenc}
+\setbeamercovered{dynamic}
 
-%%% Hanging indents: args length, number of lines.
-%%% \begin{hangparas}{1em}{1}
-\usepackage{hanging} 
-%%% Date formatting, defn of isodate
-\usepackage{datetime}
-\renewcommand{\dateseparator}{-}
-\newdateformat{isodate}{%
-\THEYEAR\dateseparator\twodigit{\THEMONTH}\dateseparator\twodigit{\THEDAY}}
-
-%%% PDF setup -- fill in the title
-\usepackage[bookmarks, colorlinks, breaklinks, pdftitle={ },pdfauthor={Michael Malecki}]{hyperref}  
-\hypersetup{linkcolor=NavyBlue,citecolor=NavyBlue,filecolor=NavyBlue,urlcolor=NavyBlue} 
-
-%% Alter some LaTeX defaults for better treatment of figures:
-%% This is from the first result of google: "latex dumb defaults"
-    \renewcommand{\topfraction}{0.9}	
-    \renewcommand{\bottomfraction}{0.8}	
-    %   Parameters for TEXT pages (not float pages):
-    \setcounter{topnumber}{2}
-    \setcounter{bottomnumber}{2}
-    \setcounter{totalnumber}{4}     
-    \setcounter{dbltopnumber}{2}    
-    \renewcommand{\dbltopfraction}{0.9}	
-    \renewcommand{\textfraction}{0.07}	
-    %   Parameters for FLOAT pages (not text pages):
-    \renewcommand{\floatpagefraction}{0.7}	% require fuller float pages
-	% N.B.: floatpagefraction MUST be less than topfraction !!
-    \renewcommand{\dblfloatpagefraction}{0.7}	% require fuller float pages
-
-%%% Enable the bibliography
-%%%     see  http://merkel.zoneo.net/Latex/natbib.php
-%%% 
-%%% round: use () for in-text cites (other options square, curly, angle)
-%%% sort: orders multiple citations into the sequence in which they 
-%%%       appear in the list of references;
-%%% sort&compress: as sort but in addition multiple numerical
-%%%                citations are compressed if possible (as 3-6, 15);
-%%% numbers: for numerica citations
-%%% super:   superscripted numbers as in Nature
-\usepackage[round]{natbib}
-%%% Want to change the section head of the bib??
-%\AtBeginDocument{\renewcommand\refname{LITERATURE CITED}}
-
-%%% Document layout, margins
-\usepackage{geometry} 
-\geometry{letterpaper, textwidth=6.5in, textheight=8in, marginparsep=1em}
-
-
-%%% This is how you set  line spacing globally inside []
-%%% Options are "singlespacing","onehalfspacing","doublespacing"
-%%% To change WITHIN the document (you want a section single spaced)
-%%% just drop in, where needed, \singlespacing
-%%% and then \doublespacing again when finished.
-\usepackage[onehalfspacing]{setspace} 
-
-%\usepackage{egameps} % See Martin Osborne's documentation!
-%\usepackage{sgame} % See Osborne
-\usepackage{hyperref} % \href{http://link.com}{link text}
-\usepackage{graphicx} % for figures of all kinds
-
-%% Caption labels bold. Always left-align, do not center short ones.
-%% Use . instead of : after label. Size option.
-\usepackage[bf,nooneline,labelsep=period,footnotesize]{caption}
-\usepackage[dvipsnames]{xcolor}
-\usepackage{dcolumn}  % enable decimal align tables
-%\usepackage{wrapfig}  % wrappable figures
-
-%%% How to treat new paragraphs: units are anything that latex
-%%% understands: in, mm, pt, cm, [em, ex (typographic units!)]
-\setlength{\parindent}{1em} % 1em  indent first line
-\setlength{\parskip}{0.5ex} % half x-height space between para
-
-%%% Working Example of how you specify shortcut macros:
-\newcommand{\ybar}{\ensuremath{\overline{y}}}
-
-%%% Other options: Options>Soft wordwrap for easy viewing
-%%% Italics and Bold: ctrl+C,F,I (C-c, C-f, C-i) for inserting italicized text. 
-%%% CFB for bold.
-%%% rm sf tt md bf up it sl sc 
-%%% Drag citations from Bibdesk
-%%% single - for intraword hyphen. Anything longer, use two -- or three ---
-
-%%% Figures. Wrapfigure at Right Left or Center.
-%%% Set bounding box size (same as figure size).
-%%% Insert your figure BEFORE the text. 
-%%% Subsequent text will wrap around the figure.
-
-%%% Normally, just use figure environment.
-%%% To insert a figure, drag the icon (without typing the command!) 
-%%% from the finder and it will insert.
-%%% Type width= or height= in the [options] before the {argument}.
-%%% Latex>Insert Envt>Figure (figure* means no number)
-%%% "Figure #." is handled by latex, not you. Just type.
-%%% To refer to a figure (or any \label) type \ref{thelabel}
-%%% in text or use Ref menu, "C-c )" emacs will do it for you.
-
-
-%%% FONTS -- REQUIRES XETEX, WHICH YOU SHOULD BE USING.
-
-% converts LaTeX specials (``quotes'' --- dashes etc.) to unicode
-\defaultfontfeatures{Ligatures={Common}, Mapping={tex-text}} 
-\setromanfont [BoldFont={* Bold}, ItalicFont={* Italic}]{Minion Pro}
-%\setromanfont [Mapping=tex-text,Ligatures={Common},BoldFont={ElectraLH-Bold},ItalicFont={ElectraLH-CursiveOsF},BoldItalicFont={ElectraLH-BoldCursiveOsF},SmallCapsFont={ElectraLH-RegularSC}]{ElectraLH-RegularOsF}
-\setsansfont[Mapping=tex-text,BoldFont={Delicious-Bold},ItalicFont={Delicious-Italic},SmallCapsFont={Delicious-SmallCaps}] {Delicious-Roman}
-\setmonofont[Scale=0.8]{Monaco} 
-%\usepackage[final,expansion=true,protrusion=true,spacing=true,kerning=true]{microtype}
-
-
-%%% Section headings (not xetex-specific)
-%%% Nice hanging indents for section numbers.
-\usepackage{sectsty} 
-\usepackage[normalem]{ulem} 
-\sectionfont{\sffamily\mdseries\upshape\Large}
-\subsectionfont{\sffamily\bfseries\upshape\normalsize} 
-\subsubsectionfont{\sffamily\mdseries\upshape\normalsize} 
-%%% Hang section numbers in the left margin
-\makeatletter 
-\def\@seccntformat#1{\protect\makebox[0pt][r]{\csname 
-the#1\endcsname\quad}} 
-\makeatother 
-%%%
-%%% Comment this out if you want to use default fullpath Sweave.sty
-%%% I use a custom one, in a path tex is aware of, with customizations
-%%% to the fancyvrb fonts and colors.
 \usepackage{Sweave}
 %%%%%%%%%%%%%%% Useful Sweave arguments!  %%%%%%%%%%%%%%%%%
 %%% echo=FALSE fig=TRUE results=hide eps=FALSE include=FALSE
@@ -202,26 +67,51 @@ load("/Users/malecki/mrp/malecki/fitted.Rdata")
 \label{sec:running-example}
 
 \raggedright
-\setlength{\parindent}{1em}
 
-The running example is the same combined poll data and model in Kastellec's \href{http://www.princeton.edu/~jkastell/mrp_primer.html}{MRP Primer}, dealing with support for same-sex marriage in 2004--2005. A simple model using only a few group-level intercepts, is run and subject to \texttt{R CMD check}; in the “not run” section of the examples, code for the complete model with census poststratification, individual- and state-level predictors, and categorical interactions is shown. This vignette walks through both of those examples.
-
+\begin{frame}
+  \frametitle{MRP Primer}
+  The running example is the same combined poll data and model in
+  Kastellec's
+  \href{http://www.princeton.edu/~jkastell/mrp_primer.html}{MRP
+    Primer}, dealing with support for same-sex marriage in 2004--2005.
+\end{frame}
 \subsection{Data}
 \label{sec:data}
 
-The data for the example are the combined survey results in the “marriage.data” data.frame, and state-level predictors in “Statelevel” data.frame. Both of these are loaded by the command\\ \texttt{data(samesexmarriage)}. The package includes several other pieces of data that are useful to US users of MRP:
-\begin{description}
-\item[mrp.census] Census data with main data columns `weighted2000', `weighted2004', and `weighted2008'. See documentation for \texttt{mrp.census} for details on the demographic features in the file.
-\item[mrp.regions] A data.frame with state two-letter abbreviations and five census region codes, with DC as its own region.
-\item[spmap.states] A projected map object with state names, \textsc{fips} codes, and two-letter state abbreviations.
-\end{description}
+\begin{frame}
+  \frametitle{Data}
+  \begin{itemize}
+  \item combined survey results in the “marriage.data” data.frame
+  \item state-level predictors in “Statelevel” data.frame.
+  \item Both loaded by \texttt{data(samesexmarriage)}.
+  \end{itemize}
 
+\end{frame}
+\begin{frame}
+  \frametitle{Other Data}
+
+\begin{description}
+\item[mrp.census] Census data with main data columns `weighted2000',
+  `weighted2004', and `weighted2008'. See documentation for
+  \texttt{mrp.census} for details on the demographic features in the
+  file.
+\item[mrp.regions] A data.frame with state two-letter abbreviations
+  and five census region codes, with DC as its own region.
+\item[spmap.states] A projected map object with state names,
+  \textsc{fips} codes, and two-letter state abbreviations.
+\end{description}
+\end{frame}
+
+\begin{frame}
+  \frametitle{loading data}
+  
 <<load-data,echo=TRUE>>=
 data(samesexmarriage)
 data(mrp.census)
 data(mrp.regions)
 data(spmap.states)
 @ 
+\end{frame}
 
 \section{Fitting a basic model}
 \label{sec:fitting-basic-model}
@@ -229,8 +119,19 @@ data(spmap.states)
 \subsection{Preparing the data}
 \label{sec:preparing-data}
 
-Almost all data will involve recoding and careful checking of categories. In particular, we rely heavily on R's “factor” data type. Factors have associated “levels” (names for categories) and may be ordered. For MRP, categorical variables need to be factors and the levels need to match between the survey data and the poststratification (census) data.
-
+\begin{frame}
+  \frametitle{preparing data}
+  \begin{itemize}
+  \item Relies heavily on R's “factor” data type
+  \item Factors have
+    associated “levels” (names for categories) and may be ordered.
+  \item categorical variables need to be factors
+  \item levels need
+    to match between the survey and poststratification
+    (census) data
+  \end{itemize}
+\end{frame}
+\end{document}
 <<prepare-data>>=
 marriage.data <- within(marriage.data, {
     state <- factor(state,exclude=NA)
@@ -253,8 +154,14 @@ marriage.data <- within(marriage.data, {
   marriage.data$state <- factor(marriage.data$state)
 @ 
 
-In this case, the poll data we have uses four instead of five categories for education. Below, we combine the top two levels of census education into a survey-matching single “Graduated College” level. We also drop any states from the census that are not in our survey dataset.
-
+\begin{frame}
+  \frametitle{things}
+  In this case, the poll data we have uses four instead of five
+  categories for Figure~\ref{fig:firstmap} education. Below, we combine the top two levels of Table~\ref{tab:table-simplemodel} 
+  census education into a survey-matching single “Graduated College”
+  level. We also drop any states from the census that are not in our
+  survey dataset.
+\end{frame}
 <<prepare-census>>=
   mrp.census <- na.omit(mrp.census[mrp.census$state %in% marriage.data$state,])
 
@@ -282,7 +189,8 @@ In the most basic setup MRP will fit an intercept to each of the groups provided
 mrp.simple <- mrp(yes.of.all ~ state+age+edu, 
                   poll=marriage.data,
                   population=mrp.census,
-                  use="weighted2004")
+                  use="weighted2004",
+                  cov.prior="none")
 @ 
 
 The \texttt{mrp} function then executes the following steps:

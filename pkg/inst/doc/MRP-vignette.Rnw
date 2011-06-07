@@ -26,6 +26,8 @@
 \usepackage[dvipsnames,usenames]{xcolor}
 %\usepackage[opticals,medfamily,minionint,footnotefigures]{MinionPro}
 \usepackage[no-math]{fontspec}
+\usepackage{ucs}
+\usepackage[utf8]{inputenc}
 \usepackage{xltxtra}
 %\VignetteIndexEntry{MRP Primer Reloaded}
 
@@ -282,7 +284,7 @@ In the most basic setup MRP will fit an intercept to each of the groups provided
 mrp.simple <- mrp(yes.of.all ~ state+age+edu, 
                   poll=marriage.data,
                   population=mrp.census,
-                  use="weighted2004")
+                  use="weighted2004",cov.prior="none")
 @ 
 
 The \texttt{mrp} function then executes the following steps:
