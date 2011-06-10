@@ -189,7 +189,7 @@ mrp <- function(formula,
   try(mrp <- mr(mrp,
             ## blmer options here, possibly moved to blmer defaults
             
-            ,...))
+            ...))
   return(mrp)
   
 }
