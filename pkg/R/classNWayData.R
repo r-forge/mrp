@@ -2,8 +2,8 @@ setClass("NWayData",representation(type="character",levels="list"),contains="arr
 ## save the levels on the original data for when it is plyd back
 ## in poststratification
 ## match on names of ways
-saveNWayLevels <- function(df){
-  fac <- sapply(df,is.factor)
+saveNWayLevels <- function(df, variables=TRUE){
+  fac <- sapply(df[variables],is.factor)
   lev <- lapply(df[,fac],attributes)
   return(lev)
 }
@@ -208,7 +208,7 @@ NWayData <- function (df, variables, response, weights, type="poll", reference.p
             dim(getNEffective(reference.poll)), dimnames(getNEffective(reference.poll)))
   }
   nway <- new("NWayData", nway, type=type,
-      levels=saveNWayLevels(df))
+      levels=saveNWayLevels(df, variables))
   
   return (nway)
 }
@@ -247,3 +247,18 @@ NWayData2df <- function (nway) {
     
 
 ## head(write.stan(CCES.complete,x=72:79, y="ban.gaymarr"))
+
+
+## just print the array when asked interactively
+setMethod(show, "NWayData",
+          definition=function(object) show(object@.Data))
+#setOldClass("array")
+
+## set up 'sweep' on poststratified NWayData
+setGeneric ("sweep")
+setMethod(sweep, "NWayData",
+          definition=function(x, MARGIN, STATS, FUN = "-", check.margin = TRUE, ...) {
+            ans <- base::sweep(x, MARGIN, STATS, FUN, check.margin = check.margin, ...)
+            ans <- new("NWayData", ans, type="sweep", levels=x@levels)
+            return(ans)
+          })

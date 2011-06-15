@@ -40,8 +40,16 @@ mrp <- function(formula,
   # TODO find a more elegant solution for requiring 0/1 values for the response.
   {
     response <- poll[, as.character (formula[[2]])]
+    if(is.logical(response)) {
+      response <- as.integer(response)
+    }
+    if(is.ordered(response) && length(levels(response))==2){
+      warning("Assuming ordered factor 2 levels represent 1=FALSE, 2=TRUE\n")
+      response <- as.integer(response)-1
+    }
+#    browser()
     if (!is.numeric (response)) {
-      stop (paste ("'", as.character (formula[[2]]), "' must be numeric values of 0 / 1", sep=""))
+      stop (paste ("'", as.character (formula[[2]]), "' must be integer values of 0 / 1 or logical", sep=""))
     }
     if (length (unique(na.exclude(response))) != 2) {
       stop (paste ("'", as.character (formula[[2]]), "' must have two values", sep=""))
