@@ -293,7 +293,7 @@ The \texttt{mrp} function then executes the following steps:
 \item Collapse the $N$-way survey array into a rectangular matrix, using $\bar{Y}$, effective $N$, and the design effects to form for each combination of strata (`cell' of the $N$-way data) a sum of yes and no responses.
 \item Perform any transformations on the prepared data; the `add' argument is discussed in detail below.
 \item Stratify the population data, creating an $N$-way array of matching dimension to that of the survey.
-\item Estimate a multilevel model. By default this is a call to \texttt{glmer} with \texttt{family= quasibinomial( link="logit")}. By default, as in the call above, the formula for this model fits just an intercept for each stratum in the specification. 
+\item Estimate a multilevel model. By default this is a call to \texttt{bglmer} with \texttt{family= quasibinomial( link="logit")}. By default, as in the call above, the formula for this model fits just an intercept for each stratum in the specification. 
 \end{enumerate}
 
 Poststratification is straightforward: multiply the fitted values from the multilevel model by the population frequencies, and collapse across any remaining dimensions. Below, we collapse across states to show the poststratified estimates of support for same-sex marriage by education and age using the formula interface of the `poststratify' method.
