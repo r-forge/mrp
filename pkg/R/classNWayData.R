@@ -117,7 +117,7 @@ setGeneric ("makeNWay", function (cell,response,weights,pop) { standardGeneric (
 setMethod (f="makeNWay",
     signature=signature(cell="data.frame"),
     definition=function(cell, response="response", 
-        weights=c(1,"weight"), pop=FALSE) {
+        weights=1, pop=FALSE) {
       if(pop==TRUE){
         if(length(weights)!=1) {
           stop(paste("When supplying a data.frame as ",sQuote("population")," you must also indicate ",sQuote("use"), ", which column of the data.frame to use.\n")) }
@@ -198,7 +198,7 @@ NWayData <- function (df, variables, response, weights, type="poll", reference.p
   if (type=="poll") {
     nway <- daply(df, .variables=variables, pop=FALSE,
         .fun=makeNWay, .progress="text",
-        response=response, weights)
+        response=response, weights=weights)
   } else if (type == "population") {
     nway <- daply(df, .variables=variables, pop=TRUE,
         .fun=makeNWay, .progress="text",
@@ -262,3 +262,4 @@ setMethod(sweep, "NWayData",
             ans <- new("NWayData", ans, type="sweep", levels=x@levels)
             return(ans)
           })
+

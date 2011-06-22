@@ -370,7 +370,36 @@ setMethod (f="poststratify",
         ans[is.nan(ans)] <- NA
         return(ans)
       }
-    }
+    })
+setMethod (f="poststratify",
+    signature=signature(object="NWayData"),
+    definition=function (object, formula=NULL) {
+      spec <- formula
+      if(is.null(spec)){
+        spec <- rep(FALSE, length(dim(object)) )
+      }
+      if(is.formula(spec)){
+        spec <- attr(terms(spec),"term.labels")
+      }
+      if(!is.logical(spec)){
+        groups <- match(spec,
+            names(dimnames(object)) )
+      } else {
+        groups <- which (spec == TRUE)
+      }
+      if (length(groups) == 0) {
+        return (mean (object, na.rm=TRUE)) 
+      } else {
+        ans <- (apply (object, groups, mean, na.rm=TRUE))
+        ans[is.nan(ans)] <- NA
+        ans <- new("NWayData",
+                   ans, type="poststratified",
+                   levels=object@levels[groups])
+        return(ans)
+      }
+    })
+
+           
 ##### INTERCEPT SHIFT BY STATE FOR KNOWN TURNOUT
 ##    from Yair. See paper, p 12.
 ##    this will go in .fun arg of aaply()
@@ -384,7 +413,7 @@ setMethod (f="poststratify",
 ##   corrected <- invlogit(logit(a) + delta)
 ##   return(list(delta=delta, corrected=corrected))
 ## }
-)
+## )
 
 
 ## newMrp <- function (response, vars, population, weight=rep(1, length(response))) {

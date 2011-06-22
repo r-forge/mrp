@@ -5,6 +5,7 @@ exportMethods (getNumberWays, setPopulation, getPopulation,
                getResponse, setPopulationOnes, getThetaHat,
                getEstimates)
 export (mrp)
+
 importFrom("sp",panel.polygonsplot,spplot)
 importFrom("grid",grid.polygon, gpar)
 export(panel.polygonsplot)
