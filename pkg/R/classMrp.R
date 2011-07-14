@@ -336,7 +336,7 @@ setMethod (f="mr",
 ## return a full-dimension shifted array
 
 
-setGeneric ("poststratify", function (object, formula=NULL) { standardGeneric ("poststratify")})
+setGeneric ("poststratify", function (object, formula=NULL, ...) { standardGeneric ("poststratify")})
 #setGeneric ("poststratify", function (object) { standardGeneric ("poststratify")})
 setMethod (f="poststratify",
     signature=signature(object="mrp"),
@@ -371,9 +371,10 @@ setMethod (f="poststratify",
         return(ans)
       }
     })
+
 setMethod (f="poststratify",
     signature=signature(object="NWayData"),
-    definition=function (object, formula=NULL) {
+    definition=function (object, formula=NULL, fun=mean) {
       spec <- formula
       if(is.null(spec)){
         spec <- rep(FALSE, length(dim(object)) )
@@ -388,13 +389,45 @@ setMethod (f="poststratify",
         groups <- which (spec == TRUE)
       }
       if (length(groups) == 0) {
-        return (mean (object, na.rm=TRUE)) 
+        return (do.call(fun, args=list(object, na.rm=TRUE))) 
       } else {
-        ans <- (apply (object, groups, mean, na.rm=TRUE))
+        browser()
+        ans <- (apply (object, groups, fun, na.rm=TRUE))
         ans[is.nan(ans)] <- NA
         ans <- new("NWayData",
                    ans, type="poststratified",
                    levels=object@levels[groups])
+        return(ans)
+      }
+    })
+
+setMethod (f="poststratify",
+    signature=signature(object="jagsNWayData"),
+    definition=function (object, formula=NULL, fun=mean, population=Census.NWay) {
+      spec <- formula
+      
+      if(is.null(spec)){
+        spec <- rep(FALSE,length(dimnames(object)))
+      }
+      if(is.formula(spec)){
+        spec <- attr(terms(spec),"term.labels")
+      }
+      stopifnot (population != numeric(0)) 
+      
+      poststratified <- object * population
+      
+      if(!is.logical(spec)){
+        groups <- match(spec,
+                        names(dimnames(object)) )
+      } else {
+        groups <- which (spec == TRUE)
+      }
+      if (length(groups) == 0) {
+        return (sum (poststratified, na.rm=TRUE) / sum (population)) 
+      } else {
+        ans <- (apply (poststratified, groups, sum, na.rm=TRUE) /
+              apply(population, groups, sum, na.rm=TRUE))
+        ans[is.nan(ans)] <- NA
         return(ans)
       }
     })
@@ -448,3 +481,4 @@ setMethod (f="poststratify",
 ##                       paste ("(1 | ", names (vars), ")", sep="", collapse=" + "))
 ##     return (new(Class="mrp", data=data, population=population, formula=formula))
 ##   }
+

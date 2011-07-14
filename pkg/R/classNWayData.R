@@ -1,11 +1,13 @@
 setClass("NWayData",representation(type="character",levels="list"),contains="array")
+
+setClass("jagsNWayData",representation(type="character",levels="list"),contains="array")
 ## save the levels on the original data for when it is plyd back
 ## in poststratification
 ## match on names of ways
 saveNWayLevels <- function(df, variables=TRUE){
   fac <- sapply(df[variables],is.factor)
   lev <- lapply(df[,fac],attributes)
-  return(lev)
+  return(lev[variables])
 }
 restoreNWayLevels <- function(df=df,nway=nway){
   pos <- na.omit(names(nway@levels)[match(names(df),names(nway@levels))])
@@ -205,6 +207,7 @@ NWayData <- function (df, variables, response, weights, type="poll", reference.p
         weights=weights)
     nway <- array(rep(nway,
             length.out=length(reference.poll)),
+                  ## this dim/dimnames should be "the last dimension"
             dim(getNEffective(reference.poll)), dimnames(getNEffective(reference.poll)))
   }
   nway <- new("NWayData", nway, type=type,
@@ -263,3 +266,36 @@ setMethod(sweep, "NWayData",
             return(ans)
           })
 
+
+
+jags2NWay <- function (df, variables, response) {
+  nway <- daply(df, .variables=variables,
+                .fun=makeJagsNWay, .progress="text",
+                response=list(party=c("R","I","D")))
+  d <- dimnames(nway)
+  names(d)[length(d)] <- names(response)
+  dimnames(nway) <- d
+  d <- list(levels=response[[1]], class="factor")
+  ## TODO remove `[variables]` when package reinstalled!
+  l <- c(saveNWayLevels(df,variables)[variables],new=list(d))
+  names(l) <- c(names(l)[1:length(variables)],names(response))
+  
+  nway <- new("jagsNWayData", nway, type="population",
+              levels=l)
+  return (nway)
+}
+
+setGeneric ("makeJagsNWay", function (cell,response) {
+  standardGeneric ("makeJagsNWay")
+})
+setMethod (f="makeJagsNWay",
+    signature=signature(cell="data.frame"),
+    definition=function(cell, response=response) {
+      N <- nrow(cell)
+      ## apply over new dims (such as est party)
+      ans <- sapply(response[[1]], function(d) {
+        mean(cell[,d])
+      })
+      names(ans) <- response[[1]]
+      return(ans)
+    })
