@@ -23,11 +23,14 @@ setClass(Class="mrp",
 )
 
 mrp <- function(formula,
-    poll, poll.weights=1,
+    data, poll.weights=1,
     population=NULL, use=NULL,
     population.formula=formula,
     add=NULL, mr.formula=NULL,
     ...) {
+  poll <- data ## 'data' later becomes the binomial form
+               ## geographic-demographic data.frame, but
+               ## is the natural argument name in the function.
   pop <- population 
   mrp.formula <- as.formula(formula)
   mrp.terms <- terms(mrp.formula)  
@@ -374,30 +377,62 @@ setMethod (f="poststratify",
 
 setMethod (f="poststratify",
     signature=signature(object="NWayData"),
-    definition=function (object, formula=NULL, fun=mean) {
+    definition=function (object, formula=NULL, fun=mean, population=Census.NWay ) {
+      if(object@type=="jagsNWayData"){
       spec <- formula
+      
       if(is.null(spec)){
-        spec <- rep(FALSE, length(dim(object)) )
+        spec <- rep(FALSE,length(dimnames(object)))
       }
       if(is.formula(spec)){
         spec <- attr(terms(spec),"term.labels")
       }
+      stopifnot (population != numeric(0)) 
+      
+      poststratified <- object * population
+      
       if(!is.logical(spec)){
         groups <- match(spec,
-            names(dimnames(object)) )
+                        names(dimnames(object)) )
       } else {
         groups <- which (spec == TRUE)
       }
       if (length(groups) == 0) {
-        return (do.call(fun, args=list(object, na.rm=TRUE))) 
+        return (sum (poststratified, na.rm=TRUE) / sum (population)) 
       } else {
-        browser()
-        ans <- (apply (object, groups, fun, na.rm=TRUE))
+        ans <- (apply (poststratified, groups, sum, na.rm=TRUE) /
+              apply(population, groups, sum, na.rm=TRUE))
         ans[is.nan(ans)] <- NA
         ans <- new("NWayData",
                    ans, type="poststratified",
                    levels=object@levels[groups])
         return(ans)
+      }
+    }
+      else {
+        spec <- formula
+        if(is.null(spec)){
+          spec <- rep(FALSE, length(dim(object)) )
+        }
+        if(is.formula(spec)){
+          spec <- attr(terms(spec),"term.labels")
+        }
+        if(!is.logical(spec)){
+          groups <- match(spec,
+                          names(dimnames(object)) )
+        } else {
+          groups <- which (spec == TRUE)
+        }
+        if (length(groups) == 0) {
+          return (do.call(fun, args=list(object, na.rm=TRUE))) 
+        } else {
+          ans <- (apply (object, groups, fun, na.rm=TRUE))
+          ans[is.nan(ans)] <- NA
+          ans <- new("NWayData",
+                     ans, type="poststratified",
+                     levels=object@levels[groups])
+          return(ans)
+        }
       }
     })
 

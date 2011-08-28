@@ -219,7 +219,8 @@ NWayData <- function (df, variables, response, weights, type="poll", reference.p
 NWayData2df <- function (nway) {
   data <- adply(nway, .margins=1:getNumberWays(nway), 
       flattenNWay,
-      design.effect=getDesignEffect(nway))
+      design.effect=getDesignEffect(nway),
+                .progress="text")
   data <- restoreNWayLevels(df=data,nway=nway)
   
   return (data)
@@ -280,7 +281,7 @@ jags2NWay <- function (df, variables, response) {
   l <- c(saveNWayLevels(df,variables)[variables],new=list(d))
   names(l) <- c(names(l)[1:length(variables)],names(response))
   
-  nway <- new("jagsNWayData", nway, type="population",
+  nway <- new("NWayData", nway, type="population",
               levels=l)
   return (nway)
 }
@@ -289,13 +290,18 @@ setGeneric ("makeJagsNWay", function (cell,response) {
   standardGeneric ("makeJagsNWay")
 })
 setMethod (f="makeJagsNWay",
-    signature=signature(cell="data.frame"),
-    definition=function(cell, response=response) {
-      N <- nrow(cell)
-      ## apply over new dims (such as est party)
-      ans <- sapply(response[[1]], function(d) {
-        mean(cell[,d])
-      })
-      names(ans) <- response[[1]]
-      return(ans)
-    })
+           signature=signature(cell="data.frame"),
+           definition=function(cell, response=response) {
+                                        #N <- nrow(cell)
+             ## apply over new dims (such as est party)
+             if(nrow(cell)==1) {
+               ans <- cell[, response[[1]] ]
+             } else {
+               ans <- sapply(response[[1]], function(d) {
+                 mean(cell[,d])
+               })
+             }
+           
+           names(ans) <- response[[1]]
+           return(ans)
+           })
