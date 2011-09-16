@@ -282,7 +282,7 @@ In the most basic setup MRP will fit an intercept to each of the groups provided
 
 <<simple-model,echo=TRUE,results=hide>>=
 mrp.simple <- mrp(yes.of.all ~ state+age+edu, 
-                  poll=marriage.data,
+                  data=marriage.data,
                   population=mrp.census,
                   use="weighted2004",cov.prior="none")
 @ 
@@ -379,7 +379,7 @@ The same updating of the formula is used in the event that you want to re-run or
 <<fullmodelcall,eval=FALSE>>=
 mrp.statelevel <- mrp(yes.of.all~
                       state+f.race+age+edu+poll,
-                      poll=marriage.data,
+                      data=marriage.data,
                       population=mrp.census,use="weighted2008",
                       population.formula=.~.-poll,
                       add=list(Statelevel,
@@ -474,7 +474,7 @@ print(spplot(mrp.statelevel, state ~ edu+age,
 
 \begin{figure}[b]
   \centering
-  \caption{The final map shows support for same-sex marriage by age cohort and level of education, centered around the national poststratified average of 34\%.}
+  \caption{The final map shows support for same-sex marriage by age cohort and level of education, centered around the national poststratified average of \sexpr{poststratify(mrp.statelevel)*100}\%.}
   \label{fig:finalmap}
 \setkeys{Gin}{width=\linewidth}
 <<finalmap,fig=TRUE,pdf=FALSE,png=TRUE,eps=FALSE,width=6.5,height=6.5,echo=FALSE,resolution=144>>=
