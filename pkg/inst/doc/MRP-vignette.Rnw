@@ -197,7 +197,7 @@ library(xtable)
 library(MRP)
 library(apsrtable)
 options(width=100,prompt="R> ",continue="   ")
-load("/Users/malecki/mrp/malecki/fitted.Rdata")
+#load("/Users/malecki/mrp/malecki/fitted.Rdata")
 @ 
 
 \section{Running Example}
