@@ -1,5 +1,5 @@
 Package: MRP
-Version: 0.81-1
+Version: 0.81-2
 Date: 2011-10-04
 Title: Multilevel Regression and Poststratification
 Author:
@@ -8,7 +8,7 @@ Author:
   Daniel Lee <bearlee@alum.mit.edu>,
   Yu-Sung Su <ys463@columbia.edu>,
 Maintainer: Michael Malecki <malecki@wustl.edu>, Daniel Lee <bearlee@alum.mit.edu>
-Depends: R (>= 2.11), methods, arm, blme, sp, lattice, plyr, reshape2
+Depends: R (>= 2.13), methods, lme4a, blme, arm, sp, lattice, plyr, reshape2
 Suggests: apsrtable, xtable, fBasics
 Description: Multilevel Regressions and Poststratification
 License: GPL (>= 2)
