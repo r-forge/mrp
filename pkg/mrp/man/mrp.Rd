@@ -9,7 +9,7 @@
 
 \usage{
 mrp (formula,
-     poll, poll.weights=1,
+     data, poll.weights=1,
      population=NULL, use=NULL,
      population.formula=formula,
      add=NULL, mr.formula=NULL,
@@ -25,7 +25,7 @@ mrp (formula,
       used to construct the multilevel model, with an intercept
       estimated for each named stratum. See \code{mr.formula}
       below to easily fit more complex models.}
-    \item{poll}{A \code{data.frame} representing a survey, containing (at
+    \item{data}{A \code{data.frame} representing a survey, containing (at
       least) the named variables in \code{formula}. The LHS response
       is expected to be dichotomous, and will be coerced to
       binary-logical (if factor, 1 for \sQuote{yes}, 0 for
@@ -44,7 +44,7 @@ mrp (formula,
       which has to be removed from the ways that we stratify the
       population. If used, should be of the form
       \code{.~.-var}. 
-	  % DL: Should remove?
+	  % DL: Should remove? MM: yes
 	  % It is possible, but strongly discouraged, to use a matching
       % factor with a different name (e.g., \sQuote{edu} in \code{poll}
       % with \code{population.formula=.~education})
@@ -67,7 +67,7 @@ mrp (formula,
       just an intercept term for each of the variables in the main
       formula specification (\code{(1|way1)+(1|way2)} etc.)}
     \item{\dots}{Additional arguments to be passed to the multilevel
-      regression \code{\link[lme4]{glmer}} step.}
+      regression \code{\link[blme]{bglmer}} step.}
   }
 \seealso{\code{\link{mrp-class}} for other
     methods on the objects produced by \code{mrp()};

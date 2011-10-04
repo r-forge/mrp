@@ -1,4 +1,5 @@
 \name{poststratify}
+\alias{poststratify}
 \alias{poststratify,mrp-method}
 \alias{poststratify,NWayData-method}
 \alias{poststratify,jagsNWayData-method}
@@ -11,7 +12,7 @@
 }
 \usage{
   \S4method{poststratify}{mrp}(object, formula)
-  \S4method{poststratify}{NWayData}(object, formula, fun)
+  \S4method{poststratify}{NWayData}(object, formula, fun, population)
   \S4method{poststratify}{jagsNWayData}(object, formula, fun, population)
 }
 \arguments{
@@ -26,7 +27,8 @@
     such names or a logical vector of length \dQuote{ways}.
     
     See example in \code{\link{mrp}}.}
-  \item{fun}{}
+  \item{fun}{The function (default=\emph{mean}) to summarize the
+  collapsed dimensions.}
   \item{population}{An array or \code{NWayData} with dimensions matching
     \code{object}, used to produce population-weighted estimates from
     \code{jagsNWayData.}}

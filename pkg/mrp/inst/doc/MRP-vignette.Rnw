@@ -382,13 +382,17 @@ mrp.statelevel <- mrp(yes.of.all~
                       data=marriage.data,
                       population=mrp.census,use="weighted2008",
                       population.formula=.~.-poll,
-                      add=list(Statelevel,
+                      add=list(
+                        Statelevel,
                         mrp.regions,
-                        expression(age.edu <- interaction(age,edu)),
-                        expression(z.age <- rescale(age))),
+                        expression(age.edu <- interaction(age,edu))
+                        ),
                       mr.formula=.~.+(1|region)+ (1|age.edu)+
-                       z.age+p.relig.full+p.kerry.full
+                       p.relig.full+p.kerry.full
                       )
+@ 
+<<load-fullmodel,echo=FALSE,results=hide>>=
+load("mrp.statelevel.Rdata")
 @ 
 
 \section{Advanced Plotting with \texttt{spplot}}
@@ -474,7 +478,7 @@ print(spplot(mrp.statelevel, state ~ edu+age,
 
 \begin{figure}[b]
   \centering
-  \caption{The final map shows support for same-sex marriage by age cohort and level of education, centered around the national poststratified average of \sexpr{poststratify(mrp.statelevel)*100}\%.}
+  \caption{The final map shows support for same-sex marriage by age cohort and level of education, centered around the national poststratified average of \Sexpr{poststratify(mrp.statelevel)*100}\%.}
   \label{fig:finalmap}
 \setkeys{Gin}{width=\linewidth}
 <<finalmap,fig=TRUE,pdf=FALSE,png=TRUE,eps=FALSE,width=6.5,height=6.5,echo=FALSE,resolution=144>>=
