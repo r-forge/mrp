@@ -122,7 +122,7 @@ mrp <- function(formula,
   ## Attempt merges. 
   if(length(data.merges)>0){
     for(d in 1:length(data.merges)){
-      data <- join(data,data.merges[[d]],type="left")
+      data <- join(data,data.merges[[d]], type="l")
     }
   }
     
@@ -375,41 +375,48 @@ setMethod (f="poststratify",
       }
     })
 
+
 setMethod (f="poststratify",
     signature=signature(object="NWayData"),
-    definition=function (object, formula=NULL, fun=mean, population=Census.NWay ) {
+    definition=function (object, formula=NULL, fun=mean,
+      population=Census.NWay, sort=NULL
+      ) {
       if(object@type=="jagsNWayData"){
-      spec <- formula
-      
-      if(is.null(spec)){
-        spec <- rep(FALSE,length(dimnames(object)))
-      }
-      if(is.formula(spec)){
-        spec <- attr(terms(spec),"term.labels")
-      }
-      stopifnot (population != numeric(0)) 
-      
-      poststratified <- object * population
-      
-      if(!is.logical(spec)){
-        groups <- match(spec,
-                        names(dimnames(object)) )
-      } else {
-        groups <- which (spec == TRUE)
-      }
-      if (length(groups) == 0) {
-        return (sum (poststratified, na.rm=TRUE) / sum (population)) 
-      } else {
-        ans <- (apply (poststratified, groups, sum, na.rm=TRUE) /
-              apply(population, groups, sum, na.rm=TRUE))
-        ans[is.nan(ans)] <- NA
-        ans <- new("NWayData",
-                   ans, type="poststratified",
-                   levels=object@levels[groups])
+        spec <- formula
+        
+        if(is.null(spec)){
+          spec <- rep(FALSE,length(dimnames(object)))
+        }
+        if(is.formula(spec)){
+          spec <- attr(terms(spec),"term.labels")
+        }
+        stopifnot (population != numeric(0)) 
+        
+        poststratified <- object * population
+        
+        if(!is.logical(spec)){
+          groups <- match(spec,
+                          names(dimnames(object)) )
+        } else {
+          groups <- which (spec == TRUE)
+        }      
+        if (length(groups) == 0) {
+          ans <- sum (poststratified, na.rm=TRUE) / sum (population) 
+        } else {
+          ans <- (apply (poststratified, groups, sum, na.rm=TRUE) /
+                  apply(population, groups, sum, na.rm=TRUE))
+          ans[is.nan(ans)] <- NA
+          ans <- new("NWayData",
+                     ans, type="poststratified",
+                     levels=object@levels[groups])
+        }
+        if (!is.null(sort)) {
+          sortme <- rep(TRUE,length(dimnames(ans)))
+          sortme[which(dimnames(ans) == sort)] <- FALSE
+          ans <- apply(ans,sortme,sort)       
+        }
         return(ans)
-      }
-    }
-      else {
+      } else {
         spec <- formula
         if(is.null(spec)){
           spec <- rep(FALSE, length(dim(object)) )
@@ -424,17 +431,25 @@ setMethod (f="poststratify",
           groups <- which (spec == TRUE)
         }
         if (length(groups) == 0) {
-          return (do.call(fun, args=list(object, na.rm=TRUE))) 
+          ans <- do.call(fun, args=list(object, na.rm=TRUE)) 
         } else {
           ans <- (apply (object, groups, fun, na.rm=TRUE))
           ans[is.nan(ans)] <- NA
           ans <- new("NWayData",
                      ans, type="poststratified",
                      levels=object@levels[groups])
-          return(ans)
+
         }
+        if (!is.null(sort)) {
+          browser()
+          sortme <- rep(TRUE,length(dimnames(ans)))
+          sortme[which(dimnames(ans) == sort)] <- FALSE
+          #ans <- apply(ans,sortme,sort)       
+        }
+        return(ans)
       }
-    })
+           
+         })
 
 setMethod (f="poststratify",
     signature=signature(object="jagsNWayData"),
