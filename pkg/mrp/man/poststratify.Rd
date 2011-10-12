@@ -12,8 +12,9 @@
 }
 \usage{
   \S4method{poststratify}{mrp}(object, formula)
-  \S4method{poststratify}{NWayData}(object, formula, fun, population)
-  \S4method{poststratify}{jagsNWayData}(object, formula, fun, population)
+  \S4method{poststratify}{NWayData}(object, formula, fun, population, sort)
+  \S4method{poststratify}{jagsNWayData}(object, formula, fun,
+population, sort)
 }
 \arguments{
   \item{object}{An \code{mrp}, \code{NWayData}, or \code{jagsNWayData}
@@ -32,6 +33,8 @@
   \item{population}{An array or \code{NWayData} with dimensions matching
     \code{object}, used to produce population-weighted estimates from
     \code{jagsNWayData.}}
+  \item{sort}{quoted character string name of dimension to sort, when
+  using MCMC samples. Default=NULL.}
   }
   
 \seealso{\code{\link{mrp-class}} for an example.
