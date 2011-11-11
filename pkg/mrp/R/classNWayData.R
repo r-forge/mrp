@@ -1,6 +1,6 @@
 setClass("NWayData",representation(type="character",levels="list"),contains="array")
-
 setClass("jagsNWayData",representation(type="character",levels="list"),contains="array")
+
 ## save the levels on the original data for when it is plyd back
 ## in poststratification
 ## match on names of ways
@@ -305,3 +305,17 @@ setMethod (f="makeJagsNWay",
            names(ans) <- response[[1]]
            return(ans)
            })
+## setGeneric("NWayData", function(object=NULL,type=NULL,levels=NULL) { standardGeneric("NWayData")} )
+## setMethod(f="NWayData",
+##           signature=signature(object="array"),
+##           definition=function(object, type="generic", levels=NULL){
+##             if(missing(levels)) {
+##               levels <- dimnames(object)
+##             }
+##             new("NWayData", object, type=type, levels=levels)
+##           })
+## setMethod(f="NWayData",
+##           signature=signature(object="NWayData"),
+##           definition=function(object,type=object@type,levels=object@levels){
+##             new("NWayData", object, type=type, levels=levels)
+##           })

@@ -8,7 +8,7 @@ Author:
   Daniel Lee <bearlee@alum.mit.edu>,
   Yu-Sung Su <ys463@columbia.edu>,
 Maintainer: Michael Malecki <malecki@wustl.edu>, Daniel Lee <bearlee@alum.mit.edu>
-Depends: R (>= 2.13), Matrix, blme, arm, sp, lattice, plyr, reshape2
+Depends: R (>= 2.13), methods, Matrix, blme, arm, sp, lattice, plyr, reshape2
 Suggests: apsrtable, xtable, fBasics
 Description: Multilevel Regressions and Poststratification
 License: GPL (>= 2)
