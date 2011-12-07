@@ -305,17 +305,19 @@ setMethod (f="makeJagsNWay",
            names(ans) <- response[[1]]
            return(ans)
            })
-## setGeneric("NWayData", function(object=NULL,type=NULL,levels=NULL) { standardGeneric("NWayData")} )
-## setMethod(f="NWayData",
-##           signature=signature(object="array"),
-##           definition=function(object, type="generic", levels=NULL){
-##             if(missing(levels)) {
-##               levels <- dimnames(object)
-##             }
-##             new("NWayData", object, type=type, levels=levels)
-##           })
-## setMethod(f="NWayData",
-##           signature=signature(object="NWayData"),
-##           definition=function(object,type=object@type,levels=object@levels){
-##             new("NWayData", object, type=type, levels=levels)
-##           })
+
+### these are convenient constructor for arrays, that won't break on an already-nway
+setGeneric("newNWayData", function(object=NULL, type=NULL, levels=NULL) { standardGeneric("newNWayData")} )
+setMethod(f="newNWayData",
+          signature=signature(object="array"),
+          definition=function(object, type="generic", levels=NULL){
+            if(missing(levels)) {
+              levels <- dimnames(object)
+            }
+            new("NWayData", object, type=type, levels=levels)
+          })
+setMethod(f="newNWayData",
+          signature=signature(object="NWayData"),
+          definition=function(object,type=object@type,levels=object@levels){
+            new("NWayData", object, type=type, levels=levels)
+          })
