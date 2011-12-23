@@ -99,7 +99,6 @@ example in \link{mrp}.
 }}
 }
 \details{
-%%  ~~ If necessary, more details than the __description__ above ~~
 }
 \source{
 Adapted from \url{http://www.princeton.edu/~jkastell/mrp_primer.html}}

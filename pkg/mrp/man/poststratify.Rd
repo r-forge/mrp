@@ -12,7 +12,7 @@
 }
 \usage{
   \S4method{poststratify}{mrp}(object, formula)
-  \S4method{poststratify}{NWayData}(object, formula, fun, population, sort)
+  \S4method{poststratify}{NWayData}(object, formula, fun, population)
   \S4method{poststratify}{jagsNWayData}(object, formula = NULL, fun = mean, population =
                  Census.NWay)
 }

@@ -72,7 +72,8 @@ mrp (formula,
 \seealso{\code{\link{mrp-class}} for other
     methods on the objects produced by \code{mrp()};
       \code{\link{plotmrp}} for how to plot poststratified results  onto maps.}
-\examples{
+    \examples{
+\dontrun{
   library(MRP)
   ## Load example data and helper datasets.
   data(samesexmarriage)
@@ -128,7 +129,7 @@ mrp (formula,
                     )
 
   print(100*poststratify(mrp.simple, ~ edu+age), digits=2)
-
+}
 \dontrun{
   ## Fit a fuller model, adding state-level predictors:
   ## This model is also used in the not-run example

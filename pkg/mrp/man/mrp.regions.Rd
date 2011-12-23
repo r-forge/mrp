@@ -15,15 +15,7 @@ A data.frame containing the regions for the 50 states plus the District of Colum
     \item{\code{region}}{a factor with levels \code{DC} \code{Midwest} \code{Northeast} \code{South} \code{West}}
   }
 }
-\details{
-%%  ~~ If necessary, more details than the __description__ above ~~
-}
-\source{
-%%  ~~ reference to a publication or URL from which the data were obtained ~~
-}
-\references{
-%%  ~~ possibly secondary sources and usages ~~
-}
+
 \examples{
 data(mrp.regions)
 }
