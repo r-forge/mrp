@@ -26,8 +26,10 @@
 \usepackage[dvipsnames,usenames]{xcolor}
 %\usepackage[opticals,medfamily,minionint,footnotefigures]{MinionPro}
 \usepackage[no-math]{fontspec}
+\usepackage{ucs}
+\usepackage[utf8]{inputenc}
 \usepackage{xltxtra}
-
+%\VignetteIndexEntry{MRP Primer Reloaded}
 
 
 %%%Set up bold Minion Pro math
@@ -180,7 +182,7 @@ the#1\endcsname\quad}}
 
 \title{MRP Package Vignette}
 \author{Michael Malecki}
-\date{2010-10-20}
+\date{\today}
 \begin{document}
 
 \maketitle
@@ -195,7 +197,7 @@ library(xtable)
 library(MRP)
 library(apsrtable)
 options(width=100,prompt="R> ",continue="   ")
-load("/Users/malecki/mrp/malecki/fitted.Rdata")
+#load("/Users/malecki/mrp/malecki/fitted.Rdata")
 @ 
 
 \section{Running Example}
@@ -209,7 +211,7 @@ The running example is the same combined poll data and model in Kastellec's \hre
 \subsection{Data}
 \label{sec:data}
 
-The data for the example are the combined survey results in the “marriage.data” data.frame, and state-level predictors in “Statelevel” data.frame. Both of these are loaded by the command\\ \texttt{data(samesexmarriage)}. The package includes several other pieces of data that are useful to US practitioners of MRP:
+The data for the example are the combined survey results in the “marriage.data” data.frame, and state-level predictors in “Statelevel” data.frame. Both of these are loaded by the command\\ \texttt{data(samesexmarriage)}. The package includes several other pieces of data that are useful to US users of MRP:
 \begin{description}
 \item[mrp.census] Census data with main data columns `weighted2000', `weighted2004', and `weighted2008'. See documentation for \texttt{mrp.census} for details on the demographic features in the file.
 \item[mrp.regions] A data.frame with state two-letter abbreviations and five census region codes, with DC as its own region.
@@ -280,9 +282,9 @@ In the most basic setup MRP will fit an intercept to each of the groups provided
 
 <<simple-model,echo=TRUE,results=hide>>=
 mrp.simple <- mrp(yes.of.all ~ state+age+edu, 
-                  poll=marriage.data,
+                  data=marriage.data,
                   population=mrp.census,
-                  use="weighted2004")
+                  use="weighted2004",cov.prior="none")
 @ 
 
 The \texttt{mrp} function then executes the following steps:
@@ -291,7 +293,7 @@ The \texttt{mrp} function then executes the following steps:
 \item Collapse the $N$-way survey array into a rectangular matrix, using $\bar{Y}$, effective $N$, and the design effects to form for each combination of strata (`cell' of the $N$-way data) a sum of yes and no responses.
 \item Perform any transformations on the prepared data; the `add' argument is discussed in detail below.
 \item Stratify the population data, creating an $N$-way array of matching dimension to that of the survey.
-\item Estimate a multilevel model. By default this is a call to \texttt{glmer} with \texttt{family= quasibinomial( link="logit")}. By default, as in the call above, the formula for this model fits just an intercept for each stratum in the specification. 
+\item Estimate a multilevel model. By default this is a call to \texttt{bglmer} with \texttt{family= quasibinomial( link="logit")}. By default, as in the call above, the formula for this model fits just an intercept for each stratum in the specification. 
 \end{enumerate}
 
 Poststratification is straightforward: multiply the fitted values from the multilevel model by the population frequencies, and collapse across any remaining dimensions. Below, we collapse across states to show the poststratified estimates of support for same-sex marriage by education and age using the formula interface of the `poststratify' method.
@@ -311,7 +313,7 @@ xtable(100*poststratify(mrp.simple, ~ edu+age), digits=0)
 \subsection{Basic Map Plotting}
 \label{sec:basic-map-plotting}
 
-The package makes it easy to plot results onto maps.\footnote{Maps very quickly blow up file sizes, and bitmap renditions may be acceptable for many documents, at least for drafts. For this reason we have submitted a patch to R to add a `png' option for Sweave.} For a wide variety of conditioning plots the \emph{MRP} \texttt{spplot} method preserves the same formula interface and to build complex maps. The method for \texttt{mrp} objects extends the \texttt{spplot} method, which uses Lattice as the “high level” graphics language.
+The package makes it easy to plot results onto maps.\footnote{Maps very quickly blow up file sizes, and bitmap renditions may be acceptable for many documents, at least for drafts. We suggest PNG.} For a wide variety of conditioning plots the \emph{MRP} \texttt{spplot} method preserves the same formula interface and to build complex maps. The method for \texttt{mrp} objects extends the \texttt{spplot} method, which uses Lattice as the “high level” graphics language.
 In future versions of \emph{MRP} we hope to make \href{http://spatialanalysis.co.uk/2010/09/27/maps-with-ggplot2/}{\emph{ggplot2} maps} with poststratified data similarly easy.
 
 A map of results poststratified by state with no further conditioning (collapsed across the other strata) using the included map object and \texttt{spplot} defaults is fantastically easy to produce.
@@ -319,7 +321,7 @@ A map of results poststratified by state with no further conditioning (collapsed
   \centering
   \caption{Support for same-sex marraige from simple MRP model.}
   \label{fig:firstmap}
-<<firstmap,fig=TRUE,pdf=TRUE,png=FALSE,eps=FALSE,width=8,height=4,resolution=144>>=
+<<firstmap,fig=TRUE,pdf=FALSE,png=TRUE,eps=FALSE,width=8,height=4,resolution=144>>=
 print(spplot(mrp.simple, state~state))
 @   
 \end{figure}
@@ -334,10 +336,12 @@ The full model includes intercepts for poll (the data combine several polls), fo
 \subsection{Modifying Population Strata}
 \label{sec:modify-popul-strata}
 
-We would like to separate the estimation data by poll, but obviously the population data are the same across polls. To remove a stratification dimension, subtract it from the initial formula by adding this argument:
+We would like to separate the estimation data by poll, but in general the population data will be the same across polls. To remove a stratification dimension, subtract it from the initial formula by adding this argument:
 <<eval=FALSE>>=
 population.formula= . ~ . - poll
 @ 
+
+In the case where population arrays may differ across polls, such as polls over time with contemporaneous census values, the current method would require duplicating the census data across all polls for which it is the same and creating a factor of name and levels corresponding to those of \texttt{poll}.
 
 \subsection{Joining Predictors and Transforming Data}
 \label{sec:join-pred-transf}
@@ -375,16 +379,20 @@ The same updating of the formula is used in the event that you want to re-run or
 <<fullmodelcall,eval=FALSE>>=
 mrp.statelevel <- mrp(yes.of.all~
                       state+f.race+age+edu+poll,
-                      poll=marriage.data,
+                      data=marriage.data,
                       population=mrp.census,use="weighted2008",
                       population.formula=.~.-poll,
-                      add=list(Statelevel,
+                      add=list(
+                        Statelevel,
                         mrp.regions,
-                        expression(age.edu <- interaction(age,edu)),
-                        expression(z.age <- rescale(age))),
+                        expression(age.edu <- interaction(age,edu))
+                        ),
                       mr.formula=.~.+(1|region)+ (1|age.edu)+
-                       z.age+p.relig.full+p.kerry.full
+                       p.relig.full+p.kerry.full
                       )
+@ 
+<<load-fullmodel,echo=FALSE,results=hide>>=
+load("mrp.statelevel.Rdata")
 @ 
 
 \section{Advanced Plotting with \texttt{spplot}}
@@ -392,7 +400,7 @@ mrp.statelevel <- mrp(yes.of.all~
 
 The \texttt{spplot,mrp-method} uses all parts of the fitted \texttt{mrp} object to produce beautiful plots with meaningful labels with the familiar fomula interface, intelligent subsetting, easy customization, and the addition of other information to the plot by selectively modifying the stroke on a list of features. 
 
-The \texttt{spplot} method takes an \texttt{mrp} object and a stratification specification, and merges it onto a map from the SpatialPolygonsDataFrame class, provided by the \emph{sp} package. Using \emph{maptools}, users can read in their own ESRI shapefiles. Shapefiles are somewhat of a standard for GIS applications. As mentioned in the data section above, we have included a map read into R from a publicly available shapefile. According to Wickham, \emph{sp} maps can be used with \emph{ggplot2} via \texttt{fortify} methods; we plan to make poststratified results more accessible to \emph{ggplot2} methods in the future. 
+The \texttt{spplot} method takes an \texttt{mrp} object and a stratification specification, and merges it onto a map from the SpatialPolygonsDataFrame class, provided by the \emph{sp} package. Using \emph{maptools}, users can read in their own ESRI “shapefiles” (actually a collection of files, in either a folder or a zip archive. Shapefiles are somewhat of a standard for GIS applications. As mentioned in the data section above, we have included a map read into R from a publicly available shapefile. According to Wickham, \emph{sp} maps can be used with \emph{ggplot2} via \texttt{fortify} methods; we plan to make poststratified results more accessible to \emph{ggplot2} methods in the future. 
 
 \subsection{Conditioning Panels}
 \label{sec:conditioning-panels}
@@ -470,10 +478,10 @@ print(spplot(mrp.statelevel, state ~ edu+age,
 
 \begin{figure}[b]
   \centering
-  \caption{The final map shows support for same-sex marriage by age cohort and level of education, centered around the national poststratified average of 34\%.}
+  \caption{The final map shows support for same-sex marriage by age cohort and level of education, centered around the national poststratified average of \Sexpr{poststratify(mrp.statelevel)*100}\%.}
   \label{fig:finalmap}
 \setkeys{Gin}{width=\linewidth}
-<<finalmap,fig=TRUE,pdf=TRUE,png=FALSE,eps=FALSE,width=6.5,height=6.5,echo=FALSE,resolution=144>>=
+<<finalmap,fig=TRUE,pdf=FALSE,png=TRUE,eps=FALSE,width=6.5,height=6.5,echo=FALSE,resolution=144>>=
 <<finalmapcode>>
 @   
 \end{figure}
