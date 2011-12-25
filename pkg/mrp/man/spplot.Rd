@@ -102,7 +102,6 @@ for details. }
   is in package \emph{fBasics}; it is used in the example below
   }
   \examples{
-\dontrun{
 ## plot the example from mrp()
 example(mrp)
 ## Dimension of plot are by order of terms -- y,x so
@@ -114,7 +113,6 @@ spplot(mrp.simple, formula=state~ age,
        colorkey=list(
          space="bottom",height=.5,width=.5)
        )
-}
 \dontrun{
 spplot(mrp.statelevel, state ~ age+edu, cuts=50,
        subset=TRUE,

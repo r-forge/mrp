@@ -20,6 +20,7 @@ CCES.complete <- within (CCES.complete, {
 
   mrp.census <- within(mrp.census,{
     age <- factor(age,exclude=NA,labels=c("18-29","30-44","45-64","65+"))
+
     education[education=="postgraduate"] <- "college graduate"
     education <- factor(education,exclude=NA)
     edu <- factor(education,exclude=NA,labels=c("< High School",
