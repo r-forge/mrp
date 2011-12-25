@@ -73,86 +73,73 @@ mrp (formula,
     methods on the objects produced by \code{mrp()};
       \code{\link{plotmrp}} for how to plot poststratified results  onto maps.}
     \examples{
-\dontrun{
-  library(MRP)
-  ## Load example data and helper datasets.
-  data(samesexmarriage)
-  ## Helper datasets for other US applications of MRP:
-  data(spmap.states) # projected US state map
-  data(mrp.census)   # census with common demo strata
-  data(mrp.regions)  # regions data.frame with DC separate
+library(MRP)
 
-  ## To ensure matching of strata between poll and population,
-  ## both should be factors with identical names and levels.
-  marriage.data <- within(marriage.data, {
-    state <- factor(state,exclude=c(NA, ""))
-    poll <- factor(poll,exclude=NA)
-    age <- factor(age.cat,exclude=NA,
-                  labels=c("18-29","30-44","45-64","65+"))
-    edu <- factor(edu.cat,exclude=NA,labels=c("< High School",
-                                       "High School",
-                                       "Some College",
-                                       "Graduated College"))
-    ## Code interaction here, first fixing levels
-    female <- factor(female,levels=c(0,1),
-                     labels=c("Male","Female"))
-    race.wbh <- factor(race.wbh, levels=c(1,3,2),
-                   labels=c("White","Black","Hispanic"))
-    f.race <- interaction(female,race.wbh)
-  })
-  
-  ## Poll has four levels of education, so we need to combine
-  ## the top two levels in the census data. We'll also go ahead
-  ## and trim it down to just the variables used here.
-  mrp.census <- na.omit(mrp.census[mrp.census$state \%in\% marriage.data$state,])
-  mrp.census <- within(mrp.census,{
+## Load example data.
+data(CCES.complete)
+
+## Helper datasets for other US applications of MRP:
+data(spmap.states) # projected US state map
+data(mrp.census)   # census with common demo strata
+data(mrp.regions)  # regions data.frame with DC separate
+
+## To ensure matching of strata between poll and population,
+## both should be factors with identical names and levels.
+CCES.complete <- within (CCES.complete, {
+  education <- factor(education,exclude=NA)
+  female <- factor(sex=="Female",exclude=NA)
+  race <- factor(race,exclude=NA)
+  f.race <- interaction(female,race)
+})
+
+## Poll has four levels of education, so we need to combine
+## the top two levels in the census data. We'll also go ahead
+## and trim it down to just the variables used here.
+mrp.census <- na.omit(mrp.census[mrp.census$state %in% CCES.complete$state,])
+mrp.census <- na.omit(mrp.census[mrp.census$education %in% CCES.complete$education,])
+
+mrp.census <- within(mrp.census,{
     age <- factor(age,exclude=NA,labels=c("18-29","30-44","45-64","65+"))
     education[education=="postgraduate"] <- "college graduate"
+    education <- factor(education,exclude=NA)
     edu <- factor(education,exclude=NA,labels=c("< High School",
                                          "High School",
                                          "Some College",
                                          "Graduated College"))
     state <- factor(state,exclude=NA)
-    race[race=="Other"] <- NA
     race <- factor(race,exclude=NA)
     f.race <- interaction(sex,race)
-  })
-  mrp.census <- na.omit(mrp.census)
-    
+})
+mrp.census <- na.omit(mrp.census)
 
-  ## Ready to run simple mrp with poll and population:
-  
-  mrp.simple <- mrp(yes.of.all ~ state+age+edu+poll,
-                    data=marriage.data,poll.weights="weight"
-                    #,pop=mrp.census,use="weighted2004",
-                    #population.formula= .~.-poll
-                    )
-
-  print(100*poststratify(mrp.simple, ~ edu+age), digits=2)
-}
+## Ready to run simple mrp with poll and population:
+mrp.simple <- mrp(ban.gaymarr ~ state+age+education, 
+                  data=CCES.complete,
+                  population=mrp.census,
+                  use="weighted2004",cov.prior="none")
+print(100*poststratify(mrp.simple, ~ education+age), digits=2)
 \dontrun{
-  ## Fit a fuller model, adding state-level predictors:
-  ## This model is also used in the not-run example
-  ## for plotting maps.
-  
-  mrp.statelevel <- mrp(formula=yes.of.all~state+f.race+age+edu+poll,
-                        poll=marriage.data,
-                        population=mrp.census,use="weighted2008",
-                        population.formula=.~.-poll,
-                        add=list(Statelevel,
-                          mrp.regions,
-                          expression(age.edu <- interaction(age,edu)),
-                          expression(z.age <- rescale(age)))
-                        )
-  ## Note: the formula is expanded from the condensed version in "formula" to
-  ##  an expanded version.
-  getFormula (mrp.statelevel)
+## Fit a fuller model, adding state-level predictors:
+## This model is also used in the not-run example
+## for plotting maps.
+mrp.statelevel <- mrp(ban.gaymarr~
+                      state+f.race+age+education,
+                      data=CCES.complete,
+                      population=mrp.census,use="weighted2008",
+                      population.formula=.~.-poll,
+                      add=list(Statelevel,
+                        mrp.regions,
+                        expression(age.edu <- interaction(age,education)),
+                        expression(z.age <- rescale(age)))
+                      )
+## Note: the formula is expanded from the condensed version in "formula" to
+##  an expanded version.
+getFormula(mrp.statelevel)
 
-						
-  ## Update the mr.formula on already-prepared mrp object and re-fit:
-  mrp.statelevel <- mr(mrp.statelevel, .~.+(1|region)+ (1|age.edu)+
-                       z.age+p.relig.full+p.kerry.full)
+## Update the mr.formula on already-prepared mrp object and re-fit:
+mrp.statelevel <- mr(mrp.statelevel, .~.+(1|region)+ (1|age.edu)+
+                     z.age+p.relig.full+p.kerry.full)
 
-  ## Fine plot control is shown with this example in plotmrp documentation!
+## Fine plot control is shown with this example in plotmrp documentation!
 }
 }
