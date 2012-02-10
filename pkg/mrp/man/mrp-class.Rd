@@ -101,6 +101,6 @@
 }
 \seealso{\code{\link{mrp}}, which produces \code{mrp} objects.}
 
-\examples{
-}
+% \examples{
+% }
 \keyword{classes}

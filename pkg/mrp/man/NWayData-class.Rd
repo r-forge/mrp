@@ -48,6 +48,6 @@
   Yu-Sung Su <ys463@columbia.edu>,
   Michael Malecki <malecki@wustl.edu>
 }
-\examples{
-}
+% \examples{
+% }
 \keyword{classes}
