@@ -1,0 +1,7 @@
+%\VignetteIndexEntry{MRP Primer Reloaded}
+
+%% This is a placeholder file. Please see
+%% MRP-vignette.Rnw.real
+
+%% Real vignette using CCES is not yet done. 
+%% enjoy this for now.
