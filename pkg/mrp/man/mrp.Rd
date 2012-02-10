@@ -73,7 +73,8 @@ mrp (formula,
     methods on the objects produced by \code{mrp()};
       \code{\link{plotmrp}} for how to plot poststratified results  onto maps.}
     \examples{
-library(MRP)
+library(mrpdata)
+library(mrp)
 
 ## Load example data.
 data(CCES.complete)

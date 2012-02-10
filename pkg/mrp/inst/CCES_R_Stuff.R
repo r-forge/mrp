@@ -1,3 +1,4 @@
+library(mrpdata) 
 data(CCES.complete)
 
 data(mrp.census)
