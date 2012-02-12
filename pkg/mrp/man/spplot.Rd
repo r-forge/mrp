@@ -102,6 +102,7 @@ for details. }
   is in package \emph{fBasics}; it is used in the example below
   }
   \examples{
+\donttest{
 ## plot the example from mrp()
 example(mrp)
 ## Dimension of plot are by order of terms -- y,x so
@@ -131,6 +132,7 @@ spplot(mrp.statelevel, state ~ age+edu, cuts=50,
        )
 
 
+}
 }
 }
   \keyword{methods}

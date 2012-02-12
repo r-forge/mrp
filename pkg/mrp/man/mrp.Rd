@@ -73,6 +73,7 @@ mrp (formula,
     methods on the objects produced by \code{mrp()};
       \code{\link{plotmrp}} for how to plot poststratified results  onto maps.}
     \examples{
+\donttest{
 library(mrpdata)
 library(mrp)
 
@@ -142,5 +143,6 @@ mrp.statelevel <- mr(mrp.statelevel, .~.+(1|region)+ (1|age.edu)+
                      z.age+p.relig.full+p.kerry.full)
 
 ## Fine plot control is shown with this example in plotmrp documentation!
+}
 }
 }
