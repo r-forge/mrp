@@ -9,3 +9,4 @@
 * TODO [#B] Add either pieces of or link to my [[http://sites.google.com/site/malecki/map-notes][map notes]] to spplot.Rd
 * TODO [#B] Is a jags array just an NWayData array, or does it need its own class? It just has an extra dimension of 'sample' (will be same as stan)
 * TODO [#A] I will fix the code mismatches on poststratify method
+* TODO [#A] Add xval method for mrp

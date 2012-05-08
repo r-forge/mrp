@@ -3,7 +3,7 @@ exportMethods (getNumberWays, setPopulation, getPopulation,
                setFormula, getFormula,
                mr, poststratify,
                getResponse, setPopulationOnes, getThetaHat,
-               getEstimates)
+               getEstimates, xval)
 export (mrp)
 
 importFrom("sp",panel.polygonsplot,spplot)
