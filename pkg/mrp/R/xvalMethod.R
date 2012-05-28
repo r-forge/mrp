@@ -89,8 +89,13 @@ setMethod(f="xval",
                 sum(l$logloss)
               })            
             cl.aa <- sum(cl.mat)
-   
-            return(list(c(aa, cl.aa), c(fm, cl.fm) ))
+
+            response <- as.matrix(M@data[, c("response.yes", "response.no")])
+            attr(cl.fm, ".Environment") <- environment()
+            insampleM <- glm(cl.fm, data=M@data,  family=binomial)
+            yhat <- fitted(insampleM)
+            LB <- -sum(M@data$response.yes*log(yhat) + M@data$response.no*log(1-yhat))
+            return(list(MulRes=aa, MulFormula=fm, ClaRes=cl.aa,  ClaFormula=cl.fm, LB=LB))
           }
           
           )

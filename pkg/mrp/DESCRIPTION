@@ -9,7 +9,7 @@ Author:
   Yu-Sung Su <ys463@columbia.edu>,
   Wei Wang <ww2243@columbia.edu>
 Maintainer: Michael Malecki <malecki@gmail.com>, Daniel Lee <bearlee@alum.mit.edu>
-Depends: R (>= 2.14), methods, Matrix, blme, arm, sp, lattice, plyr, reshape2, mrpdata, doMC
+Depends: R (>= 2.14), methods, Matrix, lme4, blme, arm, sp, lattice, plyr, reshape2, mrpdata, doMC
 Description: Multilevel Regressions and Poststratification
 License: GPL (>= 2)
 Collate: 'load.first.R' 'classNWayData.R' 'classMrp.R' 'spplot.R' 'xvalMethod.R'
