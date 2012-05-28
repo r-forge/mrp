@@ -8,8 +8,8 @@
 }
 
 \usage{
-   xval(object,
-        formula, folds=4, loss.type="logloss",
+   xval(object, 
+        formula, folds=4, loss.type,
    \dots)
 }
 \arguments{
@@ -24,7 +24,7 @@
       just an intercept term for each of the variables in the main
       formula specification (\code{(1|way1)+(1|way2)} etc.)}
     \item{folds}{Number of folds for cross valiation. Default is 4.}
-    \item{loss.tye}{Type of loss measure used in cross
+    \item{loss.type}{Type of loss measure used in cross
    validation. Currently "logloss" is supported.}
     \item{\dots}{Additional arguments to be passed to the multilevel
       regression step, which uses \code{\link[blme]{bglmer}} by default. }

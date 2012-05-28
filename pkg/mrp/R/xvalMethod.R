@@ -2,7 +2,7 @@ setGeneric("xval", function(object, formula, folds, loss.type, ...) {standardGen
 
 setMethod(f="xval",
           signature=signature(object="mrp"),
-          definition=function(object, formula, folds, loss.type, ...){
+          definition=function(object, formula, folds=4, loss.type, ...){
             ## create a list of length folds that holds different partitions
             K <- folds
             M <- object
