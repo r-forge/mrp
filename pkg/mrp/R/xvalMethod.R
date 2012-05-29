@@ -2,7 +2,7 @@ setGeneric("xval", function(object, formula, folds, loss.type, ...) {standardGen
 
 setMethod(f="xval",
           signature=signature(object="mrp"),
-          definition=function(object, formula, folds=4, loss.type, ...){
+          definition=function(object, formula, folds, loss.type, ...){
             ## create a list of length folds that holds different partitions
             K <- folds
             M <- object
@@ -23,7 +23,7 @@ setMethod(f="xval",
 
             if(missing(loss.type)) loss.type <- "log"
             ##            require(doMC, quietly=T)
-            registerDoMC()
+            registerDoParallel()
             response <- M@data[,c("response.yes", "response.no")];
             response <- ceiling(response) # annoying floating point rounding errors
             partition <- array(0, dim=c(2, 2, nrow(response), K))

@@ -1,5 +1,6 @@
 \name{xval}
 \alias{xval}
+\alias{xval,mrp-method}
 
 \title{Run k-fold cross validations on mrp model}
 \description{
@@ -8,8 +9,8 @@
 }
 
 \usage{
-   xval(object, 
-        formula, folds=4, loss.type,
+   \S4method{xval}{mrp}(object, 
+        formula, folds, loss.type,
    \dots)
 }
 \arguments{
