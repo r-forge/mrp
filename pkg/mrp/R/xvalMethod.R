@@ -124,7 +124,7 @@ setMethod(f="xval",
             insampleM <- glm(cl.fm, data=M@data,  family=binomial)
             yhat <- fitted(insampleM)
             LB <- -sum(M@data$response.yes*log(yhat) + M@data$response.no*log(1-yhat))
-            return(list(MulRes=aa, MulFormula=fm, ClaRes=cl.aa,  ClaFormula=cl.fm, LB=lb.aa))
+            return(list(MulRes=aa, MulFormula=fm, ClaRes=cl.aa,  ClaFormula=cl.fm, LB=LB))
           }
 
           )
