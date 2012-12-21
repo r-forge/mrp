@@ -39,7 +39,7 @@ setGeneric ("getYbarWeighted", function (object) { standardGeneric ("getYbarWeig
 setMethod (f="getYbarWeighted",
     signature=signature(object="NWayData"),
     definition=function (object) {
-      ybar.w <- do.call("[",c(x=quote(object), 
+      ybar.w <- do.call("[",c(x=quote(object),
               as.list(rep(TRUE,getNumberWays(object))),
               "ybar.w"))
       return(ybar.w)
@@ -49,7 +49,7 @@ setGeneric ("getN", function (object) { standardGeneric ("getN")})
 setMethod (f="getN",
     signature=signature(object="NWayData"),
     definition=function(object){
-        N <- do.call("[",c(x=quote(object), 
+        N <- do.call("[",c(x=quote(object),
               as.list(rep(TRUE,getNumberWays(object))),
               "N"))
         N[is.na(N)] <- 0
@@ -72,7 +72,7 @@ setGeneric ("getDesignEffectByCell", function (object) { standardGeneric ("getDe
 setMethod (f="getDesignEffectByCell",
     signature=signature(object="NWayData"),
     definition=function (object) {
-      D <- do.call("[",c(x=quote(object), 
+      D <- do.call("[",c(x=quote(object),
               as.list(rep(TRUE,getNumberWays(object))),
               "design.effect.cell"))
       return(D)
@@ -118,7 +118,7 @@ setMethod (f="getData",
 setGeneric ("makeNWay", function (cell,response,weights,pop) { standardGeneric ("makeNWay")})
 setMethod (f="makeNWay",
     signature=signature(cell="data.frame"),
-    definition=function(cell, response="response", 
+    definition=function(cell, response="response",
         weights=1, pop=FALSE) {
       if(pop==TRUE){
         if(length(weights)!=1) {
@@ -126,7 +126,7 @@ setMethod (f="makeNWay",
         prop <- sum(cell[,weights])
         return(prop)
       }
-      
+
       N <- nrow(cell)
       y <- cell[,response]
       ## quietly allow easy noweight
@@ -137,16 +137,16 @@ setMethod (f="makeNWay",
       w <- cell[,weights]
       ## do weighted mean
 			ybar.w <- weighted.mean(y, w)
-			
+
       if( N > 1 & all(w==1) ) {
-				# This is just for speed. Can use the other loop without 
+				# This is just for speed. Can use the other loop without
 				# an if statement and it will produce the same result.
 				design.effect.cell <- 1
       } else {
         design.effect.cell <- 1+ var(w/mean(w))
       }
       ybar.w[is.nan(ybar.w)] <- 0
-      
+
       ans <- c(N=N,
           design.effect.cell=design.effect.cell,
           ybar.w=ybar.w)
@@ -160,7 +160,7 @@ setMethod (f="makeNWay",
 setGeneric ("flattenNWay", function (v,design.effect) { standardGeneric ("flattenNWay")})
 setMethod (f="flattenNWay",
     definition=function(v,design.effect){
-      if(is.na(v["N"])) { 
+      if(is.na(v["N"])) {
         v["N"] <- 0
         v["design.effect.cell"] <- NA
         v["ybar.w"] <- .5
@@ -168,7 +168,7 @@ setMethod (f="flattenNWay",
       } else {
         ## do n.eff
         N.eff <- v["N"] / design.effect
-        
+
         ybar.w <- v["ybar.w"]
         ## do ybar.w with cases
         response.yes <- ybar.w*N.eff
@@ -191,7 +191,7 @@ setMethod (f="makeOnesNWay",
       return(pop.nway)
     } )
 
-## Convenience 
+## Convenience
 is.NWayData <- function(object) {
   inherits(object,"NWayData")
 }
@@ -212,17 +212,17 @@ NWayData <- function (df, variables, response, weights, type="poll", reference.p
   }
   nway <- new("NWayData", nway, type=type,
       levels=saveNWayLevels(df, variables))
-  
+
   return (nway)
 }
 
 NWayData2df <- function (nway) {
-  data <- adply(nway, .margins=1:getNumberWays(nway), 
+  data <- adply(nway, .margins=1:getNumberWays(nway),
       flattenNWay,
       design.effect=getDesignEffect(nway),
                 .progress="text")
   data <- restoreNWayLevels(df=data,nway=nway)
-  
+
   return (data)
 }
 
@@ -248,10 +248,6 @@ NWayData2df <- function (nway) {
   data <- cbind(y,x)
   invisible(data)
 }
-    
-
-## head(write.stan(CCES.complete,x=72:79, y="ban.gaymarr"))
-
 
 ## just print the array when asked interactively
 setMethod(show, "NWayData",
@@ -280,7 +276,7 @@ jags2NWay <- function (df, variables, response) {
   ## TODO remove `[variables]` when package reinstalled!
   l <- c(saveNWayLevels(df,variables)[variables],new=list(d))
   names(l) <- c(names(l)[1:length(variables)],names(response))
-  
+
   nway <- new("NWayData", nway, type="population",
               levels=l)
   return (nway)
@@ -301,7 +297,7 @@ setMethod (f="makeJagsNWay",
                  mean(cell[,d])
                })
              }
-           
+
            names(ans) <- response[[1]]
            return(ans)
            })

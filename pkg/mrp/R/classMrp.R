@@ -50,15 +50,18 @@ mrp <- function(formula,
       warning("Assuming ordered factor 2 levels represent 1=FALSE, 2=TRUE\n")
       response <- as.integer(response)-1
     }
-#    browser()
     if (!is.numeric (response)) {
-      stop (paste ("'", as.character (formula[[2]]), "' must be integer values of 0 / 1 or logical", sep=""))
+      stop (paste ("'", as.character (formula[[2]]),
+                   "' must be integer values of 0 / 1 or logical", sep=""))
     }
     if (length (unique(na.exclude(response))) != 2) {
-      stop (paste ("'", as.character (formula[[2]]), "' must have two values", sep=""))
+      stop (paste ("'", as.character (formula[[2]]),
+                   "' must have two values", sep=""))
     }
     if (all (c(0, 1) != sort(unique(na.exclude(response))))) {
-      stop (paste ("'", as.character (formula[[2]]), "' has values of ",sort(unique(na.exclude(response))), sep=""))
+      stop (paste ("'", as.character (formula[[2]]),
+                   "' has values of ",
+                   sort(unique(na.exclude(response))), sep=""))
     }
   }
 
@@ -73,21 +76,19 @@ mrp <- function(formula,
     poll <- na.omit(poll[,allvars])
   }
 
-  #### ------------------       ##################
-
-    ## Set up and store poll NWayData
+  ## Set up and store poll NWayData
   cat("\nMaking NWay poll data:\n")
   if (sum(mrp.varnames %in% names(poll)) != length(mrp.varnames) ) {
-    stop(paste("\nVariable ",sQuote(mrp.varnames[!(mrp.varnames %in% names(poll))])," not found in poll data."))
+    stop(paste("\nVariable ",sQuote(mrp.varnames[!(mrp.varnames %in% names(poll))]),
+               " not found in poll data."))
   }
-
-  ## TODO: Want this
 
   data <- NWayData2df (poll.nway <- # need this!
                        NWayData(df=poll, variables=mrp.varnames,
                                 response=as.character(mrp.formula[[2]]),
                                 weights=poll.weights, type="poll"))
-  ##### When multiple polls, renormalize mean1 *in each poll*
+
+  ## When multiple polls, renormalize mean1 *in each poll*
   #poll.nway <- daply(poll, .variables=mrp.varnames, pop=FALSE,
   #    .fun=makeNWay, .progress="text",
   #    response=as.character(mrp.formula[[2]]), weights=poll.weights)
@@ -103,63 +104,52 @@ mrp <- function(formula,
   data.merges <- add[sapply(add, is.data.frame)]
   data$finalrow <- 1:nrow(data)
 
-  ## sort the expressions and build higher-order interactions
-  ## unless the user has done this already
-  ##
-  ## if(length(mrp.varnames) >= 2) {
-  ##   interaction.expressions <- list()
-  ##   sapply(2:length(mrp.varnames), function(o) {
-  ##     int.vars <- as.list(combn(mrp.varnames, o))
-  ##     sapply(int.vars, function(i) {
-  ##       attr(i)
-  ##     interaction.expressions[o]
-  ##   } )
-  ## }
-  ##
   if(length(data.expressions)>0){
     data <- within(data, sapply(data.expressions, eval.parent, n=2))
   }
-  ## Attempt merges.
+  ## Attempt merges. ##
   if(length(data.merges)>0){
-    for(d in 1:length(data.merges)){
-      data <- join(data,data.merges[[d]], type="l")
+      for(d in 1:length(data.merges)){
+          data <- join(data,data.merges[[d]], type="l", by)
     }
   }
 
-  #### ------------------       ##################
-
   if (!is.null(pop)) { ## set up and store population NWayData
     if(is.data.frame(pop)) {
-      ## construct the population array based on population formula
-      ## next, repeat it across any extra dimensions in poll
+        ## construct the population array based on population formula
+        ## next, repeat it across any extra dimensions in poll
 
-      na.omit(pop[, {names(pop) %in% c(population.varnames$inpop, use)}])
-      cat("\nMaking NWay population data:\n")
-      if (sum(population.varnames$inpop %in% names(pop)) != length(population.varnames$inpop) ) {
-        stop(paste("\nVariable ",sQuote(population.varnames$inpop[!(population.varnames$inpop %in% names(pop))])," not found in population."))
-      }
-      if(!(identical(sapply(poll[,population.varnames$inpop], levels),
-                sapply(pop[,population.varnames$inpop], levels)) )) {
-        sapply(population.varnames$inpop, function(x) {
-              if(length(levels(poll[,x])) != length(levels(pop[,x]))){
-                warning("Non-conformable population array. Poststratification will not work unless factor levels are identical. You can still get raw estimates.",call.=FALSE)
+        cat("\nMaking NWay population data:\n")
+        if (sum(population.varnames$inpop %in% names(pop)) != length(population.varnames$inpop) ) {
+            stop(paste("\nVariable ",
+                       sQuote(population.varnames$inpop[!(population.varnames$inpop %in% names(pop))]),
+                       " not found in population."))
+        }
+        if(!(identical(sapply(poll[,population.varnames$inpop], levels),
+                       sapply(pop[,population.varnames$inpop], levels)) )) {
+            sapply(population.varnames$inpop, function(x) {
+                if(length(levels(poll[,x])) != length(levels(pop[,x]))){
+                    warning("Non-conformable population array. Poststratification will not work unless factor levels are identical.", call.=FALSE)
                 warning(paste("For",sQuote(x),
                         "poll has", length(levels(poll[,x])),
                         "; pop has",length(levels(pop[,x]))),call.=FALSE)
               }
             })}
 
+        main.pop.formula <- as.formula(paste0(c(use, "~", unlist(population.varnames$inpop))))
+        poparray <- prop.table(xtabs(main.pop.formula, data=pop))
 
-      pop.nway <- daply(pop, .variables=unlist(population.varnames$inpop),
-          .fun=makeNWay,pop=TRUE,weights=use,
-          .progress="text"
-      )
-      pop.nway <- array(rep(pop.nway,
-              length.out=length(poll.nway)),
-          dim(getNEffective(poll.nway)), dimnames(getNEffective(poll.nway)))
 
-      pop.nway <- new("NWayData",pop.nway,type="population",
-          levels=saveNWayLevels(pop))
+        pop.nway <- daply(pop, .variables=unlist(population.varnames$inpop),
+                          .fun=makeNWay, pop=TRUE, weights=use,
+                          .progress="text"
+                          )
+        pop.nway <- array(rep(pop.nway,
+                              length.out=length(poll.nway)),
+                          dim(getNEffective(poll.nway)), dimnames(getNEffective(poll.nway)))
+
+        pop.nway <- new("NWayData",pop.nway,type="population",
+                        levels=saveNWayLevels(pop))
     }
     ## if (is.NWayData(pop)) {
     ##   if(!identical(getNumberWays(pop), getNumberWays(poll))){
@@ -199,10 +189,8 @@ mrp <- function(formula,
   response <- as.matrix(getResponse(mrp))
   try(mrp <- mr(mrp,
             ## blmer options here, possibly moved to blmer defaults
-
             ...))
   return(mrp)
-
 }
 
 ## For population array, if there are "ways" present in poll but constant
@@ -304,6 +292,17 @@ setMethod(f="getEstimates",signature(object="mrp"),
     definition=function(object) {
       return(getThetaHat(object))
     })
+setGeneric ("getModel", function (object) { standardGeneric ("getModel")})
+setMethod(f="getModel",signature(object="mrp"),
+    definition=function(object) {
+      return(object@multilevelModel)
+    })
+
+
+
+
+
+
 
 setGeneric ("mr", function (object,mr.formula,...) { standardGeneric ("mr")})
 #setGeneric ("multilevelRegression", function (object) { standardGeneric ("multilevelRegression")})
@@ -319,9 +318,9 @@ setMethod (f="mr",
       response <- as.matrix(getResponse(object))
       object@multilevelModel <- bglmer(fm,
           data=object@data,
-          family=quasibinomial(link="logit"),...)
+          family=binomial(link="logit"),...)
       return (object)
-    })
+    } )
 
 
 ##### NEW SHIFT FUNCTION for state vote total.
@@ -340,7 +339,6 @@ setMethod (f="mr",
 
 
 setGeneric ("poststratify", function (object, formula=NULL, ...) { standardGeneric ("poststratify")})
-#setGeneric ("poststratify", function (object) { standardGeneric ("poststratify")})
 setMethod (f="poststratify",
     signature=signature(object="mrp"),
     definition=function (object, formula=NULL) {
@@ -532,3 +530,21 @@ setMethod (f="poststratify",
 ##     return (new(Class="mrp", data=data, population=population, formula=formula))
 ##   }
 
+##########
+## TODO : vignette note: don't make dumb interactions because you're not using fucking stata
+## doc note: first formula needs to be clear that these are ALL the RANDOM INTERCEPTS
+## "defined at the individual level in the megapoll"
+## ANY and ALL group-level terms, predictors, interactions, etc:
+## are added via the add list.
+## consider aliasing or renaming "add" to "grouplevel" or "group.vars"
+##
+## p.formula, = base cells
+## intercept.formula, = p.forumla plus some stuff before response frame is made
+## mr.formula = intercepts plus any from grouplevel
+
+# intercept.formula = age + edu + income + poll, # in megapoll at indiv level.
+# p.formula = age + edu + income,
+## mr.formula = (1|age) + (1|edu) + (1|income) + (1|poll) + (1|region) + (1|age.edu)
+
+## provide helper function to make a poll.data data.frame
+## several responses that we want to deal with.
